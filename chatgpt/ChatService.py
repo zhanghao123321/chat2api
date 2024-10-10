@@ -111,7 +111,15 @@ class ChatService:
     async def set_model(self):
         self.origin_model = self.data.get("model", "gpt-3.5-turbo-0125")
         self.resp_model = model_proxy.get(self.origin_model, self.origin_model)
-        if "gpt-4o-mini" in self.origin_model:
+        if "o1-preview" in self.origin_model:
+            self.req_model = "o1-preview"
+        elif "o1-mini" in self.origin_model:
+            self.req_model = "o1-mini"
+        elif "o1" in self.origin_model:
+            self.req_model = "o1"
+        elif "gpt-4o-canmore" in self.origin_model:
+            self.req_model = "gpt-4o-canmore"
+        elif "gpt-4o-mini" in self.origin_model:
             self.req_model = "gpt-4o-mini"
         elif "gpt-4o" in self.origin_model:
             self.req_model = "gpt-4o"
@@ -177,10 +185,13 @@ class ChatService:
                         logger.info(f"Turnstile ignored: {e}")
                     # raise HTTPException(status_code=403, detail="Turnstile required")
 
-                ark0se = resp.get('ark0se', {})
+                ark0se = resp.get('ark' + 'ose', {})
                 ark0se_required = ark0se.get('required')
-                if ark0se_required and self.persona != "chatgpt-freeaccount":
-                    # logger.info("Ark0se required: ignore")
+                if ark0se_required:
+                    if self.persona == "chatgpt-freeaccount":
+                        ark0se_method = "chat35"
+                    else:
+                        ark0se_method = "chat4"
                     if not self.ark0se_token_url:
                         raise HTTPException(status_code=403, detail="Ark0se service required")
                     ark0se_dx = ark0se.get("dx")
@@ -188,13 +199,14 @@ class ChatService:
                     try:
                         r2 = await ark0se_client.post(
                             url=self.ark0se_token_url,
-                            json={"blob": ark0se_dx},
+                            json={"blob": ark0se_dx, "method": ark0se_method},
                             timeout=15
                         )
                         r2esp = r2.json()
                         logger.info(f"ark0se_token: {r2esp}")
-                        self.ark0se_token = r2esp.get('token')
-                        if not self.ark0se_token:
+                        if r2esp.get('solved', True):
+                            self.ark0se_token = r2esp.get('token')
+                        else:
                             raise HTTPException(status_code=403, detail="Failed to get Ark0se token")
                     except Exception:
                         raise HTTPException(status_code=403, detail="Failed to get Ark0se token")
@@ -300,13 +312,13 @@ class ChatService:
                         check_is_limit(detail, token=self.req_token, model=self.req_model)
                 else:
                     if "cf-please-wait" in rtext:
-                        logger.error(f"Failed to send conversation: cf-please-wait")
+                        # logger.error(f"Failed to send conversation: cf-please-wait")
                         raise HTTPException(status_code=r.status_code, detail="cf-please-wait")
                     if r.status_code == 429:
-                        logger.error(f"Failed to send conversation: rate-limit")
+                        # logger.error(f"Failed to send conversation: rate-limit")
                         raise HTTPException(status_code=r.status_code, detail="rate-limit")
                     detail = r.text[:100]
-                logger.error(f"Failed to send conversation: {detail}")
+                # logger.error(f"Failed to send conversation: {detail}")
                 raise HTTPException(status_code=r.status_code, detail=detail)
 
             content_type = r.headers.get("Content-Type", "")
