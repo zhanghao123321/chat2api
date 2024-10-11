@@ -235,8 +235,8 @@ class ChatService:
                     detail = r.json().get("detail", r.json())
                 else:
                     detail = r.text
-                if "cf-please-wait" in detail:
-                    raise HTTPException(status_code=r.status_code, detail="cf-please-wait")
+                if "cf-spinner-please-wait" in detail:
+                    raise HTTPException(status_code=r.status_code, detail="cf-spinner-please-wait")
                 if r.status_code == 429:
                     raise HTTPException(status_code=r.status_code, detail="rate-limit")
                 raise HTTPException(status_code=r.status_code, detail=detail)
@@ -311,9 +311,9 @@ class ChatService:
                     if r.status_code == 429:
                         check_is_limit(detail, token=self.req_token, model=self.req_model)
                 else:
-                    if "cf-please-wait" in rtext:
-                        # logger.error(f"Failed to send conversation: cf-please-wait")
-                        raise HTTPException(status_code=r.status_code, detail="cf-please-wait")
+                    if "cf-spinner-please-wait" in rtext:
+                        # logger.error(f"Failed to send conversation: cf-spinner-please-wait")
+                        raise HTTPException(status_code=r.status_code, detail="cf-spinner-please-wait")
                     if r.status_code == 429:
                         # logger.error(f"Failed to send conversation: rate-limit")
                         raise HTTPException(status_code=r.status_code, detail="rate-limit")
