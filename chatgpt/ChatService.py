@@ -105,8 +105,6 @@ class ChatService:
             self.base_headers['authkey'] = auth_key
 
         await get_dpl(self)
-        self.s.session.cookies.set("__Secure-next-auth.callback-url", "https%3A%2F%2Fchatgpt.com;",
-                                   domain=self.host_url.split("://")[1], secure=True)
 
     async def set_model(self):
         self.origin_model = self.data.get("model", "gpt-3.5-turbo-0125")
