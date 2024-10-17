@@ -137,7 +137,7 @@ async def stream_response(service, response, model, max_tokens):
     last_message_id = None
     last_role = None
     last_content_type = None
-    last_recipient = None
+    model_slug = None
     end = False
 
     chunk_new_data = {
@@ -161,6 +161,7 @@ async def stream_response(service, response, model, max_tokens):
     async for chunk in response:
         chunk = chunk.decode("utf-8")
         if end:
+            logger.info(f"Response Model: {model_slug}")
             yield "data: [DONE]\n\n"
             break
         try:
@@ -177,6 +178,9 @@ async def stream_response(service, response, model, max_tokens):
                 message_id = message.get("id")
                 content = message.get("content", {})
                 recipient = message.get("recipient", "")
+                meta_data = message.get("metadata", {})
+                initial_text = meta_data.get("initial_text", "")
+                model_slug = meta_data.get("model_slug", model_slug)
 
                 if not message and chunk_old_data.get("type") == "moderation":
                     delta = {"role": "assistant", "content": moderation_message}
@@ -187,8 +191,10 @@ async def stream_response(service, response, model, max_tokens):
                     if outer_content_type == "text":
                         part = content.get("parts", [])[0]
                         if not part:
-                            if last_role == 'tool' and role == 'assistant':
-                                new_text = "\n\n"
+                            if role == 'assistant' and last_role != 'assistant':
+                                new_text = f"\n"
+                            elif role == 'tool' and last_role != 'tool':
+                                new_text = f">{initial_text}\n"
                             else:
                                 new_text = ""
                         else:
@@ -202,14 +208,22 @@ async def stream_response(service, response, model, max_tokens):
                                 new_text = f' **[[""]]({citation_url} "{citation_title}")** '
                                 len_last_citation = len(citation)
                             else:
-                                if role == 'tool':
-                                    part = ">" + part.replace("\n\n", "\n>\n>")
-                                new_text = part[len_last_content:]
+                                if role == 'assistant' and last_role != 'assistant':
+                                    new_text = f"\n\n{part[len_last_content:]}"
+                                elif role == 'tool' and last_role != 'tool':
+                                    new_text = f">{initial_text}\n{part[len_last_content:]}"
+                                elif role == 'tool':
+                                    new_text = part[len_last_content:].replace("\n\n", "\n")
+                                else:
+                                    new_text = part[len_last_content:]
                             len_last_content = len(part)
                     else:
                         text = content.get("text", "")
                         if outer_content_type == "code" and last_content_type != "code":
-                            new_text = "\n```" + recipient + "\n" + text[len_last_content:]
+                            language = content.get("language", "")
+                            if not language or language == "unknown":
+                                language = recipient
+                            new_text = "\n```" + language + "\n" + text[len_last_content:]
                         elif outer_content_type == "execution_output" and last_content_type != "execution_output":
                             new_text = "\n```" + "Output" + "\n" + text[len_last_content:]
                         else:
@@ -219,11 +233,9 @@ async def stream_response(service, response, model, max_tokens):
                         new_text = "\n```\n" + new_text
                     elif last_content_type == "execution_output" and outer_content_type != "execution_output":
                         new_text = "\n```\n" + new_text
-                    if recipient == "dalle.text2im" and last_recipient != "dalle.text2im":
-                        new_text = "\n```" + "json" + "\n" + new_text
+
                     delta = {"content": new_text}
                     last_content_type = outer_content_type
-                    last_recipient = recipient
                     if completion_tokens >= max_tokens:
                         delta = {}
                         finish_reason = "length"
@@ -256,7 +268,7 @@ async def stream_response(service, response, model, max_tokens):
                                 for i, sandbox_path in enumerate(matches):
                                     file_download_url = await service.get_response_file_url(conversation_id, message_id, sandbox_path)
                                     if file_download_url:
-                                        file_url_content += f"\n```\n![File {i+1}]({file_download_url})\n"
+                                        file_url_content += f"\n```\n\n![File {i+1}]({file_download_url})\n"
                                 delta = {"content": file_url_content}
                             else:
                                 delta = {}
@@ -265,10 +277,11 @@ async def stream_response(service, response, model, max_tokens):
                         finish_reason = "stop"
                         end = True
                     else:
-                        last_role = role
-                        last_message_id = None
                         len_last_content = 0
-                        continue
+                        if meta_data.get("finished_text"):
+                            delta = {"content": f"\n{meta_data.get('finished_text')}\n"}
+                        else:
+                            delta = {"content": f"\n"}
                 else:
                     continue
                 last_message_id = message_id
@@ -285,6 +298,7 @@ async def stream_response(service, response, model, max_tokens):
                 completion_tokens += 1
                 yield f"data: {json.dumps(chunk_new_data)}\n\n"
             elif chunk.startswith("data: [DONE]"):
+                logger.info(f"Response Model: {model_slug}")
                 yield "data: [DONE]\n\n"
             else:
                 continue
