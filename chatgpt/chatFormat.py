@@ -281,7 +281,7 @@ async def stream_response(service, response, model, max_tokens):
                         if meta_data.get("finished_text"):
                             delta = {"content": f"\n{meta_data.get('finished_text')}\n"}
                         else:
-                            delta = {"content": f"\n"}
+                            continue
                 else:
                     continue
                 last_message_id = message_id
