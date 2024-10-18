@@ -388,7 +388,6 @@ class ScriptSrcParser(HTMLParser):
             if "src" in attrs_dict:
                 src = attrs_dict["src"]
                 cached_scripts.append(src)
-                print(cached_scripts)
                 match = re.search(r"c/[^/]*/_", src)
                 if match:
                     cached_dpl = match.group(0)
@@ -396,19 +395,18 @@ class ScriptSrcParser(HTMLParser):
 
 
 def get_data_build_from_html(html_content):
+    global cached_scripts, cached_dpl, cached_time
     parser = ScriptSrcParser()
     parser.feed(html_content)
-    get_data_build_from_document_element(html_content)
-    return cached_dpl
-
-
-def get_data_build_from_document_element(html_content):
-    global cached_dpl, cached_time
-    match = re.search(r'<html[^>]*data-build="([^"]*)"', html_content)
-    if match:
-        data_build = match.group(1)
-        cached_time = int(time.time())
-        logger.info(f"Found dpl: {data_build}")
+    if not cached_scripts:
+        cached_scripts.append("https://chatgpt.com/backend-api/sentinel/sdk.js")
+    if not cached_dpl:
+        match = re.search(r'<html[^>]*data-build="([^"]*)"', html_content)
+        if match:
+            data_build = match.group(1)
+            cached_dpl = data_build
+            cached_time = int(time.time())
+            logger.info(f"Found dpl: {cached_dpl}")
 
 
 async def get_dpl(service):
@@ -428,8 +426,9 @@ async def get_dpl(service):
             raise Exception("No Cached DPL")
         else:
             return True
-    except Exception:
-        cached_dpl = "remix-prod-14f2d9d20b1dff8b7a6ecf23d472dbc30191dfaa"
+    except Exception as e:
+        logger.info(f"Failed to get dpl: {e}")
+        cached_dpl = None
         cached_time = int(time.time())
         return False
 
