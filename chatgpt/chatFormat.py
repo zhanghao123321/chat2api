@@ -192,7 +192,10 @@ async def stream_response(service, response, model, max_tokens):
                         part = content.get("parts", [])[0]
                         if not part:
                             if role == 'assistant' and last_role != 'assistant':
-                                new_text = f"\n"
+                                if last_role == None:
+                                    new_text = ""
+                                else:
+                                    new_text = f"\n"
                             elif role == 'tool' and last_role != 'tool':
                                 new_text = f">{initial_text}\n"
                             else:
@@ -209,7 +212,10 @@ async def stream_response(service, response, model, max_tokens):
                                 len_last_citation = len(citation)
                             else:
                                 if role == 'assistant' and last_role != 'assistant':
-                                    new_text = f"\n\n{part[len_last_content:]}"
+                                    if last_role == None:
+                                        new_text = part[len_last_content:]
+                                    else:
+                                        new_text = f"\n\n{part[len_last_content:]}"
                                 elif role == 'tool' and last_role != 'tool':
                                     new_text = f">{initial_text}\n{part[len_last_content:]}"
                                 elif role == 'tool':
