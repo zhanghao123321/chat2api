@@ -12,11 +12,11 @@ from chatgpt.authorization import get_req_token, verify_token
 from chatgpt.chatFormat import api_messages_to_chat, stream_response, format_not_stream_response, head_process_response
 from chatgpt.chatLimit import check_is_limit, handle_request_limit
 from chatgpt.proofofWork import get_config, get_dpl, get_answer_token, get_requirements_token
-from chatgpt.turnstile import process_turnstile
+
 from utils.Client import Client
 from utils.Logger import logger
 from utils.config import proxy_url_list, chatgpt_base_url_list, ark0se_token_url_list, history_disabled, pow_difficulty, \
-    conversation_only, enable_limit, upload_by_url, check_model, auth_key, user_agents_list
+    conversation_only, enable_limit, upload_by_url, check_model, auth_key, user_agents_list, turnstile_solver_url
 
 
 class ChatService:
@@ -180,7 +180,9 @@ class ChatService:
                 if turnstile_required:
                     turnstile_dx = turnstile.get("dx")
                     try:
-                        self.turnstile_token = process_turnstile(turnstile_dx, p)
+                        if turnstile_solver_url:
+                            res = await self.s.post(turnstile_solver_url, json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                            self.turnstile_token = res.json().get("t")
                     except Exception as e:
                         logger.info(f"Turnstile ignored: {e}")
                     # raise HTTPException(status_code=403, detail="Turnstile required")
