@@ -1,6 +1,8 @@
 import asyncio
+import random
 
 from fastapi import HTTPException
+import ua_generator
 
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
@@ -21,6 +23,22 @@ def get_req_token(req_token):
             return None
     else:
         return req_token
+
+
+def get_ua(req_token):
+    user_agent = globals.user_agent_map.get(req_token, "")
+    # token为空，免登录用户，则随机生成ua
+    if not user_agent:
+        ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
+        return {
+            "User-Agent": ua.text,
+            "Sec-Ch-Ua-Platform": ua.platform,
+            "Sec-Ch-Ua": ua.ch.brands,
+            "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+            "impersonate": random.choice(globals.impersonate_list),
+        }
+    else:
+        return user_agent
 
 
 async def verify_token(req_token):

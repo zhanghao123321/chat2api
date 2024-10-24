@@ -9,3 +9,4 @@ pillow
 pybase64
 jinja2
 APScheduler
+ua-generator
