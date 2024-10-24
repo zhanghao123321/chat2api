@@ -213,7 +213,7 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 > - PLUS 账号报错 `403`？
 >   - PLUS 账号需要配置 `Ark0seToken`，请根据上文进行配置。
 > - Ark0seToken 是什么，怎么获取？
->   - 请参考上文的说明，更多请参考 [https://www.ark0selabs.com/](https://www.ark0selabs.com/)
+>   - 请参考上文的说明，更多请参考 [https://www.arkoselabs.com/](https://www.arkoselabs.com/)
 
 ## License
 
