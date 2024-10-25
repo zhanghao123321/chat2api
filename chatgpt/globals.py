@@ -59,6 +59,7 @@ else:
     with open(TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
 
+
 if os.path.exists(ERROR_TOKENS_FILE):
     with open(ERROR_TOKENS_FILE, "r", encoding="utf-8") as f:
         for line in f:
