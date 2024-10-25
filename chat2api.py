@@ -12,11 +12,11 @@ from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
 
 from chatgpt.ChatService import ChatService
-from chatgpt.authorization import refresh_all_tokens
+from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_token
 import chatgpt.globals as globals
 from chatgpt.reverseProxy import chatgpt_reverse_proxy
 from utils.Logger import logger
-from utils.config import api_prefix, scheduled_refresh
+from utils.config import api_prefix, scheduled_refresh, authorization_list
 from utils.retry import async_retry
 
 warnings.filterwarnings("ignore")
@@ -126,6 +126,16 @@ async def upload_post():
 async def error_tokens():
     error_tokens_list = list(set(globals.error_token_list))
     return {"status": "success", "error_tokens": error_tokens_list}
+
+
+@app.get("/")
+async def chatgpt(request: Request):
+    req_token = get_req_token(authorization_list[0])
+    access_token = await verify_token(req_token)
+    response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": access_token})
+    response.set_cookie("req_token", value=req_token)
+    response.set_cookie("access_token", value=access_token)
+    return response
 
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])

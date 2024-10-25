@@ -6,19 +6,25 @@ import ua_generator
 
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
-from utils.config import authorization_list
+from utils.config import authorization_list, random_token
 import chatgpt.globals as globals
 
 
 def get_req_token(req_token):
     if req_token in authorization_list:
         if len(globals.token_list) - len(globals.error_token_list) > 0:
-            globals.count += 1
-            globals.count %= len(globals.token_list)
-            while globals.token_list[globals.count] in globals.error_token_list:
+            if random_token:
+                req_token = random.choice(globals.token_list)
+                while req_token in globals.error_token_list:
+                    req_token = random.choice(globals.token_list)
+                return req_token
+            else:
                 globals.count += 1
                 globals.count %= len(globals.token_list)
-            return globals.token_list[globals.count]
+                while globals.token_list[globals.count] in globals.error_token_list:
+                    globals.count += 1
+                    globals.count %= len(globals.token_list)
+                return globals.token_list[globals.count]
         else:
             return None
     else:
