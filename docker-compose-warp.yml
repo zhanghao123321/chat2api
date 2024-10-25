@@ -22,18 +22,16 @@ services:
       timeout: 10s   # 请求超时10秒
       retries: 3     # 失败3次后标记为不健康
       start_period: 5s  # 容器启动后等待5秒再开始检查
-
-
-
+      
   chat2api:
     image: lanqian528/chat2api:latest
     container_name: chat2api
     restart: unless-stopped
-    build: ~/pygpt/chat2api
     ports:
       - '5005:5005'  # 暴露chat2api服务供外部访问
     environment:
       - UPLOAD_BY_URL=true
+      - AUTHORIZATION=sk-xxx
       - CHATGPT_BASE_URL=https://chatgpt.com
       - TZ=Asia/Shanghai
       - HISTORY_DISABLED=true
@@ -47,6 +45,15 @@ services:
       - internal_network  # chat2api 和 warp 在同一个内部网络
     volumes:
       - ./data:/app/data # 挂载一些需要保存的数据
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 300 chat2api
+    
 networks:
   internal_network:
     driver: bridge  # 定义一个桥接网络
