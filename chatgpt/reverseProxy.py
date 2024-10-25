@@ -5,7 +5,7 @@ from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
-from chatgpt.authorization import get_ua
+from chatgpt.authorization import verify_token, get_req_token
 from utils.Client import Client
 from utils.config import chatgpt_base_url_list, proxy_url_list, enable_gateway
 
@@ -82,8 +82,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "user-agent",
-                                    "authorization"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer"] and key.lower() not in headers_reject_list)
         }
 
         base_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
@@ -92,11 +91,11 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         if "file-" in path and "backend-api" not in path:
             base_url = "https://files.oaiusercontent.com"
 
-        req_token = request.cookies.get("req_token")
-        ua = get_ua(req_token)
-        headers.update(ua)
+        # req_token = request.cookies.get("req_token")
+        # ua = get_ua(req_token)
+        # headers.update(ua)
         headers.update({
-            "accept-Language": "en-US,en;q=0.9",
+            "accept-language": "en-US,en;q=0.9",
             "host": base_url.replace("https://", "").replace("http://", ""),
             "origin": base_url,
             "referer": f"{base_url}/",
@@ -105,15 +104,15 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "sec-fetch-site": "same-origin",
         })
 
-        if request.headers.get('Authorization'):
-            headers['Authorization'] = request.headers['Authorization']
+        seed_token = headers.get("authorization", None)
+        if seed_token:
+            req_token = get_req_token(None, seed_token)
+            access_token = await verify_token(req_token)
+            headers.update({"authorization": access_token})
 
-        if headers.get("Content-Type") == "application/json":
-            data = await request.json()
-        else:
-            data = await request.body()
+        data = await request.body()
 
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None, impersonate=ua.get("impersonate"))
+        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
         try:
             background = BackgroundTask(client.close)
             r = await client.request(request.method, f"{base_url}/{path}", params=params, headers=headers,

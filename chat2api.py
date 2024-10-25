@@ -1,4 +1,5 @@
 import asyncio
+import time
 import types
 import warnings
 
@@ -133,17 +134,78 @@ async def error_tokens():
 async def chatgpt(request: Request):
     if not enable_gateway:
         raise HTTPException(status_code=404, detail="Gateway is disabled")
-    req_token = get_req_token(authorization_list[0])
-    access_token = await verify_token(req_token)
-    response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": access_token})
-    response.set_cookie("req_token", value=req_token)
-    response.set_cookie("access_token", value=access_token)
+
+    seed_token = request.query_params.get("seed", None)
+    if not seed_token:
+        seed_token = str(int(time.time()))
+
+    response = templates.TemplateResponse("chatgpt.html", {"request": request, "seed_token": seed_token})
+    # response.set_cookie("req_token", value=req_token)
+    # response.set_cookie("access_token", value=access_token)
+    response.set_cookie("seed_token", value=seed_token)
     return response
+
+
+# @app.get("/backend-api/conversations")
+# async def get_conversations():
+#     return {"items": [], "total": 0, "limit": 28, "offset": 0, "has_missing_conversations": False}
+
+
+@app.get("/backend-api/gizmos/bootstrap")
+async def get_gizmos_bootstrap():
+    return {"gizmos": []}
+
+
+@app.get("/backend-api/me")
+async def get_me():
+    created = int(time.time())
+    return {
+        "object": "user",
+        "id": "org-chatgpt",
+        "email": "chatgpt@openai.com",
+        "name": "ChatGPT",
+        "picture": "https://cdn.auth0.com/avatars/ai.png",
+        "created": created,
+        "phone_number": None,
+        "mfa_flag_enabled": False,
+        "amr": [],
+        "groups": [],
+        "orgs": {
+            "object": "list",
+            "data": [
+                {
+                    "object": "organization",
+                    "id": "org-chatgpt",
+                    "created": 1715641300,
+                    "title": "Personal",
+                    "name": "user-chatgpt",
+                    "description": "Personal org for chatgpt@openai.com",
+                    "personal": True,
+                    "settings": {},
+                    "parent_org_id": None,
+                    "is_default": False,
+                    "role": "owner",
+                    "is_scale_tier_authorized_purchaser": None,
+                    "is_scim_managed": False,
+                    "projects": {
+                        "object": "list",
+                        "data": []
+                    },
+                    "groups": [],
+                    "geography": None
+                }
+            ]
+        },
+        "has_payg_project_spend_limit": None
+    }
 
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
 async def reverse_proxy(request: Request, path: str):
     if path.startswith("c/"):
-        redirect_url = str(request.base_url)
+        seed_token = request.cookies.get("seed_token")
+        if not seed_token:
+            seed_token = str(int(time.time()))
+        redirect_url = str(request.base_url) + "?seed=" + seed_token
         return RedirectResponse(url=redirect_url, status_code=302)
     return await chatgpt_reverse_proxy(request, path)

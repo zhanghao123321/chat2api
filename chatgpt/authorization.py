@@ -10,21 +10,24 @@ from utils.config import authorization_list, random_token
 import chatgpt.globals as globals
 
 
-def get_req_token(req_token):
+def get_req_token(req_token, seed=None):
+    available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
+    length = len(available_token_list)
+    if seed and length > 0:
+        req_token = globals.token_list[hash(seed) % length]
+        while req_token in globals.error_token_list:
+            req_token = random.choice(globals.token_list)
+        return req_token
+
     if req_token in authorization_list:
-        if len(globals.token_list) - len(globals.error_token_list) > 0:
+        if len(available_token_list) > 0:
             if random_token:
-                req_token = random.choice(globals.token_list)
-                while req_token in globals.error_token_list:
-                    req_token = random.choice(globals.token_list)
+                req_token = random.choice(available_token_list)
                 return req_token
             else:
                 globals.count += 1
-                globals.count %= len(globals.token_list)
-                while globals.token_list[globals.count] in globals.error_token_list:
-                    globals.count += 1
-                    globals.count %= len(globals.token_list)
-                return globals.token_list[globals.count]
+                globals.count %= length
+                return available_token_list[globals.count]
         else:
             return None
     else:
