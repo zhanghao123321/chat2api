@@ -16,7 +16,7 @@ from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_toke
 import chatgpt.globals as globals
 from chatgpt.reverseProxy import chatgpt_reverse_proxy
 from utils.Logger import logger
-from utils.config import api_prefix, scheduled_refresh, authorization_list
+from utils.config import api_prefix, scheduled_refresh, authorization_list, enable_gateway
 from utils.retry import async_retry
 
 warnings.filterwarnings("ignore")
@@ -130,6 +130,8 @@ async def error_tokens():
 
 @app.get("/")
 async def chatgpt(request: Request):
+    if not enable_gateway:
+        raise HTTPException(status_code=404, detail="Gateway is disabled")
     req_token = get_req_token(authorization_list[0])
     access_token = await verify_token(req_token)
     response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": access_token})
