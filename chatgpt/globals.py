@@ -30,7 +30,6 @@ impersonate_list = [
     "chrome119",
     "chrome120",
     "chrome123",
-    "chrome124",
     "edge99",
     "edge101",
 ]

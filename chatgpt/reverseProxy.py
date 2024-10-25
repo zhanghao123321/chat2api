@@ -70,9 +70,12 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             petrol = "https"
         else:
             petrol = "http"
+        if "x-forwarded-proto" in request.headers:
+            petrol = request.headers["x-forwarded-proto"]
 
         params = dict(request.query_params)
         request_cookies = dict(request.cookies)
+
         headers = {
             key: value for key, value in request.headers.items()
             if (key.lower() not in ["host", "origin", "referer", "user-agent",
