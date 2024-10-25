@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, Response
 
 from chatgpt.ChatService import ChatService
 from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_token
@@ -135,15 +135,22 @@ async def chatgpt(request: Request):
     if not enable_gateway:
         raise HTTPException(status_code=404, detail="Gateway is disabled")
 
-    seed_token = request.query_params.get("seed", None)
+    seed_token = request.query_params.get("seed")
+    if not seed_token:
+        seed_token = request.cookies.get("seed_token")
     if not seed_token:
         seed_token = str(int(time.time()))
+    req_token = get_req_token(seed_token)
+    seed_token = await verify_token(req_token)
 
-    response = templates.TemplateResponse("chatgpt.html", {"request": request, "seed_token": seed_token})
-    # response.set_cookie("req_token", value=req_token)
-    # response.set_cookie("access_token", value=access_token)
+    response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": seed_token})
     response.set_cookie("seed_token", value=seed_token)
     return response
+
+
+@app.get("/backend-api/gizmos/bootstrap")
+async def get_gizmos_bootstrap():
+    return {"gizmos": []}
 
 
 # @app.get("/backend-api/conversations")
@@ -151,9 +158,9 @@ async def chatgpt(request: Request):
 #     return {"items": [], "total": 0, "limit": 28, "offset": 0, "has_missing_conversations": False}
 
 
-@app.get("/backend-api/gizmos/bootstrap")
-async def get_gizmos_bootstrap():
-    return {"gizmos": []}
+@app.patch("/backend-api/conversations")
+async def get_conversations():
+    return {"success": True, "message": None}
 
 
 @app.get("/backend-api/me")
@@ -200,12 +207,19 @@ async def get_me():
     }
 
 
+banned_paths = ["backend-api/accounts/logout_all", "backend-api/accounts/deactivate", "backend-api/user_system_messages"]
+redirect_paths = ["auth/logout", "c/"]
+
+
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
 async def reverse_proxy(request: Request, path: str):
-    if path.startswith("c/"):
-        seed_token = request.cookies.get("seed_token")
-        if not seed_token:
-            seed_token = str(int(time.time()))
-        redirect_url = str(request.base_url) + "?seed=" + seed_token
-        return RedirectResponse(url=redirect_url, status_code=302)
+    for banned_path in banned_paths:
+        if banned_path in path:
+            return Response(status_code=404)
+
+    for redirect_path in redirect_paths:
+        if redirect_path in path:
+            redirect_url = str(request.base_url)
+            return RedirectResponse(url=redirect_url, status_code=302)
+
     return await chatgpt_reverse_proxy(request, path)

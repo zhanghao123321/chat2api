@@ -1,13 +1,17 @@
 import asyncio
+import os
 import random
 
-from fastapi import HTTPException
 import ua_generator
+from fastapi import HTTPException
 
+import chatgpt.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
 from utils.config import authorization_list, random_token
-import chatgpt.globals as globals
+
+os.environ['PYTHONHASHSEED'] = '0'
+random.seed(0)
 
 
 def get_req_token(req_token, seed=None):
