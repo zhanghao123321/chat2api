@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
+from starlette.responses import RedirectResponse
 
 from chatgpt.ChatService import ChatService
 from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_token
@@ -128,7 +129,7 @@ async def error_tokens():
     return {"status": "success", "error_tokens": error_tokens_list}
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def chatgpt(request: Request):
     if not enable_gateway:
         raise HTTPException(status_code=404, detail="Gateway is disabled")
@@ -142,4 +143,7 @@ async def chatgpt(request: Request):
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
 async def reverse_proxy(request: Request, path: str):
+    if path.startswith("c/"):
+        redirect_url = str(request.base_url)
+        return RedirectResponse(url=redirect_url, status_code=302)
     return await chatgpt_reverse_proxy(request, path)

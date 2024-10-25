@@ -1,3 +1,4 @@
+import json
 import random
 
 from fastapi import Request, HTTPException
@@ -72,6 +73,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             petrol = "http"
         if "x-forwarded-proto" in request.headers:
             petrol = request.headers["x-forwarded-proto"]
+        if "cf-visitor" in request.headers:
+            cf_visitor = json.loads(request.headers["cf-visitor"])
+            petrol = cf_visitor.get("scheme", petrol)
 
         params = dict(request.query_params)
         request_cookies = dict(request.cookies)
@@ -143,7 +147,6 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     }
                     response = Response(content=content, headers=rheaders,
                                         status_code=r.status_code, background=background)
-                    response.set_cookie("access_token", value=request_cookies.get("access_token", ""), domain=origin_host)
                 return response
         except Exception:
             await client.close()
