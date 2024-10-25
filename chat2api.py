@@ -111,6 +111,17 @@ async def upload_post(text: str = Form(...)):
     return {"status": "success", "tokens_count": tokens_count}
 
 
+@app.get(f"/{api_prefix}/tokens/add/{{token}}" if api_prefix else "/tokens/add/{token}")
+async def add_token(token: str):
+    if token.strip() and not token.startswith("#"):
+        globals.token_list.append(token.strip())
+        with open("data/token.txt", "a", encoding="utf-8") as f:
+            f.write(token.strip() + "\n")
+    logger.info(f"Token count: {len(globals.token_list)}, Error token count: {len(globals.error_token_list)}")
+    tokens_count = len(set(globals.token_list) - set(globals.error_token_list))
+    return {"status": "success", "tokens_count": tokens_count}
+
+
 @app.post(f"/{api_prefix}/tokens/clear" if api_prefix else "/tokens/clear")
 async def upload_post():
     globals.token_list.clear()
