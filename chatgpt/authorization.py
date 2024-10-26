@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import random
 
@@ -40,16 +41,29 @@ def get_req_token(req_token, seed=None):
 
 def get_ua(req_token):
     user_agent = globals.user_agent_map.get(req_token, "")
-    # token为空，免登录用户，则随机生成ua
     if not user_agent:
-        ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
-        return {
-            "User-Agent": ua.text,
-            "Sec-Ch-Ua-Platform": ua.platform,
-            "Sec-Ch-Ua": ua.ch.brands,
-            "Sec-Ch-Ua-Mobile": ua.ch.mobile,
-            "impersonate": random.choice(globals.impersonate_list),
-        }
+        if not req_token:
+            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
+            return {
+                "User-Agent": ua.text,
+                "Sec-Ch-Ua-Platform": ua.platform,
+                "Sec-Ch-Ua": ua.ch.brands,
+                "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+                "impersonate": random.choice(globals.impersonate_list),
+            }
+        else:
+            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
+            user_agent = {
+                "User-Agent": ua.text,
+                "Sec-Ch-Ua-Platform": ua.platform,
+                "Sec-Ch-Ua": ua.ch.brands,
+                "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+                "impersonate": random.choice(globals.impersonate_list),
+            }
+            globals.user_agent_map[req_token] = user_agent
+            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+                f.write(json.dumps(globals.user_agent_map, indent=4))
+            return user_agent
     else:
         return user_agent
 

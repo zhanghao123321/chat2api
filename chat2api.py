@@ -140,11 +140,9 @@ if enable_gateway:
         if not token:
             response = templates.TemplateResponse("login.html", {"request": request})
             return response
-        req_token = get_req_token(token)
-        seed_token = await verify_token(req_token)
 
         response = templates.TemplateResponse("chatgpt.html", {"request": request, "token": token})
-        response.set_cookie("token", value=seed_token)
+        response.set_cookie("token", value=token)
         return response
 
 
