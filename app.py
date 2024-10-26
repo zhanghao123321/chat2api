@@ -7,3 +7,4 @@ log_config["formatters"]["default"]["fmt"] = default_format
 log_config["formatters"]["access"]["fmt"] = access_format
 
 uvicorn.run("chat2api:app", host="0.0.0.0", port=5005)
+# uvicorn.run("chat2api:app", host="0.0.0.0", port=5005, ssl_keyfile="key.pem", ssl_certfile="cert.pem")
