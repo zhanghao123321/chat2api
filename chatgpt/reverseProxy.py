@@ -101,14 +101,14 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "sec-fetch-site": "same-origin",
         })
 
-        seed_token = headers.get("authorization", "").replace("Bearer ", "")
-        if seed_token:
-            req_token = get_req_token(seed_token)
+        token = headers.get("authorization", "").replace("Bearer ", "")
+        if token:
+            req_token = get_req_token(token)
             access_token = await verify_token(req_token)
             if access_token.startswith("eyJhbGciOi"):
                 headers.update({"authorization": access_token})
             else:
-                req_token = get_req_token(None, seed_token)
+                req_token = get_req_token(None, token)
                 access_token = await verify_token(req_token)
                 headers.update({"authorization": access_token})
         else:

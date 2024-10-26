@@ -134,16 +134,17 @@ async def error_tokens():
 if enable_gateway:
     @app.get("/", response_class=HTMLResponse)
     async def chatgpt(request: Request):
-        seed_token = request.query_params.get("seed")
-        if not seed_token:
-            seed_token = request.cookies.get("seed_token")
-        if not seed_token:
-            seed_token = str(int(time.time()))
-        req_token = get_req_token(seed_token)
+        token = request.query_params.get("token")
+        if not token:
+            token = request.cookies.get("token")
+        if not token:
+            response = templates.TemplateResponse("login.html", {"request": request})
+            return response
+        req_token = get_req_token(token)
         seed_token = await verify_token(req_token)
 
-        response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": seed_token})
-        response.set_cookie("seed_token", value=seed_token)
+        response = templates.TemplateResponse("chatgpt.html", {"request": request, "token": token})
+        response.set_cookie("token", value=seed_token)
         return response
 
 
@@ -224,7 +225,9 @@ if enable_gateway:
         for redirect_path in redirect_paths:
             if redirect_path in path:
                 redirect_url = str(request.base_url)
-                return RedirectResponse(url=f"{redirect_url}?seed={int(time.time())}", status_code=302)
+                response = RedirectResponse(url=f"{redirect_url}", status_code=302)
+                response.delete_cookie("token")
+                return response
 
         return await chatgpt_reverse_proxy(request, path)
 else:
