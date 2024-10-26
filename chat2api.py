@@ -18,7 +18,7 @@ from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_toke
 import chatgpt.globals as globals
 from chatgpt.reverseProxy import chatgpt_reverse_proxy
 from utils.Logger import logger
-from utils.config import api_prefix, scheduled_refresh, authorization_list, enable_gateway
+from utils.config import api_prefix, scheduled_refresh, enable_gateway
 from utils.retry import async_retry
 
 warnings.filterwarnings("ignore")
@@ -40,7 +40,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def app_start():
     if scheduled_refresh:
-        scheduler.add_job(id='refresh', func=refresh_all_tokens, trigger='cron', hour=3, minute=0, day='*/4', kwargs={'force_refresh': True})
+        scheduler.add_job(id='refresh', func=refresh_all_tokens, trigger='cron', hour=3, minute=0, day='*/4',
+                          kwargs={'force_refresh': True})
         scheduler.start()
         asyncio.get_event_loop().call_later(0, lambda: asyncio.create_task(refresh_all_tokens(force_refresh=False)))
 
@@ -130,96 +131,103 @@ async def error_tokens():
     return {"status": "success", "error_tokens": error_tokens_list}
 
 
-@app.get("/", response_class=HTMLResponse)
-async def chatgpt(request: Request):
-    if not enable_gateway:
+if enable_gateway:
+    @app.get("/", response_class=HTMLResponse)
+    async def chatgpt(request: Request):
+        seed_token = request.query_params.get("seed")
+        if not seed_token:
+            seed_token = request.cookies.get("seed_token")
+        if not seed_token:
+            seed_token = str(int(time.time()))
+        req_token = get_req_token(seed_token)
+        seed_token = await verify_token(req_token)
+
+        response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": seed_token})
+        response.set_cookie("seed_token", value=seed_token)
+        return response
+
+
+    @app.get("/backend-api/gizmos/bootstrap")
+    async def get_gizmos_bootstrap():
+        return {"gizmos": []}
+
+
+    # @app.get("/backend-api/conversations")
+    # async def get_conversations():
+    #     return {"items": [], "total": 0, "limit": 28, "offset": 0, "has_missing_conversations": False}
+
+    # @app.patch("/backend-api/conversations")
+    # async def get_conversations():
+    #     return {"success": True, "message": None}
+
+
+    @app.get("/backend-api/me")
+    async def get_me():
+        created = int(time.time())
+        return {
+            "object": "user",
+            "id": "org-chatgpt",
+            "email": "chatgpt@openai.com",
+            "name": "ChatGPT",
+            "picture": "https://cdn.auth0.com/avatars/ai.png",
+            "created": created,
+            "phone_number": None,
+            "mfa_flag_enabled": False,
+            "amr": [],
+            "groups": [],
+            "orgs": {
+                "object": "list",
+                "data": [
+                    {
+                        "object": "organization",
+                        "id": "org-chatgpt",
+                        "created": 1715641300,
+                        "title": "Personal",
+                        "name": "user-chatgpt",
+                        "description": "Personal org for chatgpt@openai.com",
+                        "personal": True,
+                        "settings": {},
+                        "parent_org_id": None,
+                        "is_default": False,
+                        "role": "owner",
+                        "is_scale_tier_authorized_purchaser": None,
+                        "is_scim_managed": False,
+                        "projects": {
+                            "object": "list",
+                            "data": []
+                        },
+                        "groups": [],
+                        "geography": None
+                    }
+                ]
+            },
+            "has_payg_project_spend_limit": None
+        }
+
+
+    banned_paths = ["backend-api/accounts/logout_all", "backend-api/accounts/deactivate",
+                    "backend-api/user_system_messages"]
+    redirect_paths = ["auth/logout"]
+    chatgpt_paths = ["c/"]
+
+
+    @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
+    async def reverse_proxy(request: Request, path: str):
+        for chatgpt_path in chatgpt_paths:
+            if chatgpt_path in path:
+                return await chatgpt(request)
+
+        for banned_path in banned_paths:
+            if banned_path in path:
+                return Response(status_code=404)
+
+        for redirect_path in redirect_paths:
+            if redirect_path in path:
+                redirect_url = str(request.base_url)
+                return RedirectResponse(url=f"{redirect_url}?seed={int(time.time())}", status_code=302)
+
+        return await chatgpt_reverse_proxy(request, path)
+else:
+    @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
+    async def reverse_proxy():
         raise HTTPException(status_code=404, detail="Gateway is disabled")
-
-    seed_token = request.query_params.get("seed")
-    if not seed_token:
-        seed_token = request.cookies.get("seed_token")
-    if not seed_token:
-        seed_token = str(int(time.time()))
-    req_token = get_req_token(seed_token)
-    seed_token = await verify_token(req_token)
-
-    response = templates.TemplateResponse("chatgpt.html", {"request": request, "access_token": seed_token})
-    response.set_cookie("seed_token", value=seed_token)
-    return response
-
-
-@app.get("/backend-api/gizmos/bootstrap")
-async def get_gizmos_bootstrap():
-    return {"gizmos": []}
-
-
-# @app.get("/backend-api/conversations")
-# async def get_conversations():
-#     return {"items": [], "total": 0, "limit": 28, "offset": 0, "has_missing_conversations": False}
-
-
-@app.patch("/backend-api/conversations")
-async def get_conversations():
-    return {"success": True, "message": None}
-
-
-@app.get("/backend-api/me")
-async def get_me():
-    created = int(time.time())
-    return {
-        "object": "user",
-        "id": "org-chatgpt",
-        "email": "chatgpt@openai.com",
-        "name": "ChatGPT",
-        "picture": "https://cdn.auth0.com/avatars/ai.png",
-        "created": created,
-        "phone_number": None,
-        "mfa_flag_enabled": False,
-        "amr": [],
-        "groups": [],
-        "orgs": {
-            "object": "list",
-            "data": [
-                {
-                    "object": "organization",
-                    "id": "org-chatgpt",
-                    "created": 1715641300,
-                    "title": "Personal",
-                    "name": "user-chatgpt",
-                    "description": "Personal org for chatgpt@openai.com",
-                    "personal": True,
-                    "settings": {},
-                    "parent_org_id": None,
-                    "is_default": False,
-                    "role": "owner",
-                    "is_scale_tier_authorized_purchaser": None,
-                    "is_scim_managed": False,
-                    "projects": {
-                        "object": "list",
-                        "data": []
-                    },
-                    "groups": [],
-                    "geography": None
-                }
-            ]
-        },
-        "has_payg_project_spend_limit": None
-    }
-
-
-banned_paths = ["backend-api/accounts/logout_all", "backend-api/accounts/deactivate", "backend-api/user_system_messages"]
-redirect_paths = ["auth/logout", "c/"]
-
-
-@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
-async def reverse_proxy(request: Request, path: str):
-    for banned_path in banned_paths:
-        if banned_path in path:
-            return Response(status_code=404)
-
-    for redirect_path in redirect_paths:
-        if redirect_path in path:
-            redirect_url = str(request.base_url)
-            return RedirectResponse(url=redirect_url, status_code=302)
-
-    return await chatgpt_reverse_proxy(request, path)
