@@ -176,15 +176,14 @@ if enable_gateway:
 
 
     @app.get("/backend-api/me")
-    async def get_me():
-        created = int(time.time())
-        return {
+    async def get_me(request: Request):
+        me = {
             "object": "user",
             "id": "org-chatgpt",
             "email": "chatgpt@openai.com",
             "name": "ChatGPT",
             "picture": "https://cdn.auth0.com/avatars/ai.png",
-            "created": created,
+            "created": int(time.time()),
             "phone_number": None,
             "mfa_flag_enabled": False,
             "amr": [],
@@ -217,6 +216,7 @@ if enable_gateway:
             },
             "has_payg_project_spend_limit": None
         }
+        return me
 
 
     banned_paths = [

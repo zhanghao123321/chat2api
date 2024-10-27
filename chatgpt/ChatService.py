@@ -387,21 +387,23 @@ class ChatService:
                 download_url = r.json().get('download_url')
                 return download_url
             else:
-                return ""
-        except HTTPException:
+                raise HTTPException(status_code=r.status_code, detail=r.text)
+        except Exception as e:
+            logger.error(f"Failed to get download url: {e}")
             return ""
 
     async def get_download_url_from_upload(self, file_id):
         url = f"{self.base_url}/files/{file_id}/uploaded"
         headers = self.base_headers.copy()
         try:
-            r = await self.s.post(url, headers=headers, json={}, timeout=5)
+            r = await self.s.post(url, headers=headers, json={}, timeout=30)
             if r.status_code == 200:
                 download_url = r.json().get('download_url')
                 return download_url
             else:
-                return ""
-        except HTTPException:
+                raise HTTPException(status_code=r.status_code, detail=r.text)
+        except Exception as e:
+            logger.error(f"Failed to get download url from upload: {e}")
             return ""
 
     async def get_upload_url(self, file_name, file_size, use_case="multimodal"):
@@ -421,8 +423,9 @@ class ChatService:
                 logger.info(f"file_id: {file_id}, upload_url: {upload_url}")
                 return file_id, upload_url
             else:
-                return "", ""
-        except HTTPException:
+                raise HTTPException(status_code=r.status_code, detail=r.text)
+        except Exception as e:
+            logger.error(f"Failed to get upload url: {e}")
             return "", ""
 
     async def upload(self, upload_url, file_content, mime_type):
@@ -437,11 +440,13 @@ class ChatService:
         )
         headers.pop('Authorization', None)
         try:
-            r = await self.s.put(upload_url, headers=headers, data=file_content)
+            r = await self.s.put(upload_url, headers=headers, data=file_content, timeout=60)
             if r.status_code == 201:
                 return True
-            return False
-        except Exception:
+            else:
+                raise HTTPException(status_code=r.status_code, detail=r.text)
+        except Exception as e:
+            logger.error(f"Failed to upload file: {e}")
             return False
 
     async def upload_file(self, file_content, mime_type):
@@ -476,12 +481,6 @@ class ChatService:
                     }
                     logger.info(f"File_meta: {file_meta}")
                     return file_meta
-                else:
-                    logger.error("Failed to get download url")
-            else:
-                logger.error("Failed to upload file")
-        else:
-            logger.error("Failed to get upload url")
 
     async def check_upload(self, file_id):
         url = f'{self.base_url}/files/{file_id}'
