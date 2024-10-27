@@ -40,7 +40,7 @@ def get_req_token(req_token, seed=None):
 
 
 def get_ua(req_token):
-    user_agent = globals.user_agent_map.get(req_token, "")
+    user_agent = globals.user_agent_map.get(req_token, {})
     user_agent = {k.lower(): v for k, v in user_agent.items()}
     if not user_agent:
         if not req_token:
