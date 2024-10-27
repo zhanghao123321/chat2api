@@ -62,8 +62,8 @@ def get_ua(req_token):
                 "impersonate": random.choice(globals.impersonate_list),
             }
             globals.user_agent_map[req_token] = user_agent
-            with open(globals.USER_AGENTS_FILE, "a", encoding="utf-8") as f:
-                f.write(json.dumps({req_token: user_agent}, indent=4))
+            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+                f.write(json.dumps(globals.user_agent_map, indent=4))
             return user_agent
     else:
         return user_agent
