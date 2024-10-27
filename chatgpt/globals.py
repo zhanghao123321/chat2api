@@ -72,7 +72,7 @@ else:
 if os.path.exists(USER_AGENTS_FILE):
     with open(USER_AGENTS_FILE, "r", encoding="utf-8") as f:
         try:
-            user_agent_map = json.load(file)
+            user_agent_map = json.load(f)
         except json.JSONDecodeError:
             user_agent_map = {}
     # token数量变化时，更新ua
