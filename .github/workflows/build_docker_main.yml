@@ -7,16 +7,35 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docker-compose.yml'
+      - 'docker-compose-warp.yml'
       - 'docs/**'
-      - '.github/workflows/build_docker.yml'
+      - '.github/workflows/build_docker_dev.yml'
   workflow_dispatch:
 
 jobs:
   main:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Check out the repository
         uses: actions/checkout@v2
+
+      - name: Read the version from version.txt
+        id: get_version
+        run: |
+          version=$(cat version.txt)
+          echo "Current version: $version"
+          echo "::set-output name=version::$version"
+
+      - name: Commit and push version tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=${{ steps.get_version.outputs.version }}
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag "v$version"
+          git push https://x-access-token:${GHCR_PAT}@github.com/lanqian528/chat2api.git "v$version"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -37,7 +56,7 @@ jobs:
           images: lanqian528/chat2api
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=v1.5.11
+            type=raw,value=${{ steps.get_version.outputs.version }}
 
       - name: Build and push
         uses: docker/build-push-action@v5

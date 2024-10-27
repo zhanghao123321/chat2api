@@ -51,8 +51,11 @@ ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
 user_agents_list = ast.literal_eval(user_agents)
 
+with open('version.txt') as f:
+    version = f.read().strip()
+
 logger.info("-" * 60)
-logger.info("Chat2Api 1.5.11 | https://github.com/lanqian528/chat2api")
+logger.info(f"Chat2Api {version} | https://github.com/lanqian528/chat2api")
 logger.info("-" * 60)
 logger.info("Environment variables:")
 logger.info("API_PREFIX:        " + str(api_prefix))
