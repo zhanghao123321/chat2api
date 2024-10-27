@@ -9,6 +9,7 @@ on:
       - 'docker-compose.yml'
       - 'docker-compose-warp.yml'
       - 'docs/**'
+      - '.github/workflows/build_docker_main.yml'
       - '.github/workflows/build_docker_dev.yml'
   workflow_dispatch:
 
@@ -24,8 +25,8 @@ jobs:
         id: get_version
         run: |
           version=$(cat version.txt)
-          echo "Current version: $version"
-          echo "::set-output name=version::$version"
+          echo "Current version: v$version"
+          echo "::set-output name=version::v$version"
 
       - name: Commit and push version tag
         env:
@@ -34,8 +35,8 @@ jobs:
           version=${{ steps.get_version.outputs.version }}
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag "v$version"
-          git push https://x-access-token:${GHCR_PAT}@github.com/lanqian528/chat2api.git "v$version"
+          git tag "$version"
+          git push https://x-access-token:${GHCR_PAT}@github.com/lanqian528/chat2api.git "$version"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
