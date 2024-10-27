@@ -11,6 +11,7 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Shanghai
+      - AUTHORIZATION=sk-xxx
 
   watchtower:
     image: containrrr/watchtower

@@ -30,13 +30,8 @@ services:
     ports:
       - '5005:5005'  # 暴露chat2api服务供外部访问
     environment:
-      - UPLOAD_BY_URL=true
-      - AUTHORIZATION=sk-xxx
-      - CHATGPT_BASE_URL=https://chatgpt.com
       - TZ=Asia/Shanghai
-      - HISTORY_DISABLED=true
-      - SCHEDULED_REFRESH=true
-      - ENABLE_GATEWAY=false
+      - AUTHORIZATION=sk-xxx
       - PROXY_URL=socks5://warp:1080  # 设置 PROXY_URL 为 warp 容器的代理地址
     depends_on:
       warp:
