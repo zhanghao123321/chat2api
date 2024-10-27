@@ -30,7 +30,6 @@ impersonate_list = [
     "chrome119",
     "chrome120",
     "chrome123",
-    "chrome124",
     "edge99",
     "edge101",
 ]
@@ -59,6 +58,7 @@ if os.path.exists(TOKENS_FILE):
 else:
     with open(TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
+
 
 if os.path.exists(ERROR_TOKENS_FILE):
     with open(ERROR_TOKENS_FILE, "r", encoding="utf-8") as f:

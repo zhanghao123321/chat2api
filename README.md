@@ -28,7 +28,7 @@
 
 ## 功能
 
-### 最新版 v1.5.0
+### 最新版 v1.5.8
 
 > 已完成
 > - [x] 流式、非流式传输
@@ -123,10 +123,10 @@ cd chat2api
 在此目录中下载库中的 docker-compose.yml 文件：
 
 ```bash
-wget https://raw.githubusercontent.com/LanQian528/chat2api/main/docker-compose.yml
+wget https://raw.githubusercontent.com/LanQian528/chat2api/main/docker-compose-warp.yml
 ```
 
-修改 docker-compose.yml 文件中的环境变量，保存后：
+修改 docker-compose-warp.yml 文件中的环境变量，保存后：
 
 ```bash
 docker-compose up -d
