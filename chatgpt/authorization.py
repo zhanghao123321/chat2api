@@ -41,23 +41,24 @@ def get_req_token(req_token, seed=None):
 
 def get_ua(req_token):
     user_agent = globals.user_agent_map.get(req_token, "")
+    user_agent = {k.lower(): v for k, v in user_agent.items()}
     if not user_agent:
         if not req_token:
             ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
             return {
-                "User-Agent": ua.text,
-                "Sec-Ch-Ua-Platform": ua.platform,
-                "Sec-Ch-Ua": ua.ch.brands,
-                "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+                "user-agent": ua.text,
+                "sec-ch-ua-platform": ua.platform,
+                "sec-ch-ua": ua.ch.brands,
+                "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
             }
         else:
             ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
             user_agent = {
-                "User-Agent": ua.text,
-                "Sec-Ch-Ua-Platform": ua.platform,
-                "Sec-Ch-Ua": ua.ch.brands,
-                "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+                "user-agent": ua.text,
+                "sec-ch-ua-platform": ua.platform,
+                "sec-ch-ua": ua.ch.brands,
+                "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
             }
             globals.user_agent_map[req_token] = user_agent

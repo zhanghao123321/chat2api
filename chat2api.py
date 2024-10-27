@@ -219,8 +219,13 @@ if enable_gateway:
         }
 
 
-    banned_paths = ["backend-api/accounts/logout_all", "backend-api/accounts/deactivate",
-                    "backend-api/user_system_messages"]
+    banned_paths = [
+        "backend-api/accounts/logout_all",
+        "backend-api/accounts/deactivate",
+        "backend-api/user_system_messages",
+        "backend-api/memories",
+        "backend-api/settings/clear_account_user_memory"
+    ]
     redirect_paths = ["auth/logout"]
     chatgpt_paths = ["c/"]
 

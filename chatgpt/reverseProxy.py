@@ -88,7 +88,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer", "priority", "oai-device-id"] and key.lower() not in headers_reject_list)
         }
 
         base_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
@@ -106,10 +106,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "accept-language": "en-US,en;q=0.9",
             "host": base_url.replace("https://", "").replace("http://", ""),
             "origin": base_url,
-            "referer": f"{base_url}/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-origin",
+            "referer": f"{base_url}/"
         })
 
         token = headers.get("authorization", "").replace("Bearer ", "")

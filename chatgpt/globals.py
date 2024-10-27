@@ -78,10 +78,10 @@ if os.path.exists(USER_AGENTS_FILE):
         for token in new_tokens:
             ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
             ua_dict = {
-                "User-Agent": ua.text,
-                "Sec-Ch-Ua-Platform": ua.platform,
-                "Sec-Ch-Ua": ua.ch.brands,
-                "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+                "user-agent": ua.text,
+                "sec-ch-ua-platform": ua.platform,
+                "sec-ch-ua": ua.ch.brands,
+                "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(impersonate_list),
             }
             user_agent_map[token] = ua_dict
@@ -91,10 +91,10 @@ else:
     for token in token_list:
         ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
         ua_dict = {
-            "User-Agent": ua.text,
-            "Sec-Ch-Ua-Platform": ua.platform,
-            "Sec-Ch-Ua": ua.ch.brands,
-            "Sec-Ch-Ua-Mobile": ua.ch.mobile,
+            "user-agent": ua.text,
+            "sec-ch-ua-platform": ua.platform,
+            "sec-ch-ua": ua.ch.brands,
+            "sec-ch-ua-mobile": ua.ch.mobile,
             "impersonate": random.choice(impersonate_list),
         }
         user_agent_map[token] = ua_dict
