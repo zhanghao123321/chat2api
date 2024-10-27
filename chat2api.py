@@ -133,16 +133,20 @@ async def error_tokens():
 
 if enable_gateway:
     @app.get("/", response_class=HTMLResponse)
-    async def chatgpt(request: Request):
+    async def chatgpt_html(request: Request):
         token = request.query_params.get("token")
         if not token:
             token = request.cookies.get("token")
         if not token:
-            response = templates.TemplateResponse("login.html", {"request": request})
-            return response
+            return await login_html(request)
 
         response = templates.TemplateResponse("chatgpt.html", {"request": request, "token": token})
         response.set_cookie("token", value=token)
+        return response
+
+    @app.get("/login", response_class=HTMLResponse)
+    async def login_html(request: Request):
+        response = templates.TemplateResponse("login.html", {"request": request})
         return response
 
 
@@ -214,7 +218,7 @@ if enable_gateway:
     async def reverse_proxy(request: Request, path: str):
         for chatgpt_path in chatgpt_paths:
             if chatgpt_path in path:
-                return await chatgpt(request)
+                return await chatgpt_html(request)
 
         for banned_path in banned_paths:
             if banned_path in path:
