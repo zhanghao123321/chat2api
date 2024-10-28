@@ -229,8 +229,9 @@ if enable_gateway:
         "backend-api/accounts/deactivate",
         "backend-api/user_system_messages",
         "backend-api/memories",
-        "backend-api/settings/clear_account_user_memory"
-        "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites"
+        "backend-api/settings/clear_account_user_memory",
+        "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites",
+        "admin",
     ]
     redirect_paths = ["auth/logout"]
     chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
@@ -243,10 +244,10 @@ if enable_gateway:
 
         for banned_path in banned_paths:
             if re.match(banned_path, path):
-                return Response(status_code=404)
+                raise HTTPException(status_code=403, detail="Forbidden")
 
         for redirect_path in redirect_paths:
-            if redirect_path in path:
+            if re.match(redirect_path, path):
                 redirect_url = str(request.base_url)
                 response = RedirectResponse(url=f"{redirect_url}", status_code=302)
                 response.delete_cookie("token")
