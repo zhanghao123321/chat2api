@@ -1,4 +1,5 @@
 import asyncio
+import re
 import time
 import types
 import warnings
@@ -152,13 +153,17 @@ if enable_gateway:
             return await login_html(request)
 
         response = templates.TemplateResponse("chatgpt.html", {"request": request, "token": token})
-        response.set_cookie("token", value=token)
+        response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
         response = templates.TemplateResponse("login.html", {"request": request})
         return response
+
+    @app.get("/gpts")
+    async def get_gpts():
+        return {"kind": "store"}
 
 
     @app.get("/backend-api/gizmos/bootstrap")
@@ -225,19 +230,19 @@ if enable_gateway:
         "backend-api/user_system_messages",
         "backend-api/memories",
         "backend-api/settings/clear_account_user_memory"
+        "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites"
     ]
     redirect_paths = ["auth/logout"]
-    chatgpt_paths = ["c/"]
-
+    chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
 
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
     async def reverse_proxy(request: Request, path: str):
         for chatgpt_path in chatgpt_paths:
-            if chatgpt_path in path:
+            if re.match(chatgpt_path, path):
                 return await chatgpt_html(request)
 
         for banned_path in banned_paths:
-            if banned_path in path:
+            if re.match(banned_path, path):
                 return Response(status_code=404)
 
         for redirect_path in redirect_paths:
