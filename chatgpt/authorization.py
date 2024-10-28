@@ -11,17 +11,17 @@ from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
 from utils.config import authorization_list, random_token
 
-os.environ['PYTHONHASHSEED'] = '0'
-random.seed(0)
-
 
 def get_req_token(req_token, seed=None):
     available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
     length = len(available_token_list)
     if seed and length > 0:
-        req_token = globals.token_list[hash(seed) % length]
-        while req_token in globals.error_token_list:
-            req_token = random.choice(globals.token_list)
+        if seed not in globals.seed_map.keys():
+            globals.seed_map[seed] = {"token": random.choice(available_token_list), "conversations": []}
+            with open(globals.SEED_MAP_FILE, "w") as f:
+                json.dump(globals.seed_map, f, indent=4)
+        else:
+            req_token = globals.seed_map[seed]["token"]
         return req_token
 
     if req_token in authorization_list:
@@ -63,7 +63,7 @@ def get_ua(req_token):
             }
             globals.user_agent_map[req_token] = user_agent
             with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
-                f.write(json.dumps(globals.user_agent_map, indent=4))
+                json.dump(globals.user_agent_map, f, indent=4)
             return user_agent
     else:
         return user_agent
@@ -94,7 +94,7 @@ async def refresh_all_tokens(force_refresh=False):
     for token in list(set(globals.token_list) - set(globals.error_token_list)):
         if len(token) == 45:
             try:
-                await asyncio.sleep(2)
+                await asyncio.sleep(0.5)
                 await rt2ac(token, force_refresh=force_refresh)
             except HTTPException:
                 pass

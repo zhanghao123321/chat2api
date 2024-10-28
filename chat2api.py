@@ -1,4 +1,5 @@
 import asyncio
+import json
 import re
 import time
 import types
@@ -41,7 +42,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def app_start():
     if scheduled_refresh:
-        scheduler.add_job(id='refresh', func=refresh_all_tokens, trigger='cron', hour=3, minute=0, day='*/4',
+        scheduler.add_job(id='refresh', func=refresh_all_tokens, trigger='cron', hour=3, minute=0, day='*/2',
                           kwargs={'force_refresh': True})
         scheduler.start()
         asyncio.get_event_loop().call_later(0, lambda: asyncio.create_task(refresh_all_tokens(force_refresh=False)))
@@ -171,9 +172,43 @@ if enable_gateway:
         return {"gizmos": []}
 
 
-    # @app.get("/backend-api/conversations")
-    # async def get_conversations():
-    #     return {"items": [], "total": 0, "limit": 28, "offset": 0, "has_missing_conversations": False}
+    @app.get("/backend-api/conversations")
+    async def get_conversations(request: Request):
+        limit = request.query_params.get("limit", 28)
+        offset = request.query_params.get("offset", 0)
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if len(token) == 45 or token.startswith("eyJhbGciOi"):
+            return await chatgpt_reverse_proxy(request, "backend-api/conversations")
+        else:
+            items = []
+            for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
+                conversation = globals.conversation_map.get(conversation_id, None)
+                if conversation:
+                    items.append(conversation)
+            items = items[int(offset):int(offset) + int(limit)]
+            conversations = {
+                "items": items,
+                "total": len(items),
+                "limit": 28,
+                "offset": 0,
+                "has_missing_conversations": False
+            }
+            return conversations
+
+    @app.get("/backend-api/conversation/{conversation_id}")
+    async def update_conversations(request: Request, conversation_id: str):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if len(token) == 45 or token.startswith("eyJhbGciOi"):
+            return await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
+        else:
+            conversation_details_str = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")).body.decode('utf-8')
+            conversation_details = json.loads(conversation_details_str)
+            if conversation_id in globals.conversation_map:
+                globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
+                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived", False)
+                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.conversation_map, f, indent=4)
+            return conversation_details
 
     # @app.patch("/backend-api/conversations")
     # async def get_conversations():
@@ -238,6 +273,12 @@ if enable_gateway:
 
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
     async def reverse_proxy(request: Request, path: str):
+        if re.match("ces/v1", path):
+            return {"success": True}
+
+        if re.match("backend-api/edge", path):
+            return Response(status_code=204)
+
         for chatgpt_path in chatgpt_paths:
             if re.match(chatgpt_path, path):
                 return await chatgpt_html(request)
