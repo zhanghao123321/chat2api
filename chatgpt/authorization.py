@@ -1,12 +1,11 @@
 import asyncio
 import json
-import os
 import random
 
 import ua_generator
 from fastapi import HTTPException
 
-import chatgpt.globals as globals
+import utils.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
 from utils.config import authorization_list, random_token

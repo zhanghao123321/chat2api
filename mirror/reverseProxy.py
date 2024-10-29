@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
 from chatgpt.authorization import verify_token, get_req_token, get_ua
-import chatgpt.globals as globals
+import utils.globals as globals
 from utils.Client import Client
 from utils.config import chatgpt_base_url_list, proxy_url_list
 
@@ -82,27 +82,31 @@ async def get_real_req_token(token):
 async def content_generator(r, token):
     first_chunk = None
     async for chunk in r.aiter_content():
-        if first_chunk is None and len(token) != 45 and not token.startswith("eyJhbGciOi"):
-            first_chunk = chunk.decode('utf-8')
-            conversation_id = json.loads(first_chunk[6:]).get("conversation_id")
-            conversation_detail = {
-                "id": conversation_id,
-                "update_time": generate_current_time(),
-                "workspace_id": None,
-            }
-            if conversation_id not in globals.conversation_map:
-                globals.conversation_map[conversation_id] = conversation_detail
-            else:
-                globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
-            if conversation_id not in globals.seed_map[token]["conversations"]:
-                globals.seed_map[token]["conversations"].insert(0, conversation_id)
-            else:
-                globals.seed_map[token]["conversations"].remove(conversation_id)
-                globals.seed_map[token]["conversations"].insert(0, conversation_id)
-            with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.conversation_map, f)
-            with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.seed_map, f, indent=4)
+        try:
+            if first_chunk is None and len(token) != 45 and not token.startswith("eyJhbGciOi"):
+                first_chunk = chunk.decode('utf-8')
+                conversation_id = json.loads(first_chunk[6:].strip()).get("conversation_id")
+                conversation_detail = {
+                    "id": conversation_id,
+                    "update_time": generate_current_time(),
+                    "workspace_id": None,
+                }
+                if conversation_id not in globals.conversation_map:
+                    globals.conversation_map[conversation_id] = conversation_detail
+                else:
+                    globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
+                if conversation_id not in globals.seed_map[token]["conversations"]:
+                    globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                else:
+                    globals.seed_map[token]["conversations"].remove(conversation_id)
+                    globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.conversation_map, f)
+                with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.seed_map, f, indent=4)
+        except Exception:
+            print(chunk.decode('utf-8').stripe())
+            continue
         yield chunk
 
 

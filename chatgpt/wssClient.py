@@ -2,7 +2,7 @@ import json
 import time
 
 from utils.Logger import logger
-import chatgpt.globals as globals
+import utils.globals as globals
 
 
 def save_wss_map(wss_map):

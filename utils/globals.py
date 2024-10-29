@@ -109,6 +109,3 @@ else:
     with open(ERROR_TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
 
-
-if token_list:
-    logger.info(f"Token list count: {len(token_list)}, Error token list count: {len(error_token_list)}")

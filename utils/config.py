@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
+from utils.globals import token_list, error_token_list
 from utils.Logger import logger
 
 load_dotenv(encoding="ascii")
@@ -78,5 +79,7 @@ logger.info("SCHEDULED_REFRESH: " + str(scheduled_refresh))
 logger.info("RANDOM_TOKEN:      " + str(random_token))
 logger.info("------------------------- Gateway --------------------------")
 logger.info("ENABLE_GATEWAY:    " + str(enable_gateway))
-
 logger.info("-" * 60)
+if token_list:
+    logger.info(f"Token list count: {len(token_list)}, Error token list count: {len(error_token_list)}")
+    logger.info("-" * 60)
