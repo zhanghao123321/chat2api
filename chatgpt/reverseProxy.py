@@ -87,7 +87,6 @@ async def content_generator(r, token):
             conversation_id = json.loads(first_chunk[6:]).get("conversation_id")
             conversation_detail = {
                 "id": conversation_id,
-                "title": "New Chat",
                 "update_time": generate_current_time(),
                 "workspace_id": None,
             }

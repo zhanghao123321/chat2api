@@ -16,7 +16,7 @@ from starlette.background import BackgroundTask
 from starlette.responses import RedirectResponse, Response
 
 from chatgpt.ChatService import ChatService
-from chatgpt.authorization import refresh_all_tokens, verify_token, get_req_token
+from chatgpt.authorization import refresh_all_tokens
 import chatgpt.globals as globals
 from chatgpt.reverseProxy import chatgpt_reverse_proxy
 from utils.Logger import logger
@@ -174,8 +174,8 @@ if enable_gateway:
 
     @app.get("/backend-api/conversations")
     async def get_conversations(request: Request):
-        limit = request.query_params.get("limit", 28)
-        offset = request.query_params.get("offset", 0)
+        limit = int(request.query_params.get("limit", 28))
+        offset = int(request.query_params.get("offset", 0))
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
         if len(token) == 45 or token.startswith("eyJhbGciOi"):
             return await chatgpt_reverse_proxy(request, "backend-api/conversations")
@@ -189,30 +189,46 @@ if enable_gateway:
             conversations = {
                 "items": items,
                 "total": len(items),
-                "limit": 28,
-                "offset": 0,
+                "limit": limit,
+                "offset": offset,
                 "has_missing_conversations": False
             }
             return conversations
 
     @app.get("/backend-api/conversation/{conversation_id}")
-    async def update_conversations(request: Request, conversation_id: str):
+    async def update_conversation(request: Request, conversation_id: str):
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
         if len(token) == 45 or token.startswith("eyJhbGciOi"):
             return await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
         else:
             conversation_details_str = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")).body.decode('utf-8')
             conversation_details = json.loads(conversation_details_str)
-            if conversation_id in globals.conversation_map:
+            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
                 globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
                 globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived", False)
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
             return conversation_details
 
-    # @app.patch("/backend-api/conversations")
-    # async def get_conversations():
-    #     return {"success": True, "message": None}
+    @app.patch("/backend-api/conversation/{conversation_id}")
+    async def patch_conversation(request: Request, conversation_id: str):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if len(token) == 45 or token.startswith("eyJhbGciOi"):
+            return await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
+        else:
+            data = await request.json()
+            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
+                if not data.get("is_visible", True):
+                    globals.conversation_map.pop(conversation_id)
+                    globals.seed_map[token]["conversations"].remove(conversation_id)
+                    with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                        json.dump(globals.seed_map, f, indent=4)
+                else:
+                    globals.conversation_map[conversation_id].update(data)
+                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.conversation_map, f, indent=4)
+            patch_response = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}"))
+            return patch_response
 
 
     @app.get("/backend-api/me")
@@ -265,6 +281,7 @@ if enable_gateway:
         "backend-api/user_system_messages",
         "backend-api/memories",
         "backend-api/settings/clear_account_user_memory",
+        "backend-api/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
         "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites",
         "admin",
     ]
