@@ -15,9 +15,9 @@ from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
 from starlette.responses import RedirectResponse, Response
 
+import chatgpt.globals as globals
 from chatgpt.ChatService import ChatService
 from chatgpt.authorization import refresh_all_tokens
-import chatgpt.globals as globals
 from chatgpt.reverseProxy import chatgpt_reverse_proxy
 from utils.Logger import logger
 from utils.config import api_prefix, scheduled_refresh, enable_gateway
@@ -157,10 +157,12 @@ if enable_gateway:
         response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
 
+
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
         response = templates.TemplateResponse("login.html", {"request": request})
         return response
+
 
     @app.get("/gpts")
     async def get_gpts():
@@ -195,29 +197,37 @@ if enable_gateway:
             }
             return conversations
 
+
     @app.get("/backend-api/conversation/{conversation_id}")
     async def update_conversation(request: Request, conversation_id: str):
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        conversation_details_response = await chatgpt_reverse_proxy(request,
+                                                                    f"backend-api/conversation/{conversation_id}")
         if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
+            return conversation_details_response
         else:
-            conversation_details_str = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")).body.decode('utf-8')
+            conversation_details_str = conversation_details_response.body.decode('utf-8')
             conversation_details = json.loads(conversation_details_str)
-            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
+            if conversation_id in globals.seed_map[token][
+                "conversations"] and conversation_id in globals.conversation_map:
                 globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
-                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived", False)
+                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived",
+                                                                                                    False)
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
-            return conversation_details
+            return conversation_details_response
+
 
     @app.patch("/backend-api/conversation/{conversation_id}")
     async def patch_conversation(request: Request, conversation_id: str):
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        patch_response = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}"))
         if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
+            return patch_response
         else:
             data = await request.json()
-            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
+            if conversation_id in globals.seed_map[token][
+                "conversations"] and conversation_id in globals.conversation_map:
                 if not data.get("is_visible", True):
                     globals.conversation_map.pop(conversation_id)
                     globals.seed_map[token]["conversations"].remove(conversation_id)
@@ -227,8 +237,26 @@ if enable_gateway:
                     globals.conversation_map[conversation_id].update(data)
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
-            patch_response = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}"))
             return patch_response
+
+
+    @app.post("/backend-api/conversation/gen_title/{conversation_id}")
+    async def gen_title(request: Request, conversation_id: str):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        gen_title_response = await chatgpt_reverse_proxy(request,
+                                                         f"backend-api/conversation/gen_title/{conversation_id}")
+        if len(token) == 45 or token.startswith("eyJhbGciOi"):
+            return gen_title_response
+        else:
+            conversation_gen_title_str = gen_title_response.body.decode('utf-8')
+            conversation_gen_title = json.loads(conversation_gen_title_str)
+            title = conversation_gen_title.get("message", '').split("'")[1]
+            if conversation_id in globals.seed_map[token][
+                "conversations"] and conversation_id in globals.conversation_map:
+                globals.conversation_map[conversation_id]["title"] = title
+                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.conversation_map, f, indent=4)
+            return gen_title_response
 
 
     @app.get("/backend-api/me")
@@ -288,6 +316,7 @@ if enable_gateway:
     redirect_paths = ["auth/logout"]
     chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
 
+
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
     async def reverse_proxy(request: Request, path: str):
         if re.match("ces/v1", path):
@@ -307,8 +336,7 @@ if enable_gateway:
         for redirect_path in redirect_paths:
             if re.match(redirect_path, path):
                 redirect_url = str(request.base_url)
-                response = RedirectResponse(url=f"{redirect_url}", status_code=302)
-                response.delete_cookie("token")
+                response = RedirectResponse(url=f"{redirect_url}login", status_code=302)
                 return response
 
         return await chatgpt_reverse_proxy(request, path)
