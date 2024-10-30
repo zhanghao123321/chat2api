@@ -28,8 +28,8 @@ if enable_gateway:
 
     @app.post("/auth/refresh")
     async def refresh(request: Request):
-        res = await request.json()
-        refresh_token = res.get("refresh_token", "")
+        form_data = await request.form()
+        refresh_token = form_data.get("refresh_token", "")
         data = {
             "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
             "grant_type": "refresh_token",
