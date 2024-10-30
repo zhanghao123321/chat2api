@@ -5,6 +5,7 @@ import time
 
 from fastapi import Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from starlette.responses import JSONResponse
 
 import utils.globals as globals
 from app import app, templates
@@ -29,6 +30,7 @@ if enable_gateway:
     @app.post("/auth/refresh")
     async def refresh(request: Request):
         form_data = await request.form()
+        print(form_data)
         refresh_token = form_data.get("refresh_token", "")
         data = {
             "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
@@ -37,8 +39,9 @@ if enable_gateway:
             "refresh_token": refresh_token
         }
         client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
-        r = (await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)).json()
-        return r
+        r = (await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5))
+        res = r.json()
+        return JSONResponse(res, status_code=r.status_code)
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
