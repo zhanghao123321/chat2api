@@ -28,9 +28,8 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-
-import api.chat2api
 import mirror.backend
+import api.chat2api
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=5005)
