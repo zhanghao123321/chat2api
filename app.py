@@ -28,7 +28,7 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-import mirror.backend
+import gateway.backend
 import api.chat2api
 
 if __name__ == "__main__":

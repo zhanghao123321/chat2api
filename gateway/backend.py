@@ -1,4 +1,5 @@
 import json
+import random
 import re
 import time
 
@@ -7,8 +8,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 import utils.globals as globals
 from app import app, templates
-from mirror.reverseProxy import chatgpt_reverse_proxy
-from utils.config import enable_gateway
+from gateway.reverseProxy import chatgpt_reverse_proxy
+from utils.Client import Client
+from utils.config import enable_gateway, proxy_url_list
 
 if enable_gateway:
     @app.get("/", response_class=HTMLResponse)
@@ -23,6 +25,20 @@ if enable_gateway:
         response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
 
+
+    @app.post("/auth/refresh")
+    async def refresh(request: Request):
+        res = await request.json()
+        refresh_token = res.get("refresh_token", "")
+        data = {
+            "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
+            "grant_type": "refresh_token",
+            "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
+            "refresh_token": refresh_token
+        }
+        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+        r = (await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)).json()
+        return r
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
