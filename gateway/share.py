@@ -150,7 +150,7 @@ async def refresh(request: Request):
 
 
 if no_sentinel:
-    @app.post("/backend-api/conversation")
+    @app.post("/backend-api/sentinel/chat-requirements")
     async def sentinel_chat_conversations():
         return {
             "arkose": {
