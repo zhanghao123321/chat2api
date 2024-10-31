@@ -38,7 +38,6 @@ turnstile_solver_url = os.getenv('TURNSTILE_SOLVER_URL', None)
 history_disabled = is_true(os.getenv('HISTORY_DISABLED', True))
 pow_difficulty = os.getenv('POW_DIFFICULTY', '000032')
 retry_times = int(os.getenv('RETRY_TIMES', 3))
-enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
 conversation_only = is_true(os.getenv('CONVERSATION_ONLY', False))
 enable_limit = is_true(os.getenv('ENABLE_LIMIT', True))
 upload_by_url = is_true(os.getenv('UPLOAD_BY_URL', False))
@@ -50,6 +49,9 @@ authorization_list = authorization.split(',') if authorization else []
 chatgpt_base_url_list = chatgpt_base_url.split(',') if chatgpt_base_url else []
 ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
+
+enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
+no_sentinel = is_true(os.getenv('NO_SENTINEL', False))
 
 with open('version.txt') as f:
     version = f.read().strip()
