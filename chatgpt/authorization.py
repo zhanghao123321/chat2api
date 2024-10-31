@@ -8,11 +8,11 @@ from fastapi import HTTPException
 import utils.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
-from utils.config import authorization_list, random_token, autoseed
+from utils.config import authorization_list, random_token, auto_seed
 
 
 def get_req_token(req_token, seed=None):
-    if autoseed:
+    if auto_seed:
         available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
         length = len(available_token_list)
         if seed and length > 0:
@@ -41,7 +41,6 @@ def get_req_token(req_token, seed=None):
         if seed not in globals.seed_map.keys():
             raise HTTPException(status_code=401, detail={"error": "Invalid Seed"})
         return globals.seed_map[seed]["token"]
-        
 
 
 def get_ua(req_token):

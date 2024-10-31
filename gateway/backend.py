@@ -4,10 +4,11 @@ import time
 
 from fastapi import Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from utils.config import authorization_list
+
 import utils.globals as globals
 from app import app, templates
 from gateway.reverseProxy import chatgpt_reverse_proxy
+from utils.config import authorization_list
 from utils.config import enable_gateway
 
 if enable_gateway:
@@ -23,40 +24,26 @@ if enable_gateway:
         response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
 
+
     def verify_authorization(request: Request):
-        # 获取请求头中的 Authorization
-        auth_header = request.headers.get("Authorization")
-        
+        auth_header = request.headers.get("Authorization").replace("Bearer ", "")
+
         if not auth_header:
-            raise HTTPException(
-                status_code=401,
-                detail="Authorization header is missing"
-            )
-        
-        # 与配置中的 authorization 进行比较
+            raise HTTPException(status_code=401, detail="Authorization header is missing")
         if auth_header not in authorization_list:
-            raise HTTPException(
-                status_code=403,
-                detail="Invalid authorization"
-            )
+            raise HTTPException(status_code=401, detail="Invalid authorization")
+
 
     @app.get("/seedtoken")
     async def get_seedtoken(request: Request):
-        # 验证 authorization
         verify_authorization(request)
-        
         try:
-            # 获取查询参数
             params = request.query_params
             seed = params.get("seed")
 
-            # 如果提供了seed参数，返回特定seed的token
             if seed:
                 if seed not in globals.seed_map:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Seed '{seed}' not found"
-                    )
+                    raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
                 return {
                     "status": "success",
                     "data": {
@@ -64,101 +51,66 @@ if enable_gateway:
                         "token": globals.seed_map[seed]["token"]
                     }
                 }
-            
-            # 如果没有提供seed参数，返回所有seed的token
+
             token_map = {
-                seed: data["token"] 
+                seed: data["token"]
                 for seed, data in globals.seed_map.items()
             }
-            return {
-                "status": "success",
-                "data": token_map
-            }
+            return {"status": "success", "data": token_map}
 
         except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Internal server error: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
     @app.post("/seedtoken")
     async def set_seedtoken(request: Request):
-        # 验证 authorization
         verify_authorization(request)
-        
-        # 获取请求体的JSON数据
         data = await request.json()
-        
-        # 假设请求中包含 seed 和 token 字段
+
         seed = data.get("seed")
         token = data.get("token")
-        
-        # 如果seed不存在于seed_map中，创建新条目
+
         if seed not in globals.seed_map:
             globals.seed_map[seed] = {
                 "token": token,
                 "conversations": []
             }
         else:
-            # 如果seed已存在，更新token
             globals.seed_map[seed]["token"] = token
-            
+
         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
             json.dump(globals.seed_map, f, indent=4)
-            
-        # 返回成功响应
-        return {
-            "status": "success",
-            "message": "Token updated successfully",
-        }
+
+        return {"status": "success", "message": "Token updated successfully"}
+
 
     @app.delete("/seedtoken")
     async def delete_seedtoken(request: Request):
-        # 验证 authorization
         verify_authorization(request)
-        
+
         try:
-            # 获取请求中的数据
             data = await request.json()
             seed = data.get("seed")
 
-            # 检查是否提供了seed
             if not seed:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Missing required field: seed"
-                )
+                raise HTTPException(status_code=400, detail="Missing required field: seed")
 
-            # 检查seed是否存在于seed_map中
             if seed not in globals.seed_map:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Seed '{seed}' not found"
-                )
-
-            # 删除指定的seed
+                raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
             del globals.seed_map[seed]
 
-            # 将更新后的seed_map保存到文件
             with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.seed_map, f, indent=4)
 
-            # 返回成功响应
             return {
                 "status": "success",
                 "message": f"Seed '{seed}' deleted successfully"
             }
 
         except json.JSONDecodeError:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid JSON data"
-            )
+            raise HTTPException(status_code=400, detail="Invalid JSON data")
         except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Internal server error: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
     @app.get("/login", response_class=HTMLResponse)

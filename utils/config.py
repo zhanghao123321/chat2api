@@ -21,7 +21,7 @@ def is_true(x):
 
 
 api_prefix = os.getenv('API_PREFIX', None)
-autoseed = os.getenv('AUTOSEED', True)
+auto_seed = os.getenv('AUTO_SEED', True)
 authorization = os.getenv('AUTHORIZATION', '').replace(' ', '')
 chatgpt_base_url = os.getenv('CHATGPT_BASE_URL', 'https://chatgpt.com').replace(' ', '')
 auth_key = os.getenv('AUTH_KEY', None)
