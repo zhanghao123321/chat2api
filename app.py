@@ -29,6 +29,7 @@ templates = Jinja2Templates(directory="templates")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 import gateway.backend
+import gateway.share
 import api.chat2api
 
 if __name__ == "__main__":

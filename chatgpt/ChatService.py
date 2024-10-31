@@ -46,8 +46,6 @@ class ChatService:
 
     async def set_dynamic_data(self, data):
         if self.req_token:
-            logger.info(f"Request impersonate: {self.ua.get('impersonate')}")
-            logger.info(f"Request ua:{self.user_agent}")
             logger.info(f"Request token: {self.req_token}")
             req_len = len(self.req_token.split(","))
             if req_len == 1:

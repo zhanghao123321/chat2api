@@ -1,5 +1,4 @@
 import json
-import random
 import re
 import time
 
@@ -9,8 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 import utils.globals as globals
 from app import app, templates
 from gateway.reverseProxy import chatgpt_reverse_proxy
-from utils.Client import Client
-from utils.config import enable_gateway, proxy_url_list
+from utils.config import enable_gateway
 
 if enable_gateway:
     @app.get("/", response_class=HTMLResponse)
@@ -26,103 +24,7 @@ if enable_gateway:
         return response
 
 
-    async def chatgpt_account_check(access_token):
-        auth_info = {}
-        headers = {
-            'accept': '*/*',
-            'accept-language': 'en',
-            'authorization': 'Bearer ' + access_token,
-            'content-type': 'application/json',
-            'oai-language': 'en-US',
-            'origin': 'https://chatgpt.com',
-            'referer': 'https://chatgpt.com/',
-            'sec-ch-ua': '"Microsoft Edge";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0',
-        }
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
-        r = await client.get("https://chatgpt.com/backend-api/models?history_and_training_disabled=false",
-                             headers=headers, timeout=5)
-        models = r.json()
-        r = await client.get("https://chatgpt.com/backend-api/accounts/check/v4-2023-04-27", headers=headers, timeout=5)
-        accounts_info = r.json()
 
-        await client.close()
-
-        auth_info.update({"models": models["models"]})
-        auth_info.update({"accounts_info": accounts_info})
-
-        account_ordering = accounts_info.get("account_ordering", [])
-        is_deactivated = None
-        plan_type = None
-        team_ids = []
-        for account in account_ordering:
-            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated",
-                                                                                                    False)
-            this_plan_type = accounts_info['accounts'].get(account, {}).get("account", {}).get("plan_type", "free")
-
-            if this_is_deactivated and is_deactivated is None:
-                is_deactivated = True
-            else:
-                is_deactivated = False
-
-            if this_plan_type == "chatgptteamplan":
-                plan_type = "chatgptteamplan"
-                team_ids.append(account)
-            elif plan_type is None:
-                plan_type = this_plan_type
-
-        auth_info.update({"accountCheckInfo": {
-            "is_deactivated": is_deactivated,
-            "plan_type": plan_type,
-            "team_ids": team_ids
-        }})
-
-        return auth_info
-
-    async def chatgpt_refresh(refresh_token):
-        data = {
-            "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
-            "grant_type": "refresh_token",
-            "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
-            "refresh_token": refresh_token
-        }
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
-        r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)
-        res = r.json()
-        await client.close()
-        auth_info = {}
-        auth_info.update(res)
-        auth_info.update({"refresh_token": refresh_token})
-        auth_info.update({"accessToken": res.get("access_token", "")})
-        if r.status_code == 200:
-            access_token = res['access_token']
-            auth_info.update(await chatgpt_account_check(access_token))
-            return auth_info
-        return auth_info
-
-
-    @app.post("/auth/refresh")
-    async def refresh(request: Request):
-        auth_info = {}
-        form_data = await request.form()
-
-        refresh_token = form_data.get("refresh_token", "")
-        access_token = form_data.get("access_token", form_data.get("accessToken", ""))
-        if not refresh_token and not access_token:
-            return {"error": "refresh_token or access_token is required"}
-
-        if refresh_token:
-            auth_info.update(await chatgpt_refresh(refresh_token))
-            access_token = auth_info.get("access_token", "")
-        if access_token:
-            auth_info.update(await chatgpt_account_check(access_token))
-        response = Response(content=json.dumps(auth_info), media_type="application/json")
-        return response
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
