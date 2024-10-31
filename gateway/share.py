@@ -179,7 +179,9 @@ async def chat_conversations(request: Request):
     request_cookies = dict(request.cookies)
     background = BackgroundTask(client.close)
     r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers, cookies=request_cookies, data=data, stream=True, allow_redirects=False)
-    rheaders = r.headers.update({"x-sign": x_sign}) if x_sign else r.headers
+    rheaders = r.headers
+    if x_sign:
+        rheaders.update({"x-sign": x_sign})
     if 'stream' in rheaders.get("content-type", ""):
         return StreamingResponse(content_generator(r, token), media_type=rheaders.get("content-type"), background=background)
     else:
