@@ -26,7 +26,6 @@ from utils.config import (
     upload_by_url,
     check_model,
     auth_key,
-    user_agents_list,
     turnstile_solver_url,
 )
 
