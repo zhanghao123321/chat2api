@@ -1,5 +1,6 @@
 import json
 import random
+import uuid
 
 from fastapi import Request, HTTPException
 from fastapi.responses import Response
@@ -43,7 +44,8 @@ async def chatgpt_account_check(access_token):
         headers.update(ua)
 
         client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
-        r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers, timeout=10)
+        r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers,
+                             timeout=10)
         if r.status_code != 200:
             raise HTTPException(status_code=r.status_code, detail=r.text)
         models = r.json()
@@ -60,7 +62,8 @@ async def chatgpt_account_check(access_token):
         plan_type = None
         team_ids = []
         for account in account_ordering:
-            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated", False)
+            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated",
+                                                                                                    False)
             this_plan_type = accounts_info['accounts'].get(account, {}).get("account", {}).get("plan_type", "free")
 
             if this_is_deactivated and is_deactivated is None:
@@ -113,38 +116,59 @@ async def chatgpt_refresh(refresh_token):
         await client.close()
 
 
-if no_sentinel:
-    @app.post("/auth/refresh")
-    async def refresh(request: Request):
-        auth_info = {}
-        form_data = await request.form()
+@app.post("/auth/refresh")
+async def refresh(request: Request):
+    auth_info = {}
+    form_data = await request.form()
 
-        auth_info.update(form_data)
+    auth_info.update(form_data)
 
-        access_token = auth_info.get("access_token", auth_info.get("accessToken", ""))
-        refresh_token = auth_info.get("refresh_token", "")
+    access_token = auth_info.get("access_token", auth_info.get("accessToken", ""))
+    refresh_token = auth_info.get("refresh_token", "")
 
-        if not refresh_token and not access_token:
-            raise HTTPException(status_code=401, detail="refresh_token or access_token is required")
+    if not refresh_token and not access_token:
+        raise HTTPException(status_code=401, detail="refresh_token or access_token is required")
 
-        if access_token:
+    if access_token:
+        account_check_info = await chatgpt_account_check(access_token)
+        if account_check_info:
+            auth_info.update(account_check_info)
+            auth_info.update({"accessToken": access_token})
+            return Response(content=json.dumps(auth_info), media_type="application/json")
+
+    if refresh_token:
+        chatgpt_refresh_info = await chatgpt_refresh(refresh_token)
+        if chatgpt_refresh_info:
+            auth_info.update(chatgpt_refresh_info)
+            access_token = auth_info.get("accessToken", "")
             account_check_info = await chatgpt_account_check(access_token)
             if account_check_info:
                 auth_info.update(account_check_info)
                 auth_info.update({"accessToken": access_token})
                 return Response(content=json.dumps(auth_info), media_type="application/json")
+    raise HTTPException(status_code=401, detail="Unauthorized")
 
-        if refresh_token:
-            chatgpt_refresh_info = await chatgpt_refresh(refresh_token)
-            if chatgpt_refresh_info:
-                auth_info.update(chatgpt_refresh_info)
-                access_token = auth_info.get("accessToken", "")
-                account_check_info = await chatgpt_account_check(access_token)
-                if account_check_info:
-                    auth_info.update(account_check_info)
-                    auth_info.update({"accessToken": access_token})
-                    return Response(content=json.dumps(auth_info), media_type="application/json")
-        raise HTTPException(status_code=401, detail="Unauthorized")
+
+if no_sentinel:
+    @app.post("/backend-api/conversation")
+    async def sentinel_chat_conversations():
+        return {
+            "arkose": {
+                "dx": None,
+                "required": False
+            },
+            "persona": "chatgpt-paid",
+            "proofofwork": {
+                "difficulty": None,
+                "required": False,
+                "seed": None
+            },
+            "token": str(uuid.uuid4()),
+            "turnstile": {
+                "dx": None,
+                "required": False
+            }
+        }
 
 
     @app.post("/backend-api/conversation")
@@ -168,7 +192,8 @@ if no_sentinel:
         config = get_config(user_agent)
         p = get_requirements_token(config)
         data = {'p': p}
-        r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data, timeout=10)
+        r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
+                              timeout=10)
         resp = r.json()
         turnstile = resp.get('turnstile', {})
         turnstile_required = turnstile.get('required')
@@ -176,7 +201,8 @@ if no_sentinel:
             turnstile_dx = turnstile.get("dx")
             try:
                 if turnstile_solver_url:
-                    res = await client.post(turnstile_solver_url, json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                    res = await client.post(turnstile_solver_url,
+                                            json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
                     turnstile_token = res.json().get("t")
             except Exception as e:
                 logger.info(f"Turnstile ignored: {e}")
@@ -202,11 +228,14 @@ if no_sentinel:
         data = await request.body()
         request_cookies = dict(request.cookies)
         background = BackgroundTask(client.close)
-        r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers, cookies=request_cookies, data=data, stream=True, allow_redirects=False)
+        r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
+                                     cookies=request_cookies, data=data, stream=True, allow_redirects=False)
         rheaders = r.headers
         if x_sign:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
-            return StreamingResponse(content_generator(r, token), headers=rheaders, media_type=rheaders.get("content-type"), background=background)
+            return StreamingResponse(content_generator(r, token), headers=rheaders,
+                                     media_type=rheaders.get("content-type"), background=background)
         else:
-            return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"), status_code=r.status_code, background=background)
+            return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"),
+                            status_code=r.status_code, background=background)
