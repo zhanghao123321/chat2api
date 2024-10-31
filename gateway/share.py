@@ -13,7 +13,7 @@ from chatgpt.proofofWork import get_config, get_requirements_token, get_answer_t
 from gateway.reverseProxy import get_real_req_token, content_generator
 from utils.Client import Client
 from utils.Logger import logger
-from utils.config import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, ark0se_token_url
+from utils.config import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign
 
 base_headers = {
     'accept': '*/*',
@@ -130,7 +130,6 @@ async def chat_conversations(request: Request):
     user_agent = ua.get("user-agent", "")
     proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
     host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
-    chat_token = None
     proof_token = None
     turnstile_token = None
 
@@ -180,7 +179,8 @@ async def chat_conversations(request: Request):
     request_cookies = dict(request.cookies)
     background = BackgroundTask(client.close)
     r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers, cookies=request_cookies, data=data, stream=True, allow_redirects=False)
-    if 'stream' in r.headers.get("content-type", ""):
-        return StreamingResponse(content_generator(r, token), media_type=r.headers.get("content-type"), background=background)
+    rheaders = r.headers.update({"x-sign": x_sign}) if x_sign else r.headers
+    if 'stream' in rheaders.get("content-type", ""):
+        return StreamingResponse(content_generator(r, token), media_type=rheaders.get("content-type"), background=background)
     else:
-        return Response(content=(await r.atext()), media_type=r.headers.get("content-type"), status_code=r.status_code, background=background)
+        return Response(content=(await r.atext()), media_type=rheaders.get("content-type"), status_code=r.status_code, background=background)

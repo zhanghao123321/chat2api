@@ -24,8 +24,7 @@ api_prefix = os.getenv('API_PREFIX', None)
 authorization = os.getenv('AUTHORIZATION', '').replace(' ', '')
 chatgpt_base_url = os.getenv('CHATGPT_BASE_URL', 'https://chatgpt.com').replace(' ', '')
 auth_key = os.getenv('AUTH_KEY', None)
-user_agents = os.getenv('USER_AGENTS', '[]')
-random_token = is_true(os.getenv('RANDOM_TOKEN', True))
+x_sign = os.getenv('X_SIGN', None)
 
 ark0se_token_url = os.getenv('ARK' + 'OSE_TOKEN_URL', '').replace(' ', '')
 if not ark0se_token_url:
@@ -45,12 +44,12 @@ enable_limit = is_true(os.getenv('ENABLE_LIMIT', True))
 upload_by_url = is_true(os.getenv('UPLOAD_BY_URL', False))
 check_model = is_true(os.getenv('CHECK_MODEL', False))
 scheduled_refresh = is_true(os.getenv('SCHEDULED_REFRESH', False))
+random_token = is_true(os.getenv('RANDOM_TOKEN', True))
 
 authorization_list = authorization.split(',') if authorization else []
 chatgpt_base_url_list = chatgpt_base_url.split(',') if chatgpt_base_url else []
 ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
-user_agents_list = ast.literal_eval(user_agents)
 
 with open('version.txt') as f:
     version = f.read().strip()
