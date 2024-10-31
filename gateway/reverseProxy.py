@@ -8,6 +8,7 @@ from starlette.background import BackgroundTask
 from chatgpt.authorization import verify_token, get_req_token, get_ua
 import utils.globals as globals
 from utils.Client import Client
+from utils.Logger import logger
 from utils.config import chatgpt_base_url_list, proxy_url_list
 
 
@@ -105,7 +106,7 @@ async def content_generator(r, token):
                 with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.seed_map, f, indent=4)
         except Exception:
-            print(chunk.decode('utf-8').stripe())
+            logger.error(chunk.decode('utf-8').strip())
             continue
         yield chunk
 
