@@ -8,34 +8,40 @@ from fastapi import HTTPException
 import utils.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
-from utils.config import authorization_list, random_token
+from utils.config import authorization_list, random_token, autoseed
 
 
 def get_req_token(req_token, seed=None):
-    available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
-    length = len(available_token_list)
-    if seed and length > 0:
-        if seed not in globals.seed_map.keys():
-            globals.seed_map[seed] = {"token": random.choice(available_token_list), "conversations": []}
-            with open(globals.SEED_MAP_FILE, "w") as f:
-                json.dump(globals.seed_map, f, indent=4)
-        else:
-            req_token = globals.seed_map[seed]["token"]
-        return req_token
-
-    if req_token in authorization_list:
-        if len(available_token_list) > 0:
-            if random_token:
-                req_token = random.choice(available_token_list)
-                return req_token
+    if autoseed:
+        available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
+        length = len(available_token_list)
+        if seed and length > 0:
+            if seed not in globals.seed_map.keys():
+                globals.seed_map[seed] = {"token": random.choice(available_token_list), "conversations": []}
+                with open(globals.SEED_MAP_FILE, "w") as f:
+                    json.dump(globals.seed_map, f, indent=4)
             else:
-                globals.count += 1
-                globals.count %= length
-                return available_token_list[globals.count]
+                req_token = globals.seed_map[seed]["token"]
+            return req_token
+
+        if req_token in authorization_list:
+            if len(available_token_list) > 0:
+                if random_token:
+                    req_token = random.choice(available_token_list)
+                    return req_token
+                else:
+                    globals.count += 1
+                    globals.count %= length
+                    return available_token_list[globals.count]
+            else:
+                return None
         else:
-            return None
+            return req_token
     else:
-        return req_token
+        if seed not in globals.seed_map.keys():
+            raise HTTPException(status_code=401, detail={"error": "Invalid Seed"})
+        return globals.seed_map[seed]["token"]
+        
 
 
 def get_ua(req_token):
