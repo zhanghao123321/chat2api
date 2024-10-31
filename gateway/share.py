@@ -131,28 +131,19 @@ async def refresh(request: Request):
         if account_check_info:
             auth_info.update(account_check_info)
             auth_info.update({"accessToken": access_token})
-            return auth_info
-        else:
-            if refresh_token:
-                auth_info.update(await chatgpt_refresh(refresh_token))
-                access_token = auth_info.get("accessToken", "")
-                account_check_info = await chatgpt_account_check(access_token)
-                if account_check_info:
-                    response = Response(content=json.dumps(auth_info), media_type="application/json")
-                    return response
-                else:
-                    raise HTTPException(status_code=401, detail="Unauthorized")
-            else:
-                raise HTTPException(status_code=401, detail="Unauthorized")
-    else:
-        auth_info.update(await chatgpt_refresh(refresh_token))
-        access_token = auth_info.get("accessToken", "")
-        account_check_info = await chatgpt_account_check(access_token)
-        if account_check_info:
-            response = Response(content=json.dumps(auth_info), media_type="application/json")
-            return response
-        else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            return Response(content=json.dumps(auth_info), media_type="application/json")
+
+    if refresh_token:
+        chatgpt_refresh_info = await chatgpt_refresh(refresh_token)
+        if chatgpt_refresh_info:
+            auth_info.update(chatgpt_refresh_info)
+            access_token = auth_info.get("accessToken", "")
+            account_check_info = await chatgpt_account_check(access_token)
+            if account_check_info:
+                auth_info.update(account_check_info)
+                auth_info.update({"accessToken": access_token})
+                return Response(content=json.dumps(auth_info), media_type="application/json")
+    raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.post("/backend-api/conversation")
