@@ -30,6 +30,7 @@ base_headers = {
 
 async def chatgpt_account_check(access_token):
     auth_info = {}
+    client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
     try:
         proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
@@ -42,12 +43,14 @@ async def chatgpt_account_check(access_token):
         headers.update(ua)
 
         client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
-        r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers, timeout=0)
+        r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers, timeout=10)
+        if r.status_code != 200:
+            raise HTTPException(status_code=r.status_code, detail=r.text)
         models = r.json()
         r = await client.get(f"{host_url}/backend-api/accounts/check/v4-2023-04-27", headers=headers, timeout=10)
+        if r.status_code != 200:
+            raise HTTPException(status_code=r.status_code, detail=r.text)
         accounts_info = r.json()
-
-        await client.close()
 
         auth_info.update({"models": models["models"]})
         auth_info.update({"accounts_info": accounts_info})
@@ -80,10 +83,13 @@ async def chatgpt_account_check(access_token):
         return auth_info
     except Exception as e:
         logger.error(f"chatgpt_account_check: {e}")
-        return auth_info
+        return {}
+    finally:
+        await client.close()
 
 
 async def chatgpt_refresh(refresh_token):
+    client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
     try:
         data = {
             "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
@@ -91,22 +97,20 @@ async def chatgpt_refresh(refresh_token):
             "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
             "refresh_token": refresh_token
         }
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
-        r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)
+        r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=10)
+        if r.status_code != 200:
+            raise HTTPException(status_code=r.status_code, detail=r.text)
         res = r.json()
-        await client.close()
         auth_info = {}
         auth_info.update(res)
         auth_info.update({"refresh_token": refresh_token})
         auth_info.update({"accessToken": res.get("access_token", "")})
-        if r.status_code == 200:
-            access_token = res['access_token']
-            auth_info.update(await chatgpt_account_check(access_token))
-            return auth_info
         return auth_info
     except Exception as e:
         logger.error(f"chatgpt_refresh: {e}")
-        return {"error": "chatgpt_refresh error"}
+        return {}
+    finally:
+        await client.close()
 
 
 @app.post("/auth/refresh")
@@ -114,18 +118,41 @@ async def refresh(request: Request):
     auth_info = {}
     form_data = await request.form()
 
-    refresh_token = form_data.get("refresh_token", "")
-    access_token = form_data.get("access_token", form_data.get("accessToken", ""))
-    if not refresh_token and not access_token:
-        return {"error": "refresh_token or access_token is required"}
+    auth_info.update(form_data)
 
-    if refresh_token:
-        auth_info.update(await chatgpt_refresh(refresh_token))
-        access_token = auth_info.get("access_token", "")
+    access_token = auth_info.get("access_token", auth_info.get("accessToken", ""))
+    refresh_token = auth_info.get("refresh_token", "")
+
+    if not refresh_token and not access_token:
+        raise HTTPException(status_code=401, detail="refresh_token or access_token is required")
+
     if access_token:
-        auth_info.update(await chatgpt_account_check(access_token))
-    response = Response(content=json.dumps(auth_info), media_type="application/json")
-    return response
+        account_check_info = await chatgpt_account_check(access_token)
+        if account_check_info:
+            auth_info.update(account_check_info)
+            auth_info.update({"accessToken": access_token})
+            return auth_info
+        else:
+            if refresh_token:
+                auth_info.update(await chatgpt_refresh(refresh_token))
+                access_token = auth_info.get("accessToken", "")
+                account_check_info = await chatgpt_account_check(access_token)
+                if account_check_info:
+                    response = Response(content=json.dumps(auth_info), media_type="application/json")
+                    return response
+                else:
+                    raise HTTPException(status_code=401, detail="Unauthorized")
+            else:
+                raise HTTPException(status_code=401, detail="Unauthorized")
+    else:
+        auth_info.update(await chatgpt_refresh(refresh_token))
+        access_token = auth_info.get("accessToken", "")
+        account_check_info = await chatgpt_account_check(access_token)
+        if account_check_info:
+            response = Response(content=json.dumps(auth_info), media_type="application/json")
+            return response
+        else:
+            raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.post("/backend-api/conversation")
@@ -149,7 +176,7 @@ async def chat_conversations(request: Request):
     config = get_config(user_agent)
     p = get_requirements_token(config)
     data = {'p': p}
-    r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data, timeout=5)
+    r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data, timeout=10)
     resp = r.json()
     turnstile = resp.get('turnstile', {})
     turnstile_required = turnstile.get('required')
