@@ -29,77 +29,84 @@ base_headers = {
 
 
 async def chatgpt_account_check(access_token):
-    proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
-    host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
-    req_token = await get_real_req_token(access_token)
-    access_token = await verify_token(req_token)
-    ua = get_ua(req_token)
-
     auth_info = {}
-    headers = base_headers.copy()
-    headers.update({"authorization": f"Bearer {access_token}"})
-    headers.update(ua)
+    try:
+        proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
+        host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
+        req_token = await get_real_req_token(access_token)
+        access_token = await verify_token(req_token)
+        ua = get_ua(req_token)
 
-    client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
-    r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers, timeout=5)
-    models = r.json()
-    r = await client.get("https://chatgpt.com/backend-api/accounts/check/v4-2023-04-27", headers=headers, timeout=5)
-    accounts_info = r.json()
+        headers = base_headers.copy()
+        headers.update({"authorization": f"Bearer {access_token}"})
+        headers.update(ua)
 
-    await client.close()
+        client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
+        r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers, timeout=0)
+        models = r.json()
+        r = await client.get(f"{host_url}/backend-api/accounts/check/v4-2023-04-27", headers=headers, timeout=10)
+        accounts_info = r.json()
 
-    auth_info.update({"models": models["models"]})
-    auth_info.update({"accounts_info": accounts_info})
+        await client.close()
 
-    account_ordering = accounts_info.get("account_ordering", [])
-    is_deactivated = None
-    plan_type = None
-    team_ids = []
-    for account in account_ordering:
-        this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated",
-                                                                                                False)
-        this_plan_type = accounts_info['accounts'].get(account, {}).get("account", {}).get("plan_type", "free")
+        auth_info.update({"models": models["models"]})
+        auth_info.update({"accounts_info": accounts_info})
 
-        if this_is_deactivated and is_deactivated is None:
-            is_deactivated = True
-        else:
-            is_deactivated = False
+        account_ordering = accounts_info.get("account_ordering", [])
+        is_deactivated = None
+        plan_type = None
+        team_ids = []
+        for account in account_ordering:
+            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated", False)
+            this_plan_type = accounts_info['accounts'].get(account, {}).get("account", {}).get("plan_type", "free")
 
-        if this_plan_type == "chatgptteamplan":
-            plan_type = "chatgptteamplan"
-            team_ids.append(account)
-        elif plan_type is None:
-            plan_type = this_plan_type
+            if this_is_deactivated and is_deactivated is None:
+                is_deactivated = True
+            else:
+                is_deactivated = False
 
-    auth_info.update({"accountCheckInfo": {
-        "is_deactivated": is_deactivated,
-        "plan_type": plan_type,
-        "team_ids": team_ids
-    }})
+            if this_plan_type == "chatgptteamplan":
+                plan_type = "chatgptteamplan"
+                team_ids.append(account)
+            elif plan_type is None:
+                plan_type = this_plan_type
 
-    return auth_info
+        auth_info.update({"accountCheckInfo": {
+            "is_deactivated": is_deactivated,
+            "plan_type": plan_type,
+            "team_ids": team_ids
+        }})
+
+        return auth_info
+    except Exception as e:
+        logger.error(f"chatgpt_account_check: {e}")
+        return auth_info
 
 
 async def chatgpt_refresh(refresh_token):
-    data = {
-        "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
-        "grant_type": "refresh_token",
-        "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
-        "refresh_token": refresh_token
-    }
-    client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
-    r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)
-    res = r.json()
-    await client.close()
-    auth_info = {}
-    auth_info.update(res)
-    auth_info.update({"refresh_token": refresh_token})
-    auth_info.update({"accessToken": res.get("access_token", "")})
-    if r.status_code == 200:
-        access_token = res['access_token']
-        auth_info.update(await chatgpt_account_check(access_token))
+    try:
+        data = {
+            "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",
+            "grant_type": "refresh_token",
+            "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
+            "refresh_token": refresh_token
+        }
+        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+        r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=5)
+        res = r.json()
+        await client.close()
+        auth_info = {}
+        auth_info.update(res)
+        auth_info.update({"refresh_token": refresh_token})
+        auth_info.update({"accessToken": res.get("access_token", "")})
+        if r.status_code == 200:
+            access_token = res['access_token']
+            auth_info.update(await chatgpt_account_check(access_token))
+            return auth_info
         return auth_info
-    return auth_info
+    except Exception as e:
+        logger.error(f"chatgpt_refresh: {e}")
+        return {"error": "chatgpt_refresh error"}
 
 
 @app.post("/auth/refresh")

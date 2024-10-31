@@ -24,8 +24,6 @@ if enable_gateway:
         return response
 
 
-
-
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
         response = templates.TemplateResponse("login.html", {"request": request})
