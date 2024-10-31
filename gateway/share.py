@@ -183,6 +183,6 @@ async def chat_conversations(request: Request):
     if x_sign:
         rheaders.update({"x-sign": x_sign})
     if 'stream' in rheaders.get("content-type", ""):
-        return StreamingResponse(content_generator(r, token), media_type=rheaders.get("content-type"), background=background)
+        return StreamingResponse(content_generator(r, token), headers=rheaders, media_type=rheaders.get("content-type"), background=background)
     else:
-        return Response(content=(await r.atext()), media_type=rheaders.get("content-type"), status_code=r.status_code, background=background)
+        return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"), status_code=r.status_code, background=background)
