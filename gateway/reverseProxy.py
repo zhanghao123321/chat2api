@@ -137,7 +137,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         if "file-" in path and "backend-api" not in path:
             base_url = "https://files.oaiusercontent.com"
 
-        token = request.cookies.get("token")
+        token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
         ua = get_ua(req_token)
         headers.update(ua)
