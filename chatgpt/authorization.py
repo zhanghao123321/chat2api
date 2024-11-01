@@ -8,7 +8,7 @@ from fastapi import HTTPException
 import utils.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
-from utils.config import authorization_list, random_token, auto_seed
+from utils.config import authorization_list, random_token, auto_seed, proxy_url_list
 
 
 def get_req_token(req_token, seed=None):
@@ -55,6 +55,7 @@ def get_ua(req_token):
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
+                "proxy_url": random.choice(proxy_url_list) if proxy_url_list else None,
             }
         else:
             ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
@@ -64,12 +65,20 @@ def get_ua(req_token):
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
+                "proxy_url": random.choice(proxy_url_list) if proxy_url_list else None,
             }
             globals.user_agent_map[req_token] = user_agent
             with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
             return user_agent
     else:
+        if "proxy_url" in user_agent.keys() and user_agent["proxy_url"] not in proxy_url_list:
+            user_agent["proxy_url"] = random.choice(proxy_url_list) if proxy_url_list else None
+            globals.user_agent_map[req_token] = user_agent
+            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.user_agent_map, f, indent=4)
+            user_agent = {k.lower(): v for k, v in user_agent.items()}
+
         return user_agent
 
 
