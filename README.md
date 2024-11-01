@@ -28,9 +28,9 @@
 
 ## 功能
 
-### 最新版 v1.4.16
+### 最新版本号存于 `version.txt`
 
-> 已完成
+### 逆向API 功能
 > - [x] 流式、非流式传输
 > - [x] 免登录 GPT-3.5 对话
 > - [x] GPT-3.5 模型对话（传入模型名不包含 gpt-4，则默认使用 gpt-3.5，也就是 text-davinci-002-render-sha）
@@ -40,17 +40,59 @@
 > - [x] 支持 GPTs（传入模型名：gpt-4-gizmo-g-*）
 > - [x] 支持 Team Plus 账号（需传入 team account id）
 > - [x] 上传图片、文件（格式为 API 对应格式，支持 URL 和 base64）
-> - [x] WebUI（[http://127.0.0.1:5005](http://127.0.0.1:5005)，不支持登录使用, 网关副产品，因此不做维护）
 > - [x] 可作为网关使用，可多机分布部署
-> - [x] 多账号轮询，同时支持 AccessToken 和 RefreshToken
+> - [x] 多账号轮询，同时支持 `AccessToken` 和 `RefreshToken`
 > - [x] 请求失败重试，自动轮询下一个 Token
 > - [x] Tokens 管理，支持上传、清除
-> - [x] 定时使用 RefreshToken 刷新 AccessToken / 每次启动将会全部非强制刷新一次，每4天晚上3点全部强制刷新一次。
+> - [x] 定时使用 `RefreshToken` 刷新 `AccessToken` / 每次启动将会全部非强制刷新一次，每4天晚上3点全部强制刷新一次。
 > - [x] 支持文件下载，需要开启历史记录
-> - [x] 支持 O1-Preview/mini 模型推理过程输出
+> - [x] 支持 `O1-Preview/mini` 模型推理过程输出
+
+### 官网镜像 功能
+> - [x] 支持官网原生镜像
+> - [x] 后台账号池随机抽取，`Seed` 设置随机账号
+> - [x] 输入 `RefreshToken` 或 `AccessToken` 直接登录使用
+> - [x] 支持 O1-Preview/mini、GPT-4、GPT-4o/mini
+> - [x] 敏感信息接口禁用、部分设置接口禁用
+> - [x] /login 登录页面，注销后自动跳转到登录页面
+> - [x] /?token=xxx 直接登录, xxx 为 `RefreshToken` 或 `AccessToken` 或 `SeedToken` (随机种子)
+
 
 > TODO
-> - [ ] 暂无，欢迎提 issue
+> - [ ] 镜像支持 `GPTs`
+> - [ ] 暂无，欢迎提 `issue`
+
+## 逆向API
+
+完全 `OpenAI` 格式的 API ，支持传入 `AccessToken` 或 `RefreshToken`，可用 GPT-4, GPT-4o, GPTs, O1-Preview, O1-Mini：
+
+```bash
+curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {{Token}}' \
+--data '{
+     "model": "gpt-3.5-turbo",
+     "messages": [{"role": "user", "content": "Say this is a test!"}],
+     "stream": true
+   }'
+```
+
+将你账号的 `AccessToken` 或 `RefreshToken` 作为 `{{ Token }}` 传入。
+也可填写你设置的环境变量 `Authorization` 的值, 将会随机选择后台账号
+
+如果有team账号，可以传入 `ChatGPT-Account-ID`，使用 Team 工作区：
+
+- 传入方式一：
+`headers` 中传入 `ChatGPT-Account-ID`值
+
+- 传入方式二：
+`Authorization: Bearer <AccessToken 或 RefreshToken>,<ChatGPT-Account-ID>`
+
+如果设置了 `AUTHORIZATION` 环境变量，可以将设置的值作为 `{{ Token }}` 传入进行多 Tokens 轮询。
+
+> - `AccessToken` 获取: chatgpt官网登录后，再打开 [https://chatgpt.com/api/auth/session](https://chatgpt.com/api/auth/session) 获取 `accessToken` 这个值。
+> - `RefreshToken` 获取: 此处不提供获取方法。
+> - 免登录 gpt-3.5 无需传入 Token。
 
 ## Tokens 管理
 
@@ -58,9 +100,23 @@
 
 2. 访问 `/tokens` 或者 `/{api_prefix}/tokens` 可以查看现有 Tokens 数量，也可以上传新的 Tokens ，或者清空 Tokens。
 
-3. 请求时传入 `AUTHORIZATION` 中配置的 `授权码` 即可使用轮询的Tokens进行对话， `AUTHORIZATION` 可以配置多个值，用英文逗号分隔。
+3. 请求时传入 `AUTHORIZATION` 中配置的 `授权码` 即可使用轮询的Tokens进行对话
 
 ![tokens.png](docs/tokens.png)
+
+## 官网原生镜像
+
+1. 配置环境变量 `ENABLE_GATEWAY` 为 `true`，然后运行程序, 注意开启后别人也可以直接通过域名访问你的网关。
+
+2. 在 Tokens 管理页面上传 `RefreshToken` 或 `AccessToken`
+
+3. 访问 `/login` 到登录页面
+
+![login.png](docs/login.png)
+
+4. 进入官网原生镜像页面使用
+
+![chatgpt.png](docs/chatgpt.png)
 
 ## 环境变量
 
@@ -74,17 +130,17 @@
 | 请求相关 | CHATGPT_BASE_URL  | `https://chatgpt.com`                                       | `https://chatgpt.com` | ChatGPT 网关地址，设置后会改变请求的网站，多个网关用逗号分隔                           |
 |      | PROXY_URL         | `http://ip:port`,<br/>`http://username:password@ip:port`    | `[]`                  | 全局代理 URL，出 403 时启用，多个代理用逗号分隔                                 |
 |      | EXPORT_PROXY_URL  | `http://ip:port`或<br/>`http://username:password@ip:port`    | `None`                | 出口代理 URL，防止请求图片和文件时泄漏源站 ip                                   |
-|      | ARK0SE_TOKEN_URL  | `https://example.com/token`                                 | `[]`                  | 获取 Ark0se token 的地址                                          |
-|      | USER_AGENTS       | `["ua1", "ua2"]`                                            | `[]`                  | 设置随机使用的 UserAgent 列表（可降低风控），不设置则使用默认的 Chrome 浏览器对应UA         |
 | 功能相关 | HISTORY_DISABLED  | `true`                                                      | `true`                | 是否不保存聊天记录并返回 conversation_id                                 |
 |      | POW_DIFFICULTY    | `00003a`                                                    | `00003a`              | 要解决的工作量证明难度，不懂别设置                                            |
-|      | RETRY_TIMES       | `3`                                                         | `3`                   | 出错重试次数，使用 AUTHORIZATION 会自动轮询下一个账号                           |
-|      | ENABLE_GATEWAY    | `true`                                                      | `true`                | 是否启用网关模式（WEBUI）                                              |
-|      | CONVERSATION_ONLY | `false`                                                     | `false`               | 是否直接使用对话接口，如果你用的网关支持自动解决pow和ark0se才启用                        |
+|      | RETRY_TIMES       | `3`                                                         | `3`                   | 出错重试次数，使用 `AUTHORIZATION` 会自动随机/轮询下一个账号                      |
+|      | CONVERSATION_ONLY | `false`                                                     | `false`               | 是否直接使用对话接口，如果你用的网关支持自动解决 `POW` 才启用                           |
 |      | ENABLE_LIMIT      | `true`                                                      | `true`                | 开启后不尝试突破官方次数限制，尽可能防止封号                                       |
 |      | UPLOAD_BY_URL     | `false`                                                     | `false`               | 开启后按照 `URL+空格+正文` 进行对话，自动解析 URL 内容并上传，多个 URL 用空格分隔           |
 |      | CHECK_MODEL       | `false`                                                     | `false`               | 检查账号是否支持传入模型，开启后可以稍微避免4o返回3.5内容，但是会增加请求时延，且并不能解决降智问题         |
-|      | SCHEDULED_REFRESH | `false`                                                     | `false`               | 是否定时刷新 AccessToken ，开启后每次启动程序将会全部非强制刷新一次，每4天晚上3点全部强制刷新一次。    |
+|      | SCHEDULED_REFRESH | `false`                                                     | `false`               | 是否定时刷新 `AccessToken` ，开启后每次启动程序将会全部非强制刷新一次，每4天晚上3点全部强制刷新一次。  |
+|      | RANDOM_TOKEN      | `true`                                                      | `true`                | 是否随机选取后台 `Token` ，开启后随机后台账号，关闭后为顺序轮询                         |
+| 网关功能 | ENABLE_GATEWAY    | `false`                                                     | `false`               | 是否启用网关模式，开启后可以使用镜像站，但也将会不设防                                  |
+
 ## 部署
 
 ### Zeabur 部署
@@ -123,75 +179,15 @@ cd chat2api
 在此目录中下载库中的 docker-compose.yml 文件：
 
 ```bash
-wget https://raw.githubusercontent.com/LanQian528/chat2api/main/docker-compose.yml
+wget https://raw.githubusercontent.com/LanQian528/chat2api/main/docker-compose-warp.yml
 ```
 
-修改 docker-compose.yml 文件中的环境变量，保存后：
+修改 docker-compose-warp.yml 文件中的环境变量，保存后：
 
 ```bash
 docker-compose up -d
 ```
 
-## 使用
-
-1. 在网页使用，直接访问以下地址，仅支持使用免登 GPT-3.5：
-
-```
-http://127.0.0.1:5005
-```
-
-2. 使用 API ，支持传入 AccessToken 或 RefreshToken，可用 GPT-4, GPT-4o, GPTs：
-
-```bash
-curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer {{OpenAI APIKEY}}' \
---data '{
-     "model": "gpt-3.5-turbo",
-     "messages": [{"role": "user", "content": "Say this is a test!"}],
-     "stream": true
-   }'
-```
-
-将你账号的 `AccessToken` 或 `RefreshToken` 当作 `OpenAI APIKEY` 传入。
-
-如果有team账号，可以传入 `ChatGPT-Account-ID`，使用 Team 工作区：
-
-- 传入方式一：
-`headers` 中传入 `ChatGPT-Account-ID`值
-
-- 传入方式二：
-`Authorization: Bearer <AccessToken 或 RefreshToken>,<ChatGPT-Account-ID>`
-
-如果设置了 `AUTHORIZATION` 环境变量，可以将设置的值当作 `OpenAI APIKEY` 传入进行多 Tokens 轮询。
-
-> - `AccessToken` 获取: chatgpt官网登录后，再打开 [https://chatgpt.com/api/auth/session](https://chatgpt.com/api/auth/session) 获取 `accessToken` 这个值。
-> - `RefreshToken` 获取: 此处不提供获取方法。
-> - 免登录 gpt-3.5 无需传入 Token。
-
-## Ark0seToken
-
-> #### 目前支持外部服务提供 Ark0seToken
->
-> #### 推荐使用 docker-compose 方式部署，已内置 Ark0se 服务
-
-1. 设置环境变量 `ARK0SE_TOKEN_URL`
-
-2. 在需要 `Ark0seToken` 的时候，`chat2api` 会向 `ARK0SE_TOKEN_URL` 发送 `POST` 请求
-
-3. 请按照以下格式提供外部服务：
-
-- 请求体：
-
-```json
-{"blob": "rFYaxQNEApDlx/Db.KyrE79pAAFBs70CYtbM4pMNUsc7jIkLGdiDs7vziHRGe78bqWXDo0AYyq2A10qIlcTt89lBYXJqCbONC/nD8C199pEZ/c9ocVKKtM27jZQ7fyOpWd9p5qjKeXT4xEGBFpoE3Re1DwdQeijYp7VMJQyw7RYN+IDB1QEx3aKSO6aTI+ivnhw9ztfn/p1SkvAyyOhur/ArF08WQ+rXQpxpttaSQlzMsIwlYbuUUuYE2f9JrQaYG7qip1DKvju111P6wTNy4QVlMXG32VrzaOWh4nmQ0lOcZ1DmN6u2aeJZotffHV2zOOQAqqnParidTbN+qFre2t77ZwBuGKGqLyT8LeOp02GdFwcyw0kkeX+L7vwYAzBpjA5ky0r0X+i8HpzWt8QCyWzEW9kHn9LLCTwg2MOumzjb66Ad4WDe+C1bAcOKuEyXiYh+a1cWZAOdzEuxEg90yCfI7DZR94BsoDR85gEC/Og88i098u5HV7hZZEOQ6J8fmi68FSyPkN7oLCmBsZCMAZqzapNP/MkeIMExrdw7Jf/PtMrZN4bwM56mWfyIJf5h/zXu8PUajVwE9Pj/M5VtB0spZg49JNeHExosVCAB0C0JW+T8vEIwoqiY4pRQ0lbMHTQZFpU2xURTgcgh+m6g1SEYR1FY3de1XnzfiTQq1RTNJPydj5xpt6r6okr8yIJdRhmVXlQI+pS7vi3+Lls2hnpr7L+l1mcUIMPZNBCs3AUFJNpp6SwQjZkPvKggg1p+uS6PdvKRizM9O9+FKc103AhuSia8KTrvU8tWhBhCzIHCD4LNfnkjuBWSdbDttva4AEXUoPuKkQCWaBzq4lQPUIHFOM9HmNe738vVkNdAuOYffxDNegcpIxLVgZGfbgLQ="}
-```
-
-- 响应体：
-
-```json
-{"token": "45017c7bb17115f36.7290869304|r=ap-southeast-1|meta=3|metabgclr=transparent|metaiconclr=%23757575|guitextcolor=%23000000|pk=0A1D34FC-659D-4E23-B17B-694DCFCF6A6C|at=40|sup=1|rid=3|ag=101|cdn_url=https%3A%2F%2Ftcr9i.openai.com%2Fcdn%2Ffc|lurl=https%3A%2F%2Faudio-ap-southeast-1.ark0selabs.com|surl=https%3A%2F%2Ftcr9i.openai.com|smurl=https%3A%2F%2Ftcr9i.openai.com%2Fcdn%2Ffc%2Fassets%2Fstyle-manager"}
-```
 
 ## 常见问题
 
@@ -210,10 +206,7 @@ curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
 >   - 是一个自己给 chat2api 设置的一个身份验证，设置后才可使用已保存的 Tokens 轮询，请求时当作 `APIKEY` 传入。
 > - AccessToken 如何获取？
 >   - chatgpt官网登录后，再打开 [https://chatgpt.com/api/auth/session](https://chatgpt.com/api/auth/session) 获取 `accessToken` 这个值。
-> - PLUS 账号报错 `403`？
->   - PLUS 账号需要配置 `Ark0seToken`，请根据上文进行配置。
-> - Ark0seToken 是什么，怎么获取？
->   - 请参考上文的说明，更多请参考 [https://www.ark0selabs.com/](https://www.ark0selabs.com/)
+
 
 ## License
 

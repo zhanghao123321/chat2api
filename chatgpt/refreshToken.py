@@ -45,11 +45,14 @@ async def chat_refresh(refresh_token):
             access_token = r.json()['access_token']
             return access_token
         else:
-            with open(globals.ERROR_TOKENS_FILE, "a", encoding="utf-8") as f:
-                f.write(refresh_token + "\n")
-            if refresh_token not in globals.error_token_list:
-                globals.error_token_list.append(refresh_token)
-            raise Exception(r.text[:100])
+            if "invalid_grant" in r.text or "access_denied" in r.text:
+                if refresh_token not in globals.error_token_list:
+                    globals.error_token_list.append(refresh_token)
+                    with open(globals.ERROR_TOKENS_FILE, "a", encoding="utf-8") as f:
+                        f.write(refresh_token + "\n")
+                raise Exception(r.text)
+            else:
+                raise Exception(r.text[:300])
     except Exception as e:
         logger.error(f"Failed to refresh access_token `{refresh_token}`: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to refresh access_token.")
