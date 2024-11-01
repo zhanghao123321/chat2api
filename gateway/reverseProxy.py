@@ -81,33 +81,44 @@ async def get_real_req_token(token):
 
 
 async def content_generator(r, token):
-    first_chunk = None
+    conversation_id = None
+    title = None
     async for chunk in r.aiter_content():
         try:
-            if first_chunk is None and len(token) != 45 and not token.startswith("eyJhbGciOi"):
-                first_chunk = chunk.decode('utf-8')
-                conversation_id = json.loads(first_chunk[6:].strip()).get("conversation_id")
-                conversation_detail = {
-                    "id": conversation_id,
-                    "update_time": generate_current_time(),
-                    "workspace_id": None,
-                }
-                if conversation_id not in globals.conversation_map:
-                    globals.conversation_map[conversation_id] = conversation_detail
-                else:
-                    globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
-                if conversation_id not in globals.seed_map[token]["conversations"]:
-                    globals.seed_map[token]["conversations"].insert(0, conversation_id)
-                else:
-                    globals.seed_map[token]["conversations"].remove(conversation_id)
-                    globals.seed_map[token]["conversations"].insert(0, conversation_id)
-                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.conversation_map, f)
-                with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.seed_map, f, indent=4)
-        except Exception:
-            logger.error(chunk.decode('utf-8').strip())
-            continue
+            if (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
+                chat_chunk = chunk.decode('utf-8').strip()
+                if chat_chunk.startswith("data: {"):
+                    if conversation_id is None:
+                        conversation_id = json.loads(chat_chunk[6:]).get("conversation_id")
+                        if conversation_id in globals.conversation_map:
+                            title = globals.conversation_map[conversation_id].get("title")
+                    if title is None:
+                        title = json.loads(chat_chunk[6:]).get("title")
+
+                    if conversation_id and title:
+                        conversation_detail = {
+                            "id": conversation_id,
+                            "title": title,
+                            "update_time": generate_current_time(),
+                            "workspace_id": None,
+                        }
+                        if conversation_id not in globals.conversation_map:
+                            globals.conversation_map[conversation_id] = conversation_detail
+                        else:
+                            globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
+                        if conversation_id not in globals.seed_map[token]["conversations"]:
+                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                        else:
+                            globals.seed_map[token]["conversations"].remove(conversation_id)
+                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                        with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                            json.dump(globals.conversation_map, f)
+                        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                            json.dump(globals.seed_map, f, indent=4)
+        except Exception as e:
+            # logger.error(e)
+            # logger.error(chunk.decode('utf-8'))
+            pass
         yield chunk
 
 
