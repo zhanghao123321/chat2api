@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import uuid
 
 from fastapi import Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -11,6 +12,22 @@ from gateway.reverseProxy import chatgpt_reverse_proxy
 from utils.config import authorization_list
 from utils.config import enable_gateway
 
+with open("templates/remix_context.json", "r", encoding="utf-8") as f:
+    remix_context = json.load(f)
+
+
+def set_value_for_key(data, target_key, new_value):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key == target_key:
+                data[key] = new_value
+            else:
+                set_value_for_key(value, target_key, new_value)
+    elif isinstance(data, list):
+        for item in data:
+            set_value_for_key(item, target_key, new_value)
+
+
 if enable_gateway:
     @app.get("/", response_class=HTMLResponse)
     async def chatgpt_html(request: Request):
@@ -20,9 +37,30 @@ if enable_gateway:
         if not token:
             return await login_html(request)
 
-        response = templates.TemplateResponse("chatgpt.html", {"request": request, "token": token})
+        user_remix_context = remix_context.copy()
+        set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})
+        set_value_for_key(user_remix_context, "accessToken", token)
+
+        response = templates.TemplateResponse("chatgpt.html", {"request": request, "remix_context": user_remix_context})
         response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
+
+    # @app.get("/backend-api/accounts/check/v4-2023-04-27")
+    # async def check_account(request: Request):
+    #     token = request.headers.get("Authorization").replace("Bearer ", "")
+    #     check_account_response = await chatgpt_reverse_proxy(request, "backend-api/accounts/check/v4-2023-04-27")
+    #     if len(token) == 45 or token.startswith("eyJhbGciOi"):
+    #         return check_account_response
+    #     else:
+    #         check_account_str = check_account_response.body.decode('utf-8')
+    #         check_account_info = json.loads(check_account_str)
+    #         for key in check_account_info.get("accounts", {}).keys():
+    #             account_id = check_account_info["accounts"][key]["account"]["account_id"]
+    #             globals.seed_map[token]["user_id"] = check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
+    #             check_account_info["accounts"][key]["account"]["account_user_id"] = f"user-chatgpt__{account_id}"
+    #         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+    #             json.dump(globals.seed_map, f, indent=4)
+    #         return check_account_info
 
 
     def verify_authorization(request: Request):
@@ -194,26 +232,6 @@ if enable_gateway:
                     json.dump(globals.conversation_map, f, indent=4)
             return patch_response
 
-
-    @app.post("/backend-api/conversation/gen_title/{conversation_id}")
-    async def gen_title(request: Request, conversation_id: str):
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        gen_title_response = await chatgpt_reverse_proxy(request,
-                                                         f"backend-api/conversation/gen_title/{conversation_id}")
-        if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return gen_title_response
-        else:
-            conversation_gen_title_str = gen_title_response.body.decode('utf-8')
-            conversation_gen_title = json.loads(conversation_gen_title_str)
-            title = conversation_gen_title.get("message", '').split("'")[1]
-            if conversation_id in globals.seed_map[token][
-                "conversations"] and conversation_id in globals.conversation_map:
-                globals.conversation_map[conversation_id]["title"] = title
-                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.conversation_map, f, indent=4)
-            return gen_title_response
-
-
     @app.get("/backend-api/me")
     async def get_me(request: Request):
         me = {
@@ -238,9 +256,13 @@ if enable_gateway:
                         "name": "user-chatgpt",
                         "description": "Personal org for chatgpt@openai.com",
                         "personal": True,
-                        "settings": {},
+                        "settings": {
+                            "threads_ui_visibility": "NONE",
+                            "usage_dashboard_visibility": "ANY_ROLE",
+                            "disable_user_api_keys": False
+                        },
                         "parent_org_id": None,
-                        "is_default": False,
+                        "is_default": True,
                         "role": "owner",
                         "is_scale_tier_authorized_purchaser": None,
                         "is_scim_managed": False,
@@ -253,7 +275,7 @@ if enable_gateway:
                     }
                 ]
             },
-            "has_payg_project_spend_limit": None
+            "has_payg_project_spend_limit": True
         }
         return me
 
