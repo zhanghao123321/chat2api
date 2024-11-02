@@ -152,6 +152,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
         fp = get_fp(req_token)
+        proxy_url = fp.get("proxy_url")
+        user_agent = fp.get("user-agent")
+        impersonate = fp.get("impersonate", "safari15_3")
         headers.update(fp)
 
         headers.update({
@@ -169,7 +172,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         data = await request.body()
 
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+        client = Client(proxy=proxy_url, impersonate=impersonate)
         try:
             background = BackgroundTask(client.close)
             r = await client.request(request.method, f"{base_url}/{path}", params=params, headers=headers,
@@ -186,8 +189,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                 .replace("https", petrol)}, background=background)
             elif 'stream' in r.headers.get("content-type", ""):
                 logger.info(f"Request token: {req_token}")
-                logger.info(f"Request UA: {fp.get('user-agent')}")
-                logger.info(f"Request impersonate: {fp.get('impersonate')}")
+                logger.info(f"Request proxy: {proxy_url}")
+                logger.info(f"Request UA: {user_agent}")
+                logger.info(f"Request impersonate: {impersonate}")
                 return StreamingResponse(content_generator(r, token), media_type=r.headers.get("content-type", ""),
                                          background=background)
             else:

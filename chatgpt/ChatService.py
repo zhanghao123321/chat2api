@@ -34,9 +34,6 @@ class ChatService:
     def __init__(self, origin_token=None):
         # self.user_agent = random.choice(user_agents_list) if user_agents_list else "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
         self.req_token = get_req_token(origin_token)
-        self.fp = {}
-        self.proxy_url = None
-        self.user_agent = None
         self.chat_token = "gAAAAAB"
         self.s = None
         self.ws = None
@@ -57,11 +54,12 @@ class ChatService:
 
         self.fp = get_fp(self.req_token)
         self.proxy_url = self.fp.get("proxy_url")
-        self.user_agent = self.fp.get("user-agent")
+        self.user_agent = self.fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        self.impersonate = self.fp.get("impersonate", "safari15_3")
         logger.info(f"Request token: {self.req_token}")
         logger.info(f"Request proxy: {self.proxy_url}")
         logger.info(f"Request UA: {self.user_agent}")
-        logger.info(f"Request impersonate: {self.fp.get('impersonate')}")
+        logger.info(f"Request impersonate: {self.impersonate}")
 
         self.data = data
         await self.set_model()
@@ -86,7 +84,7 @@ class ChatService:
         self.host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
 
-        self.s = Client(proxy=self.proxy_url, impersonate=self.fp.get("impersonate", "safari15_3"))
+        self.s = Client(proxy=self.proxy_url, impersonate=self.impersonate)
 
         self.oai_device_id = str(uuid.uuid4())
         self.persona = None

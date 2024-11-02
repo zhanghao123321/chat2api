@@ -177,8 +177,10 @@ if no_sentinel:
         req_token = await get_real_req_token(token)
         access_token = await verify_token(req_token)
         fp = get_fp(req_token)
-        user_agent = fp.get("user-agent", "")
-        proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
+        proxy_url = fp.get("proxy_url", None)
+        user_agent = fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        impersonate = fp.get("impersonate", "safari15_3")
+
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         proof_token = None
         turnstile_token = None
@@ -187,7 +189,7 @@ if no_sentinel:
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
-        client = Client(proxy=proxy_url, impersonate=fp.get("impersonate", "safari15_3"))
+        client = Client(proxy=proxy_url, impersonate=impersonate)
 
         config = get_config(user_agent)
         p = get_requirements_token(config)
@@ -235,8 +237,9 @@ if no_sentinel:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
             logger.info(f"Request token: {req_token}")
-            logger.info(f"Request UA: {fp.get('user-agent')}")
-            logger.info(f"Request impersonate: {fp.get('impersonate')}")
+            logger.info(f"Request proxy: {proxy_url}")
+            logger.info(f"Request UA: {user_agent}")
+            logger.info(f"Request impersonate: {impersonate}")
             return StreamingResponse(content_generator(r, token), headers=rheaders,
                                      media_type=rheaders.get("content-type"), background=background)
         else:

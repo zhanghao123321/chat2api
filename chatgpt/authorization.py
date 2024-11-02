@@ -47,39 +47,8 @@ def get_req_token(req_token, seed=None):
 
 def get_fp(req_token):
     fp = globals.user_agent_map.get(req_token, {})
-    if not fp:
-        options = Options(version_ranges={
-            'chrome': VersionRange(min_version=124),
-            'edge': VersionRange(min_version=124),
-        })
-        if not req_token:
-            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge', 'firefox', 'safari'),
-                                       platform=('windows', 'macos'), options=options)
-            return {
-                "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
-                "sec-ch-ua-platform": ua.ch.platform,
-                "sec-ch-ua": ua.ch.brands,
-                "sec-ch-ua-mobile": ua.ch.mobile,
-                "impersonate": random.choice(globals.impersonate_list),
-                "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
-            }
-        else:
-            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge', 'firefox', 'safari'),
-                                       platform=('windows', 'macos'), options=options)
-            fp = {
-                "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
-                "sec-ch-ua-platform": ua.ch.platform,
-                "sec-ch-ua": ua.ch.brands,
-                "sec-ch-ua-mobile": ua.ch.mobile,
-                "impersonate": random.choice(globals.impersonate_list),
-                "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
-            }
-            globals.user_agent_map[req_token] = fp
-            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.user_agent_map, f, indent=4)
-            return fp
-    else:
-        if "proxy_url" in fp.keys() and fp["proxy_url"] not in configs.proxy_url_list:
+    if fp and fp.get("user-agent") and fp.get("impersonate"):
+        if "proxy_url" in fp.keys() and fp["proxy_url"] and fp["proxy_url"] not in configs.proxy_url_list:
             fp["proxy_url"] = random.choice(configs.proxy_url_list) if configs.proxy_url_list else None
             globals.user_agent_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
@@ -94,9 +63,30 @@ def get_fp(req_token):
             globals.user_agent_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
-
         user_agent = {k.lower(): v for k, v in fp.items()}
         return user_agent
+    else:
+        options = Options(version_ranges={
+            'chrome': VersionRange(min_version=124),
+            'edge': VersionRange(min_version=124),
+        })
+        ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge', 'firefox', 'safari'),
+                                   platform=('windows', 'macos'), options=options)
+        fp = {
+            "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
+            "sec-ch-ua-platform": ua.ch.platform,
+            "sec-ch-ua": ua.ch.brands,
+            "sec-ch-ua-mobile": ua.ch.mobile,
+            "impersonate": random.choice(globals.impersonate_list),
+            "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
+        }
+        if not req_token:
+            return fp
+        else:
+            globals.user_agent_map[req_token] = fp
+            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.user_agent_map, f, indent=4)
+            return fp
 
 
 async def verify_token(req_token):
