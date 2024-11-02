@@ -38,7 +38,7 @@ if enable_gateway:
             return await login_html(request)
 
         user_remix_context = remix_context.copy()
-        set_value_for_key(user_remix_context, "user", {})
+        set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})
         set_value_for_key(user_remix_context, "accessToken", token)
 
         response = templates.TemplateResponse("chatgpt.html", {"request": request, "remix_context": user_remix_context})

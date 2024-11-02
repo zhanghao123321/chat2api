@@ -202,8 +202,6 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                         status_code=r.status_code, background=background)
                 else:
                     content = await r.atext()
-                    if "initialize" in content:
-                        pass
                     content = (content
                                .replace("ab.chatgpt.com", origin_host)
                                .replace("cdn.oaistatic.com", origin_host)
