@@ -57,7 +57,7 @@ def get_fp(req_token):
                                        platform=('windows', 'macos'), options=options)
             return {
                 "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
-                "sec-ch-ua-platform": ua.platform,
+                "sec-ch-ua-platform": ua.ch.platform,
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
@@ -68,31 +68,31 @@ def get_fp(req_token):
                                        platform=('windows', 'macos'), options=options)
             fp = {
                 "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
-                "sec-ch-ua-platform": ua.platform,
+                "sec-ch-ua-platform": ua.ch.platform,
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
                 "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
             }
             globals.user_agent_map[req_token] = fp
-            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
             return fp
     else:
         if "proxy_url" in fp.keys() and fp["proxy_url"] not in configs.proxy_url_list:
             fp["proxy_url"] = random.choice(configs.proxy_url_list) if configs.proxy_url_list else None
             globals.user_agent_map[req_token] = fp
-            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
         if globals.impersonate_list and "impersonate" in fp.keys() and fp["impersonate"] not in globals.impersonate_list:
             fp["impersonate"] = random.choice(globals.impersonate_list)
             globals.user_agent_map[req_token] = fp
-            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
         if configs.user_agents_list and "user-agent" in fp.keys() and fp["user-agent"] not in configs.user_agents_list:
             fp["user-agent"] = random.choice(configs.user_agents_list)
             globals.user_agent_map[req_token] = fp
-            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+            with open(globals.FP_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
 
         user_agent = {k.lower(): v for k, v in fp.items()}

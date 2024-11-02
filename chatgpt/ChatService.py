@@ -34,20 +34,15 @@ class ChatService:
     def __init__(self, origin_token=None):
         # self.user_agent = random.choice(user_agents_list) if user_agents_list else "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
         self.req_token = get_req_token(origin_token)
-        self.fp = get_fp(self.req_token)
-        self.user_agent = self.fp.get(
-            "user-agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-        )
+        self.fp = {}
+        self.proxy_url = None
+        self.user_agent = None
         self.chat_token = "gAAAAAB"
         self.s = None
         self.ws = None
 
     async def set_dynamic_data(self, data):
         if self.req_token:
-            logger.info(f"Request token: {self.req_token}")
-            logger.info(f"Request UA: {self.user_agent}")
-            logger.info(f"Request impersonate: {self.fp.get('impersonate')}")
             req_len = len(self.req_token.split(","))
             if req_len == 1:
                 self.access_token = await verify_token(self.req_token)
@@ -59,6 +54,14 @@ class ChatService:
             logger.info("Request token is empty, use no-auth 3.5")
             self.access_token = None
             self.account_id = None
+
+        self.fp = get_fp(self.req_token)
+        self.proxy_url = self.fp.get("proxy_url")
+        self.user_agent = self.fp.get("user-agent")
+        logger.info(f"Request token: {self.req_token}")
+        logger.info(f"Request proxy: {self.proxy_url}")
+        logger.info(f"Request UA: {self.user_agent}")
+        logger.info(f"Request impersonate: {self.fp.get('impersonate')}")
 
         self.data = data
         await self.set_model()
@@ -79,8 +82,6 @@ class ChatService:
             self.max_tokens = 2147483647
 
         # self.proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
-        self.proxy_url = self.fp.get("proxy_url")
-        logger.info(f"Request proxy: {self.proxy_url}")
 
         self.host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
@@ -116,9 +117,9 @@ class ChatService:
         }
         if self.access_token:
             self.base_url = self.host_url + "/backend-api"
-            self.base_headers['Authorization'] = f'Bearer {self.access_token}'
+            self.base_headers['authorization'] = f'Bearer {self.access_token}'
             if self.account_id:
-                self.base_headers['Chatgpt-Account-Id'] = self.account_id
+                self.base_headers['chatgpt-account-id'] = self.account_id
         else:
             self.base_url = self.host_url + "/backend-anon"
 
@@ -384,7 +385,7 @@ class ChatService:
         url = f"{self.base_url}/files/{file_id}/download"
         headers = self.base_headers.copy()
         try:
-            r = await self.s.get(url, headers=headers, timeout=5)
+            r = await self.s.get(url, headers=headers, timeout=10)
             if r.status_code == 200:
                 download_url = r.json().get('download_url')
                 return download_url
@@ -398,7 +399,7 @@ class ChatService:
         url = f"{self.base_url}/files/{file_id}/uploaded"
         headers = self.base_headers.copy()
         try:
-            r = await self.s.post(url, headers=headers, json={}, timeout=30)
+            r = await self.s.post(url, headers=headers, json={}, timeout=10)
             if r.status_code == 200:
                 download_url = r.json().get('download_url')
                 return download_url
@@ -415,7 +416,7 @@ class ChatService:
             r = await self.s.post(
                 url,
                 headers=headers,
-                json={"file_name": file_name, "file_size": file_size, "timezone_offset_min": -480, "use_case": use_case},
+                json={"file_name": file_name, "file_size": file_size, "reset_rate_limits": False, "timezone_offset_min": -480, "use_case": use_case},
                 timeout=5,
             )
             if r.status_code == 200:
@@ -440,7 +441,9 @@ class ChatService:
                 'x-ms-version': '2020-04-08',
             }
         )
-        headers.pop('Authorization', None)
+        headers.pop('authorization', None)
+        headers.pop('oai-device-id', None)
+        headers.pop('oai-language', None)
         try:
             r = await self.s.put(upload_url, headers=headers, data=file_content, timeout=60)
             if r.status_code == 201:

@@ -112,7 +112,7 @@ async def content_generator(r, token):
                             globals.seed_map[token]["conversations"].remove(conversation_id)
                             globals.seed_map[token]["conversations"].insert(0, conversation_id)
                         with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                            json.dump(globals.conversation_map, f)
+                            json.dump(globals.conversation_map, f, indent=4)
                         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
                             json.dump(globals.seed_map, f, indent=4)
         except Exception as e:
