@@ -9,8 +9,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 import utils.globals as globals
 from app import app, templates
 from gateway.reverseProxy import chatgpt_reverse_proxy
-from utils.config import authorization_list
-from utils.config import enable_gateway
+from utils.configs import authorization_list
+from utils.configs import enable_gateway
 
 with open("templates/remix_context.json", "r", encoding="utf-8") as f:
     remix_context = json.load(f)

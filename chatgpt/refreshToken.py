@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from utils.Client import Client
 from utils.Logger import logger
-from utils.config import proxy_url_list
+from utils.configs import proxy_url_list
 import utils.globals as globals
 
 

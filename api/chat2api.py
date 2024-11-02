@@ -11,7 +11,7 @@ from app import templates, oauth2_scheme, app
 from chatgpt.ChatService import ChatService
 from chatgpt.authorization import refresh_all_tokens
 from utils.Logger import logger
-from utils.config import api_prefix, scheduled_refresh
+from utils.configs import api_prefix, scheduled_refresh
 from utils.retry import async_retry
 
 scheduler = AsyncIOScheduler()

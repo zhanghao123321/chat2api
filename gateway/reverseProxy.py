@@ -5,11 +5,11 @@ from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
-from chatgpt.authorization import verify_token, get_req_token, get_ua
+from chatgpt.authorization import verify_token, get_req_token, get_fp
 import utils.globals as globals
 from utils.Client import Client
 from utils.Logger import logger
-from utils.config import chatgpt_base_url_list, proxy_url_list
+from utils.configs import chatgpt_base_url_list, proxy_url_list
 
 
 from datetime import datetime, timezone
@@ -151,8 +151,8 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
-        ua = get_ua(req_token)
-        headers.update(ua)
+        fp = get_fp(req_token)
+        headers.update(fp)
 
         headers.update({
             "accept-language": "en-US,en;q=0.9",
@@ -185,6 +185,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                 .replace("cdn.oaistatic.com", origin_host)
                                 .replace("https", petrol)}, background=background)
             elif 'stream' in r.headers.get("content-type", ""):
+                logger.info(f"Request token: {req_token}")
+                logger.info(f"Request UA: {fp.get('user-agent')}")
+                logger.info(f"Request impersonate: {fp.get('impersonate')}")
                 return StreamingResponse(content_generator(r, token), media_type=r.headers.get("content-type", ""),
                                          background=background)
             else:

@@ -8,14 +8,14 @@ from starlette.concurrency import run_in_threadpool
 
 from api.files import get_image_size, get_file_extension, determine_file_use_case
 from api.models import model_proxy
-from chatgpt.authorization import get_req_token, verify_token, get_ua
+from chatgpt.authorization import get_req_token, verify_token, get_fp
 from chatgpt.chatFormat import api_messages_to_chat, stream_response, format_not_stream_response, head_process_response
 from chatgpt.chatLimit import check_is_limit, handle_request_limit
 from chatgpt.proofofWork import get_config, get_dpl, get_answer_token, get_requirements_token
 
 from utils.Client import Client
 from utils.Logger import logger
-from utils.config import (
+from utils.configs import (
     proxy_url_list,
     chatgpt_base_url_list,
     ark0se_token_url_list,
@@ -34,8 +34,8 @@ class ChatService:
     def __init__(self, origin_token=None):
         # self.user_agent = random.choice(user_agents_list) if user_agents_list else "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
         self.req_token = get_req_token(origin_token)
-        self.ua = get_ua(self.req_token)
-        self.user_agent = self.ua.get(
+        self.fp = get_fp(self.req_token)
+        self.user_agent = self.fp.get(
             "user-agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
         )
@@ -46,6 +46,8 @@ class ChatService:
     async def set_dynamic_data(self, data):
         if self.req_token:
             logger.info(f"Request token: {self.req_token}")
+            logger.info(f"Request UA: {self.user_agent}")
+            logger.info(f"Request impersonate: {self.fp.get('impersonate')}")
             req_len = len(self.req_token.split(","))
             if req_len == 1:
                 self.access_token = await verify_token(self.req_token)
@@ -77,12 +79,13 @@ class ChatService:
             self.max_tokens = 2147483647
 
         # self.proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
-        self.proxy_url = self.ua.get("proxy_url", random.choice(proxy_url_list) if proxy_url_list else None)
+        self.proxy_url = self.fp.get("proxy_url")
         logger.info(f"Request proxy: {self.proxy_url}")
+
         self.host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
 
-        self.s = Client(proxy=self.proxy_url, impersonate=self.ua.get("impersonate", "safari15_3"))
+        self.s = Client(proxy=self.proxy_url, impersonate=self.fp.get("impersonate", "safari15_3"))
 
         self.oai_device_id = str(uuid.uuid4())
         self.persona = None
@@ -103,9 +106,9 @@ class ChatService:
             'origin': self.host_url,
             'priority': 'u=1, i',
             'referer': f'{self.host_url}/',
-            'sec-ch-ua': self.ua.get("sec-ch-ua", '"Chromium";v="124", "Microsoft Edge";v="124", "Not-A.Brand";v="99"'),
-            'sec-ch-ua-mobile': self.ua.get("sec-ch-ua-mobile", "?0"),
-            'sec-ch-ua-platform': self.ua.get("sec-ch-ua-platform", '"Windows"'),
+            'sec-ch-ua': self.fp.get("sec-ch-ua", '"Chromium";v="124", "Microsoft Edge";v="124", "Not-A.Brand";v="99"'),
+            'sec-ch-ua-mobile': self.fp.get("sec-ch-ua-mobile", "?0"),
+            'sec-ch-ua-platform': self.fp.get("sec-ch-ua-platform", '"Windows"'),
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
@@ -223,7 +226,7 @@ class ChatService:
                     if not self.ark0se_token_url:
                         raise HTTPException(status_code=403, detail="Ark0se service required")
                     ark0se_dx = ark0se.get("dx")
-                    ark0se_client = Client(impersonate=self.ua.get("impersonate", "safari15_3"))
+                    ark0se_client = Client(impersonate=self.fp.get("impersonate", "safari15_3"))
                     try:
                         r2 = await ark0se_client.post(
                             url=self.ark0se_token_url, json={"blob": ark0se_dx, "method": ark0se_method}, timeout=15

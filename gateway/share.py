@@ -9,12 +9,12 @@ from starlette.concurrency import run_in_threadpool
 from starlette.responses import StreamingResponse
 
 from app import app
-from chatgpt.authorization import get_ua, verify_token
+from chatgpt.authorization import get_fp, verify_token
 from chatgpt.proofofWork import get_config, get_requirements_token, get_answer_token
 from gateway.reverseProxy import get_real_req_token, content_generator
 from utils.Client import Client
 from utils.Logger import logger
-from utils.config import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign, no_sentinel
+from utils.configs import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign, no_sentinel
 
 base_headers = {
     'accept': '*/*',
@@ -37,13 +37,13 @@ async def chatgpt_account_check(access_token):
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         req_token = await get_real_req_token(access_token)
         access_token = await verify_token(req_token)
-        ua = get_ua(req_token)
+        fp = get_fp(req_token)
 
         headers = base_headers.copy()
         headers.update({"authorization": f"Bearer {access_token}"})
-        headers.update(ua)
+        headers.update(fp)
 
-        client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
+        client = Client(proxy=proxy_url, impersonate=fp.get("impersonate", "safari15_3"))
         r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers,
                              timeout=10)
         if r.status_code != 200:
@@ -176,18 +176,18 @@ if no_sentinel:
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
         req_token = await get_real_req_token(token)
         access_token = await verify_token(req_token)
-        ua = get_ua(req_token)
-        user_agent = ua.get("user-agent", "")
+        fp = get_fp(req_token)
+        user_agent = fp.get("user-agent", "")
         proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         proof_token = None
         turnstile_token = None
 
         headers = base_headers.copy()
-        headers.update(ua)
+        headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
-        client = Client(proxy=proxy_url, impersonate=ua.get("impersonate", "safari15_3"))
+        client = Client(proxy=proxy_url, impersonate=fp.get("impersonate", "safari15_3"))
 
         config = get_config(user_agent)
         p = get_requirements_token(config)
@@ -234,6 +234,9 @@ if no_sentinel:
         if x_sign:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
+            logger.info(f"Request token: {req_token}")
+            logger.info(f"Request UA: {fp.get('user-agent')}")
+            logger.info(f"Request impersonate: {fp.get('impersonate')}")
             return StreamingResponse(content_generator(r, token), headers=rheaders,
                                      media_type=rheaders.get("content-type"), background=background)
         else:

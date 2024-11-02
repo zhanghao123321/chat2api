@@ -3,16 +3,18 @@ import json
 import random
 
 import ua_generator
+from ua_generator.options import Options
+from ua_generator.data.version import VersionRange
 from fastapi import HTTPException
 
+import utils.configs as configs
 import utils.globals as globals
 from chatgpt.refreshToken import rt2ac
 from utils.Logger import logger
-from utils.config import authorization_list, random_token, auto_seed, proxy_url_list
 
 
 def get_req_token(req_token, seed=None):
-    if auto_seed:
+    if configs.auto_seed:
         available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
         length = len(available_token_list)
         if seed and length > 0:
@@ -24,9 +26,9 @@ def get_req_token(req_token, seed=None):
                 req_token = globals.seed_map[seed]["token"]
             return req_token
 
-        if req_token in authorization_list:
+        if req_token in configs.authorization_list:
             if len(available_token_list) > 0:
-                if random_token:
+                if configs.random_token:
                     req_token = random.choice(available_token_list)
                     return req_token
                 else:
@@ -43,48 +45,63 @@ def get_req_token(req_token, seed=None):
         return globals.seed_map[seed]["token"]
 
 
-def get_ua(req_token):
-    user_agent = globals.user_agent_map.get(req_token, {})
-    user_agent = {k.lower(): v for k, v in user_agent.items()}
-    if not user_agent:
+def get_fp(req_token):
+    fp = globals.user_agent_map.get(req_token, {})
+    if not fp:
+        options = Options(version_ranges={
+            'chrome': VersionRange(min_version=124),
+            'edge': VersionRange(min_version=124),
+        })
         if not req_token:
-            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
+            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge', 'firefox', 'safari'),
+                                       platform=('windows', 'macos'), options=options)
             return {
-                "user-agent": ua.text,
+                "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
                 "sec-ch-ua-platform": ua.platform,
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
-                "proxy_url": random.choice(proxy_url_list) if proxy_url_list else None,
+                "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
             }
         else:
-            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge'), platform=('windows', 'macos'))
-            user_agent = {
-                "user-agent": ua.text,
+            ua = ua_generator.generate(device='desktop', browser=('chrome', 'edge', 'firefox', 'safari'),
+                                       platform=('windows', 'macos'), options=options)
+            fp = {
+                "user-agent": ua.text if not configs.user_agents_list else random.choice(configs.user_agents_list),
                 "sec-ch-ua-platform": ua.platform,
                 "sec-ch-ua": ua.ch.brands,
                 "sec-ch-ua-mobile": ua.ch.mobile,
                 "impersonate": random.choice(globals.impersonate_list),
-                "proxy_url": random.choice(proxy_url_list) if proxy_url_list else None,
+                "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
             }
-            globals.user_agent_map[req_token] = user_agent
+            globals.user_agent_map[req_token] = fp
             with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
-            return user_agent
+            return fp
     else:
-        if "proxy_url" in user_agent.keys() and user_agent["proxy_url"] not in proxy_url_list:
-            user_agent["proxy_url"] = random.choice(proxy_url_list) if proxy_url_list else None
-            globals.user_agent_map[req_token] = user_agent
+        if "proxy_url" in fp.keys() and fp["proxy_url"] not in configs.proxy_url_list:
+            fp["proxy_url"] = random.choice(configs.proxy_url_list) if configs.proxy_url_list else None
+            globals.user_agent_map[req_token] = fp
             with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
                 json.dump(globals.user_agent_map, f, indent=4)
-            user_agent = {k.lower(): v for k, v in user_agent.items()}
+        if globals.impersonate_list and "impersonate" in fp.keys() and fp["impersonate"] not in globals.impersonate_list:
+            fp["impersonate"] = random.choice(globals.impersonate_list)
+            globals.user_agent_map[req_token] = fp
+            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.user_agent_map, f, indent=4)
+        if configs.user_agents_list and "user-agent" in fp.keys() and fp["user-agent"] not in configs.user_agents_list:
+            fp["user-agent"] = random.choice(configs.user_agents_list)
+            globals.user_agent_map[req_token] = fp
+            with open(globals.USER_AGENTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.user_agent_map, f, indent=4)
 
+        user_agent = {k.lower(): v for k, v in fp.items()}
         return user_agent
 
 
 async def verify_token(req_token):
     if not req_token:
-        if authorization_list:
+        if configs.authorization_list:
             logger.error("Unauthorized with empty token.")
             raise HTTPException(status_code=401)
         else:

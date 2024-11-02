@@ -3,7 +3,6 @@ import os
 
 from dotenv import load_dotenv
 
-from utils.globals import token_list, error_token_list
 from utils.Logger import logger
 
 load_dotenv(encoding="ascii")
@@ -32,6 +31,8 @@ if not ark0se_token_url:
     ark0se_token_url = os.getenv('ARK0SE_TOKEN_URL', None)
 proxy_url = os.getenv('PROXY_URL', '').replace(' ', '')
 export_proxy_url = os.getenv('EXPORT_PROXY_URL', None)
+impersonate_list_str = os.getenv('IMPERSONATE', '[]')
+user_agents_list_str = os.getenv('USER_AGENTS', '[]')
 
 cf_file_url = os.getenv('CF_FILE_URL', None)
 turnstile_solver_url = os.getenv('TURNSTILE_SOLVER_URL', None)
@@ -50,6 +51,8 @@ authorization_list = authorization.split(',') if authorization else []
 chatgpt_base_url_list = chatgpt_base_url.split(',') if chatgpt_base_url else []
 ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
+impersonate_list = ast.literal_eval(impersonate_list_str)
+user_agents_list = ast.literal_eval(user_agents_list_str)
 
 enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
 no_sentinel = is_true(os.getenv('NO_SENTINEL', False))
@@ -69,6 +72,8 @@ logger.info("------------------------- Request --------------------------")
 logger.info("CHATGPT_BASE_URL:  " + str(chatgpt_base_url_list))
 logger.info("PROXY_URL:         " + str(proxy_url_list))
 logger.info("EXPORT_PROXY_URL:  " + str(export_proxy_url))
+logger.info("IMPERSONATE:       " + str(impersonate_list))
+logger.info("USER_AGENTS:       " + str(user_agents_list))
 logger.info("---------------------- Functionality -----------------------")
 logger.info("HISTORY_DISABLED:  " + str(history_disabled))
 logger.info("POW_DIFFICULTY:    " + str(pow_difficulty))
@@ -82,6 +87,3 @@ logger.info("RANDOM_TOKEN:      " + str(random_token))
 logger.info("------------------------- Gateway --------------------------")
 logger.info("ENABLE_GATEWAY:    " + str(enable_gateway))
 logger.info("-" * 60)
-if token_list:
-    logger.info(f"Token list count: {len(token_list)}, Error token list count: {len(error_token_list)}")
-    logger.info("-" * 60)

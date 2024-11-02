@@ -1,9 +1,7 @@
 import json
 import os
 
-import ua_generator
-import random
-
+import utils.configs as configs
 from utils.Logger import logger
 
 DATA_FOLDER = "data"
@@ -24,19 +22,8 @@ user_agent_map = {}
 seed_map = {}
 conversation_map = {}
 impersonate_list = [
-    "chrome99",
-    "chrome100",
     "chrome101",
-    "chrome104",
-    "chrome107",
-    "chrome110",
-    "chrome116",
-    "chrome119",
-    "chrome120",
-    "chrome123",
-    "edge99",
-    "edge101",
-]
+] if not configs.impersonate_list else configs.impersonate_list
 
 if not os.path.exists(DATA_FOLDER):
     os.makedirs(DATA_FOLDER)
@@ -59,7 +46,6 @@ if os.path.exists(WSS_MAP_FILE):
 else:
     wss_map = {}
 
-
 if os.path.exists(USER_AGENTS_FILE):
     with open(USER_AGENTS_FILE, "r", encoding="utf-8") as f:
         try:
@@ -68,7 +54,6 @@ if os.path.exists(USER_AGENTS_FILE):
             user_agent_map = {}
 else:
     user_agent_map = {}
-
 
 if os.path.exists(SEED_MAP_FILE):
     with open(SEED_MAP_FILE, "r") as f:
@@ -79,7 +64,6 @@ if os.path.exists(SEED_MAP_FILE):
 else:
     seed_map = {}
 
-
 if os.path.exists(CONVERSATION_MAP_FILE):
     with open(CONVERSATION_MAP_FILE, "r") as f:
         try:
@@ -88,7 +72,6 @@ if os.path.exists(CONVERSATION_MAP_FILE):
             conversation_map = {}
 else:
     conversation_map = {}
-
 
 if os.path.exists(TOKENS_FILE):
     with open(TOKENS_FILE, "r", encoding="utf-8") as f:
@@ -99,7 +82,6 @@ else:
     with open(TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
 
-
 if os.path.exists(ERROR_TOKENS_FILE):
     with open(ERROR_TOKENS_FILE, "r", encoding="utf-8") as f:
         for line in f:
@@ -109,3 +91,6 @@ else:
     with open(ERROR_TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
 
+if token_list:
+    logger.info(f"Token list count: {len(token_list)}, Error token list count: {len(error_token_list)}")
+    logger.info("-" * 60)
