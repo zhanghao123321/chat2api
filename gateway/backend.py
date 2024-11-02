@@ -38,7 +38,7 @@ if enable_gateway:
             return await login_html(request)
 
         user_remix_context = remix_context.copy()
-        set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})
+        set_value_for_key(user_remix_context, "user", {})
         set_value_for_key(user_remix_context, "accessToken", token)
 
         response = templates.TemplateResponse("chatgpt.html", {"request": request, "remix_context": user_remix_context})
@@ -296,6 +296,9 @@ if enable_gateway:
 
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
     async def reverse_proxy(request: Request, path: str):
+        if re.match("/v1/rgstr", path):
+            return Response(status_code=202, content=b'{"success":true}')
+
         if re.match("ces/v1", path):
             return {"success": True}
 
