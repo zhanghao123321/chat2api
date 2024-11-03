@@ -1,5 +1,6 @@
 import json
 import random
+import time
 
 from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
@@ -165,6 +166,13 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "origin": base_url,
             "referer": f"{base_url}/"
         })
+        if "ab.chatgpt.com" in base_url:
+            headers.update({
+                "statsig-sdk-type": "js-client",
+                "statsig-api-key": "client-tnE5GCU2F2cTxRiMbvTczMDT1jpwIigZHsZSdqiy4u",
+                "statsig-sdk-version": "5.1.0",
+                "statsig-client-time": int(time.time() * 1000)
+            })
 
         token = headers.get("authorization", "").replace("Bearer ", "")
         if token:
