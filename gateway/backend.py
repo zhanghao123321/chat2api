@@ -188,24 +188,24 @@ if enable_gateway:
                 "offset": offset,
                 "has_missing_conversations": False
             }
-            return conversations
+            return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
 
 
     @app.get("/backend-api/conversation/{conversation_id}")
     async def update_conversation(request: Request, conversation_id: str):
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        conversation_details_response = await chatgpt_reverse_proxy(request,
-                                                                    f"backend-api/conversation/{conversation_id}")
+        conversation_details_response = await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
         if len(token) == 45 or token.startswith("eyJhbGciOi"):
             return conversation_details_response
         else:
             conversation_details_str = conversation_details_response.body.decode('utf-8')
             conversation_details = json.loads(conversation_details_str)
-            if conversation_id in globals.seed_map[token][
-                "conversations"] and conversation_id in globals.conversation_map:
+            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
                 globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
-                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived",
-                                                                                                    False)
+                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived", False)
+                globals.conversation_map[conversation_id]["conversation_template_id"] = conversation_details.get("conversation_template_id", None)
+                globals.conversation_map[conversation_id]["gizmo_id"] = conversation_details.get("gizmo_id", None)
+                globals.conversation_map[conversation_id]["async_status"] = conversation_details.get("async_status", None)
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
             return conversation_details_response
