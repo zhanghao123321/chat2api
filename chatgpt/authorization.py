@@ -14,7 +14,7 @@ from utils.Logger import logger
 
 
 def get_req_token(req_token, seed=None):
-    if configs.auto_seed:
+    if configs.auto_seed or not seed:
         available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
         length = len(available_token_list)
         if seed and length > 0:

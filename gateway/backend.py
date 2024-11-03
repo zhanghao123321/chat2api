@@ -130,6 +130,12 @@ if enable_gateway:
             data = await request.json()
             seed = data.get("seed")
 
+            if seed == "clear":
+                globals.seed_map.clear() 
+                with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.seed_map, f, indent=4)
+                return {"status": "success", "message": "All seeds deleted successfully"}
+            
             if not seed:
                 raise HTTPException(status_code=400, detail="Missing required field: seed")
 
