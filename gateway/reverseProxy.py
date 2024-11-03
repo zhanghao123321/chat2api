@@ -87,14 +87,25 @@ async def content_generator(r, token):
     async for chunk in r.aiter_content():
         try:
             if (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
-                chat_chunk = chunk.decode('utf-8').strip()
+                chat_chunk = chunk.decode('utf-8')
+                if "title" in chat_chunk:
+                    pass
                 if chat_chunk.startswith("data: {"):
+                    if "\n\nevent: delta" in chat_chunk:
+                        index = chat_chunk.find("\n\nevent: delta")
+                        chunk_data = chat_chunk[6:index]
+                    elif "\n\ndata: {" in chat_chunk:
+                        index = chat_chunk.find("\n\ndata: {")
+                        chunk_data = chat_chunk[6:index]
+                    else:
+                        chunk_data = chat_chunk[6:]
+                    chunk_data = chunk_data.strip()
                     if conversation_id is None:
-                        conversation_id = json.loads(chat_chunk[6:]).get("conversation_id")
+                        conversation_id = json.loads(chunk_data).get("conversation_id")
                         if conversation_id in globals.conversation_map:
                             title = globals.conversation_map[conversation_id].get("title")
                     if title is None:
-                        title = json.loads(chat_chunk[6:]).get("title")
+                        title = json.loads(chunk_data).get("title")
 
                     if conversation_id and title:
                         conversation_detail = {
@@ -116,6 +127,7 @@ async def content_generator(r, token):
                             json.dump(globals.conversation_map, f, indent=4)
                         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
                             json.dump(globals.seed_map, f, indent=4)
+                        logger.info(f"Conversation ID: {conversation_id}, Title: {title}")
         except Exception as e:
             # logger.error(e)
             # logger.error(chunk.decode('utf-8'))
