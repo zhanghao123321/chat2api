@@ -20,7 +20,6 @@ def is_true(x):
 
 
 api_prefix = os.getenv('API_PREFIX', None)
-auto_seed = os.getenv('AUTO_SEED', True)
 authorization = os.getenv('AUTHORIZATION', '').replace(' ', '')
 chatgpt_base_url = os.getenv('CHATGPT_BASE_URL', 'https://chatgpt.com').replace(' ', '')
 auth_key = os.getenv('AUTH_KEY', None)
@@ -55,6 +54,7 @@ impersonate_list = ast.literal_eval(impersonate_list_str)
 user_agents_list = ast.literal_eval(user_agents_list_str)
 
 enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
+auto_seed = is_true(os.getenv('AUTO_SEED', True))
 no_sentinel = is_true(os.getenv('NO_SENTINEL', False))
 
 with open('version.txt') as f:

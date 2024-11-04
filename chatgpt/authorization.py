@@ -14,7 +14,7 @@ from utils.Logger import logger
 
 
 def get_req_token(req_token, seed=None):
-    if configs.auto_seed or not seed:
+    if configs.auto_seed:
         available_token_list = list(set(globals.token_list) - set(globals.error_token_list))
         length = len(available_token_list)
         if seed and length > 0:
@@ -40,6 +40,7 @@ def get_req_token(req_token, seed=None):
         else:
             return req_token
     else:
+        seed = req_token
         if seed not in globals.seed_map.keys():
             raise HTTPException(status_code=401, detail={"error": "Invalid Seed"})
         return globals.seed_map[seed]["token"]
