@@ -18,7 +18,7 @@ token_list = []
 error_token_list = []
 refresh_map = {}
 wss_map = {}
-user_agent_map = {}
+fp_map = {}
 seed_map = {}
 conversation_map = {}
 impersonate_list = [
@@ -60,11 +60,11 @@ else:
 if os.path.exists(FP_FILE):
     with open(FP_FILE, "r", encoding="utf-8") as f:
         try:
-            user_agent_map = json.load(f)
+            fp_map = json.load(f)
         except:
-            user_agent_map = {}
+            fp_map = {}
 else:
-    user_agent_map = {}
+    fp_map = {}
 
 if os.path.exists(SEED_MAP_FILE):
     with open(SEED_MAP_FILE, "r") as f:

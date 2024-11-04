@@ -1,7 +1,6 @@
 import json
 import re
 import time
-import uuid
 
 from fastapi import Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -9,7 +8,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 import utils.globals as globals
 from app import app, templates
 from gateway.reverseProxy import chatgpt_reverse_proxy
-from utils.configs import authorization_list
 from utils.configs import enable_gateway
 
 with open("templates/remix_context.json", "r", encoding="utf-8") as f:
@@ -45,6 +43,7 @@ if enable_gateway:
         response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
         return response
 
+
     # @app.get("/backend-api/accounts/check/v4-2023-04-27")
     # async def check_account(request: Request):
     #     token = request.headers.get("Authorization").replace("Bearer ", "")
@@ -61,101 +60,6 @@ if enable_gateway:
     #         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
     #             json.dump(globals.seed_map, f, indent=4)
     #         return check_account_info
-
-
-    def verify_authorization(request: Request):
-        auth_header = request.headers.get("Authorization").replace("Bearer ", "")
-
-        if not auth_header:
-            raise HTTPException(status_code=401, detail="Authorization header is missing")
-        if auth_header not in authorization_list:
-            raise HTTPException(status_code=401, detail="Invalid authorization")
-
-
-    @app.get("/seedtoken")
-    async def get_seedtoken(request: Request):
-        verify_authorization(request)
-        try:
-            params = request.query_params
-            seed = params.get("seed")
-
-            if seed:
-                if seed not in globals.seed_map:
-                    raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
-                return {
-                    "status": "success",
-                    "data": {
-                        "seed": seed,
-                        "token": globals.seed_map[seed]["token"]
-                    }
-                }
-
-            token_map = {
-                seed: data["token"]
-                for seed, data in globals.seed_map.items()
-            }
-            return {"status": "success", "data": token_map}
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-
-    @app.post("/seedtoken")
-    async def set_seedtoken(request: Request):
-        verify_authorization(request)
-        data = await request.json()
-
-        seed = data.get("seed")
-        token = data.get("token")
-
-        if seed not in globals.seed_map:
-            globals.seed_map[seed] = {
-                "token": token,
-                "conversations": []
-            }
-        else:
-            globals.seed_map[seed]["token"] = token
-
-        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-            json.dump(globals.seed_map, f, indent=4)
-
-        return {"status": "success", "message": "Token updated successfully"}
-
-
-    @app.delete("/seedtoken")
-    async def delete_seedtoken(request: Request):
-        verify_authorization(request)
-
-        try:
-            data = await request.json()
-            seed = data.get("seed")
-
-            if seed == "clear":
-                globals.seed_map.clear() 
-                with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.seed_map, f, indent=4)
-                return {"status": "success", "message": "All seeds deleted successfully"}
-            
-            if not seed:
-                raise HTTPException(status_code=400, detail="Missing required field: seed")
-
-            if seed not in globals.seed_map:
-                raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
-            del globals.seed_map[seed]
-
-            with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.seed_map, f, indent=4)
-
-            return {
-                "status": "success",
-                "message": f"Seed '{seed}' deleted successfully"
-            }
-
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON data")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_html(request: Request):
@@ -237,6 +141,7 @@ if enable_gateway:
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
             return patch_response
+
 
     @app.get("/backend-api/me")
     async def get_me(request: Request):

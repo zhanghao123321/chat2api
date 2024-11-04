@@ -1,6 +1,7 @@
 import json
 import random
 import time
+import uuid
 
 from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
@@ -81,6 +82,31 @@ async def get_real_req_token(token):
         return req_token
 
 
+def save_conversation(token, conversation_id, title=None):
+    if conversation_id not in globals.conversation_map:
+        conversation_detail = {
+            "id": conversation_id,
+            "title": title,
+            "update_time": generate_current_time()
+        }
+        globals.conversation_map[conversation_id] = conversation_detail
+    else:
+        globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
+        if title:
+            globals.conversation_map[conversation_id]["title"] = title
+    if conversation_id not in globals.seed_map[token]["conversations"]:
+        globals.seed_map[token]["conversations"].insert(0, conversation_id)
+    else:
+        globals.seed_map[token]["conversations"].remove(conversation_id)
+        globals.seed_map[token]["conversations"].insert(0, conversation_id)
+    with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+        json.dump(globals.conversation_map, f, indent=4)
+    with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+        json.dump(globals.seed_map, f, indent=4)
+    if title:
+        logger.info(f"Conversation ID: {conversation_id}, Title: {title}")
+
+
 async def content_generator(r, token):
     conversation_id = None
     title = None
@@ -88,8 +114,6 @@ async def content_generator(r, token):
         try:
             if (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
                 chat_chunk = chunk.decode('utf-8')
-                if "title" in chat_chunk:
-                    pass
                 if chat_chunk.startswith("data: {"):
                     if "\n\nevent: delta" in chat_chunk:
                         index = chat_chunk.find("\n\nevent: delta")
@@ -102,32 +126,14 @@ async def content_generator(r, token):
                     chunk_data = chunk_data.strip()
                     if conversation_id is None:
                         conversation_id = json.loads(chunk_data).get("conversation_id")
-                        if conversation_id in globals.conversation_map:
-                            title = globals.conversation_map[conversation_id].get("title")
+                        save_conversation(token, conversation_id)
+                        title = globals.conversation_map[conversation_id].get("title")
                     if title is None:
+                        if "title" in chunk_data:
+                            pass
                         title = json.loads(chunk_data).get("title")
-
-                    if conversation_id and title:
-                        conversation_detail = {
-                            "id": conversation_id,
-                            "title": title,
-                            "update_time": generate_current_time(),
-                            "workspace_id": None,
-                        }
-                        if conversation_id not in globals.conversation_map:
-                            globals.conversation_map[conversation_id] = conversation_detail
-                        else:
-                            globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
-                        if conversation_id not in globals.seed_map[token]["conversations"]:
-                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
-                        else:
-                            globals.seed_map[token]["conversations"].remove(conversation_id)
-                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
-                        with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                            json.dump(globals.conversation_map, f, indent=4)
-                        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                            json.dump(globals.seed_map, f, indent=4)
-                        logger.info(f"Conversation ID: {conversation_id}, Title: {title}")
+                    if title:
+                        save_conversation(token, conversation_id, title)
         except Exception as e:
             # logger.error(e)
             # logger.error(chunk.decode('utf-8'))
@@ -190,7 +196,10 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         if token:
             req_token = await get_real_req_token(token)
             access_token = await verify_token(req_token)
-            headers.update({"authorization": access_token})
+            headers.update({
+                "authorization": f"Bearer {access_token}",
+                "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
+            })
 
         data = await request.body()
 

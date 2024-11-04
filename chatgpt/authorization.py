@@ -1,6 +1,7 @@
 import asyncio
 import json
 import random
+import uuid
 
 import ua_generator
 from ua_generator.options import Options
@@ -47,25 +48,25 @@ def get_req_token(req_token, seed=None):
 
 
 def get_fp(req_token):
-    fp = globals.user_agent_map.get(req_token, {})
+    fp = globals.fp_map.get(req_token, {})
     if fp and fp.get("user-agent") and fp.get("impersonate"):
         if "proxy_url" in fp.keys() and fp["proxy_url"] and fp["proxy_url"] not in configs.proxy_url_list:
             fp["proxy_url"] = random.choice(configs.proxy_url_list) if configs.proxy_url_list else None
-            globals.user_agent_map[req_token] = fp
+            globals.fp_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.user_agent_map, f, indent=4)
+                json.dump(globals.fp_map, f, indent=4)
         if globals.impersonate_list and "impersonate" in fp.keys() and fp["impersonate"] not in globals.impersonate_list:
             fp["impersonate"] = random.choice(globals.impersonate_list)
-            globals.user_agent_map[req_token] = fp
+            globals.fp_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.user_agent_map, f, indent=4)
+                json.dump(globals.fp_map, f, indent=4)
         if configs.user_agents_list and "user-agent" in fp.keys() and fp["user-agent"] not in configs.user_agents_list:
             fp["user-agent"] = random.choice(configs.user_agents_list)
-            globals.user_agent_map[req_token] = fp
+            globals.fp_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.user_agent_map, f, indent=4)
-        user_agent = {k.lower(): v for k, v in fp.items()}
-        return user_agent
+                json.dump(globals.fp_map, f, indent=4)
+        fp = {k.lower(): v for k, v in fp.items()}
+        return fp
     else:
         options = Options(version_ranges={
             'chrome': VersionRange(min_version=124),
@@ -80,13 +81,14 @@ def get_fp(req_token):
             "sec-ch-ua-mobile": ua.ch.mobile,
             "impersonate": random.choice(globals.impersonate_list),
             "proxy_url": random.choice(configs.proxy_url_list) if configs.proxy_url_list else None,
+            "oai-device-id": str(uuid.uuid4())
         }
         if not req_token:
             return fp
         else:
-            globals.user_agent_map[req_token] = fp
+            globals.fp_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
-                json.dump(globals.user_agent_map, f, indent=4)
+                json.dump(globals.fp_map, f, indent=4)
             return fp
 
 

@@ -8,13 +8,15 @@ from starlette.background import BackgroundTask
 from starlette.concurrency import run_in_threadpool
 from starlette.responses import StreamingResponse
 
+import utils.globals as globals
 from app import app
 from chatgpt.authorization import get_fp, verify_token
 from chatgpt.proofofWork import get_config, get_requirements_token, get_answer_token
 from gateway.reverseProxy import get_real_req_token, content_generator
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign, no_sentinel
+from utils.configs import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign, no_sentinel, \
+    authorization_list
 
 base_headers = {
     'accept': '*/*',
@@ -27,6 +29,100 @@ base_headers = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
 }
+
+
+def verify_authorization(request: Request):
+    auth_header = request.headers.get("Authorization").replace("Bearer ", "")
+
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization header is missing")
+    if auth_header not in authorization_list:
+        raise HTTPException(status_code=401, detail="Invalid authorization")
+
+
+@app.get("/seedtoken")
+async def get_seedtoken(request: Request):
+    verify_authorization(request)
+    try:
+        params = request.query_params
+        seed = params.get("seed")
+
+        if seed:
+            if seed not in globals.seed_map:
+                raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
+            return {
+                "status": "success",
+                "data": {
+                    "seed": seed,
+                    "token": globals.seed_map[seed]["token"]
+                }
+            }
+
+        token_map = {
+            seed: data["token"]
+            for seed, data in globals.seed_map.items()
+        }
+        return {"status": "success", "data": token_map}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@app.post("/seedtoken")
+async def set_seedtoken(request: Request):
+    verify_authorization(request)
+    data = await request.json()
+
+    seed = data.get("seed")
+    token = data.get("token")
+
+    if seed not in globals.seed_map:
+        globals.seed_map[seed] = {
+            "token": token,
+            "conversations": []
+        }
+    else:
+        globals.seed_map[seed]["token"] = token
+
+    with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+        json.dump(globals.seed_map, f, indent=4)
+
+    return {"status": "success", "message": "Token updated successfully"}
+
+
+@app.delete("/seedtoken")
+async def delete_seedtoken(request: Request):
+    verify_authorization(request)
+
+    try:
+        data = await request.json()
+        seed = data.get("seed")
+
+        if seed == "clear":
+            globals.seed_map.clear()
+            with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.seed_map, f, indent=4)
+            return {"status": "success", "message": "All seeds deleted successfully"}
+
+        if not seed:
+            raise HTTPException(status_code=400, detail="Missing required field: seed")
+
+        if seed not in globals.seed_map:
+            raise HTTPException(status_code=404, detail=f"Seed '{seed}' not found")
+        del globals.seed_map[seed]
+
+        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+            json.dump(globals.seed_map, f, indent=4)
+
+        return {
+            "status": "success",
+            "message": f"Seed '{seed}' deleted successfully"
+        }
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON data")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 async def chatgpt_account_check(access_token):
@@ -178,7 +274,8 @@ if no_sentinel:
         access_token = await verify_token(req_token)
         fp = get_fp(req_token)
         proxy_url = fp.get("proxy_url", None)
-        user_agent = fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        user_agent = fp.get("user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
         impersonate = fp.get("impersonate", "safari15_3")
 
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
@@ -187,7 +284,10 @@ if no_sentinel:
 
         headers = base_headers.copy()
         headers.update(fp)
-        headers.update({"authorization": f"Bearer {access_token}"})
+        headers.update({
+            "authorization": f"Bearer {access_token}",
+            "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
+        })
 
         client = Client(proxy=proxy_url, impersonate=impersonate)
 
