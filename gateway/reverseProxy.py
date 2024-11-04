@@ -1,13 +1,24 @@
 import json
 import random
+import time
 
 from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
-from chatgpt.authorization import verify_token, get_req_token, get_ua
+from chatgpt.authorization import verify_token, get_req_token, get_fp
+import utils.globals as globals
 from utils.Client import Client
-from utils.config import chatgpt_base_url_list, proxy_url_list, enable_gateway
+from utils.Logger import logger
+from utils.configs import chatgpt_base_url_list, proxy_url_list
+
+
+from datetime import datetime, timezone
+
+def generate_current_time():
+    current_time = datetime.now(timezone.utc)
+    formatted_time = current_time.isoformat(timespec='microseconds').replace('+00:00', 'Z')
+    return formatted_time
 
 headers_reject_list = [
     "x-real-ip",
@@ -70,6 +81,60 @@ async def get_real_req_token(token):
         return req_token
 
 
+async def content_generator(r, token):
+    conversation_id = None
+    title = None
+    async for chunk in r.aiter_content():
+        try:
+            if (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
+                chat_chunk = chunk.decode('utf-8')
+                if "title" in chat_chunk:
+                    pass
+                if chat_chunk.startswith("data: {"):
+                    if "\n\nevent: delta" in chat_chunk:
+                        index = chat_chunk.find("\n\nevent: delta")
+                        chunk_data = chat_chunk[6:index]
+                    elif "\n\ndata: {" in chat_chunk:
+                        index = chat_chunk.find("\n\ndata: {")
+                        chunk_data = chat_chunk[6:index]
+                    else:
+                        chunk_data = chat_chunk[6:]
+                    chunk_data = chunk_data.strip()
+                    if conversation_id is None:
+                        conversation_id = json.loads(chunk_data).get("conversation_id")
+                        if conversation_id in globals.conversation_map:
+                            title = globals.conversation_map[conversation_id].get("title")
+                    if title is None:
+                        title = json.loads(chunk_data).get("title")
+
+                    if conversation_id and title:
+                        conversation_detail = {
+                            "id": conversation_id,
+                            "title": title,
+                            "update_time": generate_current_time(),
+                            "workspace_id": None,
+                        }
+                        if conversation_id not in globals.conversation_map:
+                            globals.conversation_map[conversation_id] = conversation_detail
+                        else:
+                            globals.conversation_map[conversation_id]["update_time"] = generate_current_time()
+                        if conversation_id not in globals.seed_map[token]["conversations"]:
+                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                        else:
+                            globals.seed_map[token]["conversations"].remove(conversation_id)
+                            globals.seed_map[token]["conversations"].insert(0, conversation_id)
+                        with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                            json.dump(globals.conversation_map, f, indent=4)
+                        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                            json.dump(globals.seed_map, f, indent=4)
+                        logger.info(f"Conversation ID: {conversation_id}, Title: {title}")
+        except Exception as e:
+            # logger.error(e)
+            # logger.error(chunk.decode('utf-8'))
+            pass
+        yield chunk
+
+
 async def chatgpt_reverse_proxy(request: Request, path: str):
     try:
         origin_host = request.url.netloc
@@ -96,11 +161,16 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             base_url = "https://cdn.oaistatic.com"
         if "file-" in path and "backend-api" not in path:
             base_url = "https://files.oaiusercontent.com"
+        if "v1/" in path:
+            base_url = "https://ab.chatgpt.com"
 
-        token = request.cookies.get("token")
+        token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
-        ua = get_ua(req_token)
-        headers.update(ua)
+        fp = get_fp(req_token)
+        proxy_url = fp.get("proxy_url")
+        user_agent = fp.get("user-agent")
+        impersonate = fp.get("impersonate", "safari15_3")
+        headers.update(fp)
 
         headers.update({
             "accept-language": "en-US,en;q=0.9",
@@ -108,6 +178,13 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "origin": base_url,
             "referer": f"{base_url}/"
         })
+        if "ab.chatgpt.com" in base_url:
+            headers.update({
+                "statsig-sdk-type": "js-client",
+                "statsig-api-key": "client-tnE5GCU2F2cTxRiMbvTczMDT1jpwIigZHsZSdqiy4u",
+                "statsig-sdk-version": "5.1.0",
+                "statsig-client-time": int(time.time() * 1000)
+            })
 
         token = headers.get("authorization", "").replace("Bearer ", "")
         if token:
@@ -117,28 +194,39 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         data = await request.body()
 
-        client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+        client = Client(proxy=proxy_url, impersonate=impersonate)
         try:
             background = BackgroundTask(client.close)
             r = await client.request(request.method, f"{base_url}/{path}", params=params, headers=headers,
                                      cookies=request_cookies, data=data, stream=True, allow_redirects=False)
-
+            if r.status_code == 307:
+                if "bing" in path:
+                    return Response(status_code=307,
+                                    headers={"Location": r.headers.get("Location").replace("chatgpt.com", origin_host)
+                                    .replace("https", petrol)}, background=background)
             if r.status_code == 302:
                 return Response(status_code=302,
                                 headers={"Location": r.headers.get("Location").replace("chatgpt.com", origin_host)
                                 .replace("cdn.oaistatic.com", origin_host)
                                 .replace("https", petrol)}, background=background)
             elif 'stream' in r.headers.get("content-type", ""):
-                return StreamingResponse(r.aiter_content(), media_type=r.headers.get("content-type", ""),
+                logger.info(f"Request token: {req_token}")
+                logger.info(f"Request proxy: {proxy_url}")
+                logger.info(f"Request UA: {user_agent}")
+                logger.info(f"Request impersonate: {impersonate}")
+                return StreamingResponse(content_generator(r, token), media_type=r.headers.get("content-type", ""),
                                          background=background)
             else:
                 if "/backend-api/conversation" in path or "/register-websocket" in path:
                     response = Response(content=(await r.atext()), media_type=r.headers.get("content-type"),
                                         status_code=r.status_code, background=background)
                 else:
-                    content = ((await r.atext()).replace("chatgpt.com", origin_host)
+                    content = await r.atext()
+                    content = (content
+                               .replace("ab.chatgpt.com", origin_host)
                                .replace("cdn.oaistatic.com", origin_host)
                                # .replace("files.oaiusercontent.com", origin_host)
+                               .replace("chatgpt.com", origin_host)
                                .replace("https", petrol))
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")

@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 import pybase64
 
 from utils.Logger import logger
-from utils.config import conversation_only
+from utils.configs import conversation_only
 
 cores = [16, 24, 32]
 screens = [3000, 4000, 6000]
