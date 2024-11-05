@@ -10,8 +10,24 @@ from app import app, templates
 from gateway.reverseProxy import chatgpt_reverse_proxy
 from utils.configs import enable_gateway
 
-with open("templates/remix_context.json", "r", encoding="utf-8") as f:
-    remix_context = json.load(f)
+with open("templates/chatgpt_context.json", "r", encoding="utf-8") as f:
+    chatgpt_context = json.load(f)
+
+with open("templates/gpts_context.json", "r", encoding="utf-8") as f:
+    gpts_context = json.load(f)
+
+banned_paths = [
+    "backend-api/accounts/logout_all",
+    "backend-api/accounts/deactivate",
+    "backend-api/user_system_messages",
+    "backend-api/memories",
+    "backend-api/settings/clear_account_user_memory",
+    "backend-api/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+    "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites",
+    "admin",
+]
+redirect_paths = ["auth/logout"]
+chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
 
 
 def set_value_for_key(data, target_key, new_value):
@@ -35,7 +51,7 @@ if enable_gateway:
         if not token:
             return await login_html(request)
 
-        user_remix_context = remix_context.copy()
+        user_remix_context = chatgpt_context.copy()
         set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})
         set_value_for_key(user_remix_context, "accessToken", token)
 
@@ -70,6 +86,14 @@ if enable_gateway:
     @app.get("/gpts")
     async def get_gpts():
         return {"kind": "store"}
+
+    @app.get("/g/g-{gizmo_id}")
+    async def get_gizmo_json(request: Request, gizmo_id: str):
+        params = request.query_params
+        if params.get("_data") == "routes/g.$gizmoId._index":
+            return Response(content=json.dumps(gpts_context, indent=4), media_type="application/json")
+        else:
+            return await chatgpt_html(request)
 
 
     @app.get("/backend-api/gizmos/bootstrap")
@@ -129,8 +153,7 @@ if enable_gateway:
             return patch_response
         else:
             data = await request.json()
-            if conversation_id in globals.seed_map[token][
-                "conversations"] and conversation_id in globals.conversation_map:
+            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
                 if not data.get("is_visible", True):
                     globals.conversation_map.pop(conversation_id)
                     globals.seed_map[token]["conversations"].remove(conversation_id)
@@ -141,6 +164,16 @@ if enable_gateway:
                 with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
                     json.dump(globals.conversation_map, f, indent=4)
             return patch_response
+
+
+    @app.post("/v1/initialize")
+    async def initialize(request: Request):
+        initialize_response = (await chatgpt_reverse_proxy(request, f"/v1/initialize"))
+        initialize_str = initialize_response.body.decode('utf-8')
+        initialize_json = json.loads(initialize_str)
+        set_value_for_key(initialize_json, "ip", "8.8.8.8")
+        set_value_for_key(initialize_json, "country", "US")
+        return Response(content=json.dumps(initialize_json, indent=4), media_type="application/json")
 
 
     @app.get("/backend-api/me")
@@ -189,20 +222,6 @@ if enable_gateway:
             "has_payg_project_spend_limit": True
         }
         return me
-
-
-    banned_paths = [
-        "backend-api/accounts/logout_all",
-        "backend-api/accounts/deactivate",
-        "backend-api/user_system_messages",
-        "backend-api/memories",
-        "backend-api/settings/clear_account_user_memory",
-        "backend-api/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
-        "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites",
-        "admin",
-    ]
-    redirect_paths = ["auth/logout"]
-    chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
 
 
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
