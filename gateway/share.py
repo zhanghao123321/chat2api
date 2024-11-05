@@ -1,22 +1,17 @@
 import json
 import random
-import uuid
 
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, Depends, Security
 from fastapi.responses import Response
-from starlette.background import BackgroundTask
-from starlette.concurrency import run_in_threadpool
-from starlette.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials
 
 import utils.globals as globals
-from app import app
+from app import app, security_scheme
 from chatgpt.authorization import get_fp, verify_token
-from chatgpt.proofofWork import get_config, get_requirements_token, get_answer_token
-from gateway.reverseProxy import get_real_req_token, content_generator
+from gateway.reverseProxy import get_real_req_token
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import proxy_url_list, chatgpt_base_url_list, turnstile_solver_url, x_sign, no_sentinel, \
-    authorization_list
+from utils.configs import proxy_url_list, chatgpt_base_url_list, authorization_list
 
 base_headers = {
     'accept': '*/*',
@@ -31,18 +26,16 @@ base_headers = {
 }
 
 
-def verify_authorization(request: Request):
-    auth_header = request.headers.get("Authorization").replace("Bearer ", "")
-
-    if not auth_header:
+def verify_authorization(bearer_token):
+    if not bearer_token:
         raise HTTPException(status_code=401, detail="Authorization header is missing")
-    if auth_header not in authorization_list:
+    if bearer_token not in authorization_list:
         raise HTTPException(status_code=401, detail="Invalid authorization")
 
 
 @app.get("/seedtoken")
-async def get_seedtoken(request: Request):
-    verify_authorization(request)
+async def get_seedtoken(request: Request, credentials: HTTPAuthorizationCredentials = Security(security_scheme)):
+    verify_authorization(credentials.credentials)
     try:
         params = request.query_params
         seed = params.get("seed")
@@ -69,8 +62,8 @@ async def get_seedtoken(request: Request):
 
 
 @app.post("/seedtoken")
-async def set_seedtoken(request: Request):
-    verify_authorization(request)
+async def set_seedtoken(request: Request, credentials: HTTPAuthorizationCredentials = Security(security_scheme)):
+    verify_authorization(credentials.credentials)
     data = await request.json()
 
     seed = data.get("seed")
@@ -91,8 +84,8 @@ async def set_seedtoken(request: Request):
 
 
 @app.delete("/seedtoken")
-async def delete_seedtoken(request: Request):
-    verify_authorization(request)
+async def delete_seedtoken(request: Request, credentials: HTTPAuthorizationCredentials = Security(security_scheme)):
+    verify_authorization(credentials.credentials)
 
     try:
         data = await request.json()
@@ -129,17 +122,18 @@ async def chatgpt_account_check(access_token):
     auth_info = {}
     client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
     try:
-        proxy_url = random.choice(proxy_url_list) if proxy_url_list else None
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         req_token = await get_real_req_token(access_token)
         access_token = await verify_token(req_token)
         fp = get_fp(req_token)
+        proxy_url = fp.pop("proxy_url", None)
+        impersonate = fp.pop("impersonate", "safari15_3")
 
         headers = base_headers.copy()
         headers.update({"authorization": f"Bearer {access_token}"})
         headers.update(fp)
 
-        client = Client(proxy=proxy_url, impersonate=fp.get("impersonate", "safari15_3"))
+        client = Client(proxy=proxy_url, impersonate=impersonate)
         r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers,
                              timeout=10)
         if r.status_code != 200:
@@ -243,105 +237,3 @@ async def refresh(request: Request):
                 auth_info.update({"accessToken": access_token})
                 return Response(content=json.dumps(auth_info), media_type="application/json")
     raise HTTPException(status_code=401, detail="Unauthorized")
-
-
-if no_sentinel:
-    @app.post("/backend-api/sentinel/chat-requirements")
-    async def sentinel_chat_conversations():
-        return {
-            "arkose": {
-                "dx": None,
-                "required": False
-            },
-            "persona": "chatgpt-paid",
-            "proofofwork": {
-                "difficulty": None,
-                "required": False,
-                "seed": None
-            },
-            "token": str(uuid.uuid4()),
-            "turnstile": {
-                "dx": None,
-                "required": False
-            }
-        }
-
-
-    @app.post("/backend-api/conversation")
-    async def chat_conversations(request: Request):
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        req_token = await get_real_req_token(token)
-        access_token = await verify_token(req_token)
-        fp = get_fp(req_token)
-        proxy_url = fp.get("proxy_url", None)
-        user_agent = fp.get("user-agent",
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
-        impersonate = fp.get("impersonate", "safari15_3")
-
-        host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
-        proof_token = None
-        turnstile_token = None
-
-        headers = base_headers.copy()
-        headers.update(fp)
-        headers.update({
-            "authorization": f"Bearer {access_token}",
-            "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
-        })
-
-        client = Client(proxy=proxy_url, impersonate=impersonate)
-
-        config = get_config(user_agent)
-        p = get_requirements_token(config)
-        data = {'p': p}
-        r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                              timeout=10)
-        resp = r.json()
-        turnstile = resp.get('turnstile', {})
-        turnstile_required = turnstile.get('required')
-        if turnstile_required:
-            turnstile_dx = turnstile.get("dx")
-            try:
-                if turnstile_solver_url:
-                    res = await client.post(turnstile_solver_url,
-                                            json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
-                    turnstile_token = res.json().get("t")
-            except Exception as e:
-                logger.info(f"Turnstile ignored: {e}")
-
-        proofofwork = resp.get('proofofwork', {})
-        proofofwork_required = proofofwork.get('required')
-        if proofofwork_required:
-            proofofwork_diff = proofofwork.get("difficulty")
-            proofofwork_seed = proofofwork.get("seed")
-            proof_token, solved = await run_in_threadpool(
-                get_answer_token, proofofwork_seed, proofofwork_diff, config
-            )
-            if not solved:
-                raise HTTPException(status_code=403, detail="Failed to solve proof of work")
-        chat_token = resp.get('token')
-        headers.update({
-            "openai-sentinel-chat-requirements-token": chat_token,
-            "openai-sentinel-proof-token": proof_token,
-            "openai-sentinel-turnstile-token": turnstile_token,
-        })
-
-        params = dict(request.query_params)
-        data = await request.body()
-        request_cookies = dict(request.cookies)
-        background = BackgroundTask(client.close)
-        r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
-                                     cookies=request_cookies, data=data, stream=True, allow_redirects=False)
-        rheaders = r.headers
-        if x_sign:
-            rheaders.update({"x-sign": x_sign})
-        if 'stream' in rheaders.get("content-type", ""):
-            logger.info(f"Request token: {req_token}")
-            logger.info(f"Request proxy: {proxy_url}")
-            logger.info(f"Request UA: {user_agent}")
-            logger.info(f"Request impersonate: {impersonate}")
-            return StreamingResponse(content_generator(r, token), headers=rheaders,
-                                     media_type=rheaders.get("content-type"), background=background)
-        else:
-            return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"),
-                            status_code=r.status_code, background=background)

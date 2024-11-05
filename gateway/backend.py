@@ -1,20 +1,23 @@
 import json
+import random
 import re
 import time
+import uuid
 
 from fastapi import Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import RedirectResponse, StreamingResponse, Response
+from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 
 import utils.globals as globals
-from app import app, templates
-from gateway.reverseProxy import chatgpt_reverse_proxy
-from utils.configs import enable_gateway
-
-with open("templates/chatgpt_context.json", "r", encoding="utf-8") as f:
-    chatgpt_context = json.load(f)
-
-with open("templates/gpts_context.json", "r", encoding="utf-8") as f:
-    gpts_context = json.load(f)
+from app import app
+from chatgpt.authorization import verify_token, get_fp
+from chatgpt.proofofWork import get_answer_token, get_config, get_requirements_token
+from gateway.chatgpt import chatgpt_html
+from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list
+from utils.Client import Client
+from utils.Logger import logger
+from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel
 
 banned_paths = [
     "backend-api/accounts/logout_all",
@@ -30,154 +33,117 @@ redirect_paths = ["auth/logout"]
 chatgpt_paths = ["c/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"]
 
 
-def set_value_for_key(data, target_key, new_value):
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if key == target_key:
-                data[key] = new_value
-            else:
-                set_value_for_key(value, target_key, new_value)
-    elif isinstance(data, list):
-        for item in data:
-            set_value_for_key(item, target_key, new_value)
+@app.get("/backend-api/accounts/check/v4-2023-04-27")
+async def check_account(request: Request):
+    token = request.headers.get("Authorization").replace("Bearer ", "")
+    check_account_response = await chatgpt_reverse_proxy(request, "backend-api/accounts/check/v4-2023-04-27")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return check_account_response
+    else:
+        check_account_str = check_account_response.body.decode('utf-8')
+        check_account_info = json.loads(check_account_str)
+        for key in check_account_info.get("accounts", {}).keys():
+            account_id = check_account_info["accounts"][key]["account"]["account_id"]
+            globals.seed_map[token]["user_id"] = \
+            check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
+            check_account_info["accounts"][key]["account"]["account_user_id"] = f"user-chatgpt__{account_id}"
+        with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+            json.dump(globals.seed_map, f, indent=4)
+        return check_account_info
 
 
-if enable_gateway:
-    @app.get("/", response_class=HTMLResponse)
-    async def chatgpt_html(request: Request):
-        token = request.query_params.get("token")
-        if not token:
-            token = request.cookies.get("token")
-        if not token:
-            return await login_html(request)
-
-        user_remix_context = chatgpt_context.copy()
-        set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})
-        set_value_for_key(user_remix_context, "accessToken", token)
-
-        response = templates.TemplateResponse("chatgpt.html", {"request": request, "remix_context": user_remix_context})
-        response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
-        return response
-
-
-    # @app.get("/backend-api/accounts/check/v4-2023-04-27")
-    # async def check_account(request: Request):
-    #     token = request.headers.get("Authorization").replace("Bearer ", "")
-    #     check_account_response = await chatgpt_reverse_proxy(request, "backend-api/accounts/check/v4-2023-04-27")
-    #     if len(token) == 45 or token.startswith("eyJhbGciOi"):
-    #         return check_account_response
-    #     else:
-    #         check_account_str = check_account_response.body.decode('utf-8')
-    #         check_account_info = json.loads(check_account_str)
-    #         for key in check_account_info.get("accounts", {}).keys():
-    #             account_id = check_account_info["accounts"][key]["account"]["account_id"]
-    #             globals.seed_map[token]["user_id"] = check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
-    #             check_account_info["accounts"][key]["account"]["account_user_id"] = f"user-chatgpt__{account_id}"
-    #         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-    #             json.dump(globals.seed_map, f, indent=4)
-    #         return check_account_info
-
-    @app.get("/login", response_class=HTMLResponse)
-    async def login_html(request: Request):
-        response = templates.TemplateResponse("login.html", {"request": request})
-        return response
-
-
-    @app.get("/gpts")
-    async def get_gpts():
-        return {"kind": "store"}
-
-    @app.get("/g/g-{gizmo_id}")
-    async def get_gizmo_json(request: Request, gizmo_id: str):
-        params = request.query_params
-        if params.get("_data") == "routes/g.$gizmoId._index":
-            return Response(content=json.dumps(gpts_context, indent=4), media_type="application/json")
-        else:
-            return await chatgpt_html(request)
-
-
-    @app.get("/backend-api/gizmos/bootstrap")
-    async def get_gizmos_bootstrap():
+@app.get("/backend-api/gizmos/bootstrap")
+async def get_gizmos_bootstrap(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/gizmos/bootstrap")
+    else:
         return {"gizmos": []}
 
 
-    @app.get("/backend-api/conversations")
-    async def get_conversations(request: Request):
-        limit = int(request.query_params.get("limit", 28))
-        offset = int(request.query_params.get("offset", 0))
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return await chatgpt_reverse_proxy(request, "backend-api/conversations")
-        else:
-            items = []
-            for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
-                conversation = globals.conversation_map.get(conversation_id, None)
-                if conversation:
-                    items.append(conversation)
-            items = items[int(offset):int(offset) + int(limit)]
-            conversations = {
-                "items": items,
-                "total": len(items),
-                "limit": limit,
-                "offset": offset,
-                "has_missing_conversations": False
-            }
-            return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
-
-
-    @app.get("/backend-api/conversation/{conversation_id}")
-    async def update_conversation(request: Request, conversation_id: str):
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        conversation_details_response = await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}")
-        if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return conversation_details_response
-        else:
-            conversation_details_str = conversation_details_response.body.decode('utf-8')
-            conversation_details = json.loads(conversation_details_str)
-            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
-                globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
-                globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived", False)
-                globals.conversation_map[conversation_id]["conversation_template_id"] = conversation_details.get("conversation_template_id", None)
-                globals.conversation_map[conversation_id]["gizmo_id"] = conversation_details.get("gizmo_id", None)
-                globals.conversation_map[conversation_id]["async_status"] = conversation_details.get("async_status", None)
-                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.conversation_map, f, indent=4)
-            return conversation_details_response
-
-
-    @app.patch("/backend-api/conversation/{conversation_id}")
-    async def patch_conversation(request: Request, conversation_id: str):
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        patch_response = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}"))
-        if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return patch_response
-        else:
-            data = await request.json()
-            if conversation_id in globals.seed_map[token]["conversations"] and conversation_id in globals.conversation_map:
-                if not data.get("is_visible", True):
-                    globals.conversation_map.pop(conversation_id)
-                    globals.seed_map[token]["conversations"].remove(conversation_id)
-                    with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
-                        json.dump(globals.seed_map, f, indent=4)
+@app.get("/backend-api/conversations")
+async def get_conversations(request: Request):
+    limit = int(request.query_params.get("limit", 28))
+    offset = int(request.query_params.get("offset", 0))
+    is_archived = request.query_params.get("is_archived", None)
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/conversations")
+    else:
+        items = []
+        for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
+            conversation = globals.conversation_map.get(conversation_id, None)
+            if conversation:
+                if is_archived == "true":
+                    if conversation.get("is_archived", False):
+                        items.append(conversation)
                 else:
-                    globals.conversation_map[conversation_id].update(data)
-                with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
-                    json.dump(globals.conversation_map, f, indent=4)
-            return patch_response
+                    if not conversation.get("is_archived", False):
+                        items.append(conversation)
+        items = items[int(offset):int(offset) + int(limit)]
+        conversations = {
+            "items": items,
+            "total": len(items),
+            "limit": limit,
+            "offset": offset,
+            "has_missing_conversations": False
+        }
+        return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
 
 
-    @app.post("/v1/initialize")
-    async def initialize(request: Request):
-        initialize_response = (await chatgpt_reverse_proxy(request, f"/v1/initialize"))
-        initialize_str = initialize_response.body.decode('utf-8')
-        initialize_json = json.loads(initialize_str)
-        set_value_for_key(initialize_json, "ip", "8.8.8.8")
-        set_value_for_key(initialize_json, "country", "US")
-        return Response(content=json.dumps(initialize_json, indent=4), media_type="application/json")
+@app.get("/backend-api/conversation/{conversation_id}")
+async def update_conversation(request: Request, conversation_id: str):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    conversation_details_response = await chatgpt_reverse_proxy(request,
+                                                                f"backend-api/conversation/{conversation_id}")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return conversation_details_response
+    else:
+        conversation_details_str = conversation_details_response.body.decode('utf-8')
+        conversation_details = json.loads(conversation_details_str)
+        if conversation_id in globals.seed_map[token][
+            "conversations"] and conversation_id in globals.conversation_map:
+            globals.conversation_map[conversation_id]["title"] = conversation_details.get("title", None)
+            globals.conversation_map[conversation_id]["is_archived"] = conversation_details.get("is_archived",
+                                                                                                False)
+            globals.conversation_map[conversation_id]["conversation_template_id"] = conversation_details.get(
+                "conversation_template_id", None)
+            globals.conversation_map[conversation_id]["gizmo_id"] = conversation_details.get("gizmo_id", None)
+            globals.conversation_map[conversation_id]["async_status"] = conversation_details.get("async_status",
+                                                                                                 None)
+            with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.conversation_map, f, indent=4)
+        return conversation_details_response
 
 
-    @app.get("/backend-api/me")
-    async def get_me(request: Request):
+@app.patch("/backend-api/conversation/{conversation_id}")
+async def patch_conversation(request: Request, conversation_id: str):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    patch_response = (await chatgpt_reverse_proxy(request, f"backend-api/conversation/{conversation_id}"))
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return patch_response
+    else:
+        data = await request.json()
+        if conversation_id in globals.seed_map[token][
+            "conversations"] and conversation_id in globals.conversation_map:
+            if not data.get("is_visible", True):
+                globals.conversation_map.pop(conversation_id)
+                globals.seed_map[token]["conversations"].remove(conversation_id)
+                with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(globals.seed_map, f, indent=4)
+            else:
+                globals.conversation_map[conversation_id].update(data)
+            with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
+                json.dump(globals.conversation_map, f, indent=4)
+        return patch_response
+
+
+@app.get("/backend-api/me")
+async def get_me(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/me")
+    else:
         me = {
             "object": "user",
             "id": "org-chatgpt",
@@ -221,36 +187,136 @@ if enable_gateway:
             },
             "has_payg_project_spend_limit": True
         }
-        return me
+    return Response(content=json.dumps(me, indent=4), media_type="application/json")
 
 
-    @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
-    async def reverse_proxy(request: Request, path: str):
-        if re.match("/v1/rgstr", path):
-            return Response(status_code=202, content=b'{"success":true}')
+@app.post("/backend-api/edge")
+async def edge():
+    return Response(status_code=204)
 
-        if re.match("ces/v1", path):
-            return {"success": True}
 
-        if re.match("backend-api/edge", path):
-            return Response(status_code=204)
+if no_sentinel:
+    @app.post("/backend-api/sentinel/chat-requirements")
+    async def sentinel_chat_conversations():
+        return {
+            "arkose": {
+                "dx": None,
+                "required": False
+            },
+            "persona": "chatgpt-paid",
+            "proofofwork": {
+                "difficulty": None,
+                "required": False,
+                "seed": None
+            },
+            "token": str(uuid.uuid4()),
+            "turnstile": {
+                "dx": None,
+                "required": False
+            }
+        }
 
-        for chatgpt_path in chatgpt_paths:
-            if re.match(chatgpt_path, path):
-                return await chatgpt_html(request)
 
+    @app.post("/backend-api/conversation")
+    async def chat_conversations(request: Request):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        req_token = await get_real_req_token(token)
+        access_token = await verify_token(req_token)
+        fp = get_fp(req_token)
+        proxy_url = fp.pop("proxy_url", None)
+        impersonate = fp.pop("impersonate", "safari15_3")
+        user_agent = fp.get("user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+
+        host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
+        proof_token = None
+        turnstile_token = None
+
+        headers = {
+            key: value for key, value in request.headers.items()
+            if (key.lower() not in ["host", "origin", "referer", "priority",
+                                    "oai-device-id"] and key.lower() not in headers_reject_list)
+        }
+        headers.update(fp)
+        headers.update({
+            "authorization": f"Bearer {access_token}",
+            "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
+        })
+
+        client = Client(proxy=proxy_url, impersonate=impersonate)
+
+        config = get_config(user_agent)
+        p = get_requirements_token(config)
+        data = {'p': p}
+        r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
+                              timeout=10)
+        resp = r.json()
+        turnstile = resp.get('turnstile', {})
+        turnstile_required = turnstile.get('required')
+        if turnstile_required:
+            turnstile_dx = turnstile.get("dx")
+            try:
+                if turnstile_solver_url:
+                    res = await client.post(turnstile_solver_url,
+                                            json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                    turnstile_token = res.json().get("t")
+            except Exception as e:
+                logger.info(f"Turnstile ignored: {e}")
+
+        proofofwork = resp.get('proofofwork', {})
+        proofofwork_required = proofofwork.get('required')
+        if proofofwork_required:
+            proofofwork_diff = proofofwork.get("difficulty")
+            proofofwork_seed = proofofwork.get("seed")
+            proof_token, solved = await run_in_threadpool(
+                get_answer_token, proofofwork_seed, proofofwork_diff, config
+            )
+            if not solved:
+                raise HTTPException(status_code=403, detail="Failed to solve proof of work")
+        chat_token = resp.get('token')
+        headers.update({
+            "openai-sentinel-chat-requirements-token": chat_token,
+            "openai-sentinel-proof-token": proof_token,
+            "openai-sentinel-turnstile-token": turnstile_token,
+        })
+
+        params = dict(request.query_params)
+        data = await request.body()
+        request_cookies = dict(request.cookies)
+        background = BackgroundTask(client.close)
+        r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
+                                     cookies=request_cookies, data=data, stream=True, allow_redirects=False)
+        rheaders = r.headers
+        if x_sign:
+            rheaders.update({"x-sign": x_sign})
+        if 'stream' in rheaders.get("content-type", ""):
+            logger.info(f"Request token: {req_token}")
+            logger.info(f"Request proxy: {proxy_url}")
+            logger.info(f"Request UA: {user_agent}")
+            logger.info(f"Request impersonate: {impersonate}")
+            return StreamingResponse(content_generator(r, token), headers=rheaders,
+                                     media_type=rheaders.get("content-type"), background=background)
+        else:
+            return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"),
+                            status_code=r.status_code, background=background)
+
+
+@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
+async def reverse_proxy(request: Request, path: str):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) != 45 and not token.startswith("eyJhbGciOi"):
         for banned_path in banned_paths:
             if re.match(banned_path, path):
                 raise HTTPException(status_code=403, detail="Forbidden")
 
-        for redirect_path in redirect_paths:
-            if re.match(redirect_path, path):
-                redirect_url = str(request.base_url)
-                response = RedirectResponse(url=f"{redirect_url}login", status_code=302)
-                return response
+    for chatgpt_path in chatgpt_paths:
+        if re.match(chatgpt_path, path):
+            return await chatgpt_html(request)
 
-        return await chatgpt_reverse_proxy(request, path)
-else:
-    @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
-    async def reverse_proxy():
-        raise HTTPException(status_code=404, detail="Gateway is disabled")
+    for redirect_path in redirect_paths:
+        if re.match(redirect_path, path):
+            redirect_url = str(request.base_url)
+            response = RedirectResponse(url=f"{redirect_url}login", status_code=302)
+            return response
+
+    return await chatgpt_reverse_proxy(request, path)

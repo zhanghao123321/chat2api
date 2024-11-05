@@ -2,12 +2,13 @@ import asyncio
 import types
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import Request, Depends, HTTPException, Form
+from fastapi import Request, Depends, HTTPException, Form, Security
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials
 from starlette.background import BackgroundTask
 
 import utils.globals as globals
-from app import templates, oauth2_scheme, app
+from app import app, templates, security_scheme
 from chatgpt.ChatService import ChatService
 from chatgpt.authorization import refresh_all_tokens
 from utils.Logger import logger
@@ -49,7 +50,8 @@ async def process(request_data, req_token):
 
 
 @app.post(f"/{api_prefix}/v1/chat/completions" if api_prefix else "/v1/chat/completions")
-async def send_conversation(request: Request, req_token: str = Depends(oauth2_scheme)):
+async def send_conversation(request: Request, credentials: HTTPAuthorizationCredentials = Security(security_scheme)):
+    req_token = credentials.credentials
     try:
         request_data = await request.json()
     except Exception:

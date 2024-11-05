@@ -2,24 +2,24 @@ import json
 import random
 import time
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
 from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
-from chatgpt.authorization import verify_token, get_req_token, get_fp
 import utils.globals as globals
+from chatgpt.authorization import verify_token, get_req_token, get_fp
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import chatgpt_base_url_list, proxy_url_list
+from utils.configs import chatgpt_base_url_list
 
-
-from datetime import datetime, timezone
 
 def generate_current_time():
     current_time = datetime.now(timezone.utc)
     formatted_time = current_time.isoformat(timespec='microseconds').replace('+00:00', 'Z')
     return formatted_time
+
 
 headers_reject_list = [
     "x-real-ip",
@@ -159,7 +159,8 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority", "oai-device-id"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer", "priority",
+                                    "oai-device-id"] and key.lower() not in headers_reject_list)
         }
 
         base_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
@@ -173,9 +174,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
         fp = get_fp(req_token)
-        proxy_url = fp.get("proxy_url")
+        proxy_url = fp.pop("proxy_url", None)
+        impersonate = fp.pop("impersonate", "safari15_3")
         user_agent = fp.get("user-agent")
-        impersonate = fp.get("impersonate", "safari15_3")
         headers.update(fp)
 
         headers.update({
@@ -185,12 +186,13 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "referer": f"{base_url}/"
         })
         if "ab.chatgpt.com" in base_url:
-            headers.update({
-                "statsig-sdk-type": "js-client",
-                "statsig-api-key": "client-tnE5GCU2F2cTxRiMbvTczMDT1jpwIigZHsZSdqiy4u",
-                "statsig-sdk-version": "5.1.0",
-                "statsig-client-time": int(time.time() * 1000)
-            })
+            if "statsig-api-key" not in headers:
+                headers.update({
+                    "statsig-sdk-type": "js-client",
+                    "statsig-api-key": "client-tnE5GCU2F2cTxRiMbvTczMDT1jpwIigZHsZSdqiy4u",
+                    "statsig-sdk-version": "5.1.0",
+                    "statsig-client-time": int(time.time() * 1000)
+                })
 
         token = headers.get("authorization", "").replace("Bearer ", "")
         if token:
