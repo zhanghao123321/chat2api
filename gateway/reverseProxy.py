@@ -208,14 +208,11 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             background = BackgroundTask(client.close)
             r = await client.request(request.method, f"{base_url}/{path}", params=params, headers=headers,
                                      cookies=request_cookies, data=data, stream=True, allow_redirects=False)
-            if r.status_code == 307:
-                if "bing" in path:
-                    return Response(status_code=307,
-                                    headers={"Location": r.headers.get("Location").replace("chatgpt.com", origin_host)
-                                    .replace("https", petrol)}, background=background)
-            if r.status_code == 302:
-                return Response(status_code=302,
-                                headers={"Location": r.headers.get("Location").replace("chatgpt.com", origin_host)
+            if r.status_code == 307 or r.status_code == 302 or r.status_code == 301:
+                return Response(status_code=307,
+                                headers={"Location": r.headers.get("Location")
+                                .replace("ab.chatgpt.com", origin_host)
+                                .replace("chatgpt.com", origin_host)
                                 .replace("cdn.oaistatic.com", origin_host)
                                 .replace("https", petrol)}, background=background)
             elif 'stream' in r.headers.get("content-type", ""):
