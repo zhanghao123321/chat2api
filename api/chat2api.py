@@ -87,7 +87,7 @@ async def upload_post(text: str = Form(...)):
     for line in lines:
         if line.strip() and not line.startswith("#"):
             globals.token_list.append(line.strip())
-            with open("../data/token.txt", "a", encoding="utf-8") as f:
+            with open(globals.TOKENS_FILE, "a", encoding="utf-8") as f:
                 f.write(line.strip() + "\n")
     logger.info(f"Token count: {len(globals.token_list)}, Error token count: {len(globals.error_token_list)}")
     tokens_count = len(set(globals.token_list) - set(globals.error_token_list))
@@ -98,7 +98,7 @@ async def upload_post(text: str = Form(...)):
 async def upload_post():
     globals.token_list.clear()
     globals.error_token_list.clear()
-    with open("../data/token.txt", "w", encoding="utf-8") as f:
+    with open(globals.TOKENS_FILE, "w", encoding="utf-8") as f:
         pass
     logger.info(f"Token count: {len(globals.token_list)}, Error token count: {len(globals.error_token_list)}")
     tokens_count = len(set(globals.token_list) - set(globals.error_token_list))
@@ -115,7 +115,7 @@ async def error_tokens():
 async def add_token(token: str):
     if token.strip() and not token.startswith("#"):
         globals.token_list.append(token.strip())
-        with open("../data/token.txt", "a", encoding="utf-8") as f:
+        with open(globals.TOKENS_FILE, "a", encoding="utf-8") as f:
             f.write(token.strip() + "\n")
     logger.info(f"Token count: {len(globals.token_list)}, Error token count: {len(globals.error_token_list)}")
     tokens_count = len(set(globals.token_list) - set(globals.error_token_list))
