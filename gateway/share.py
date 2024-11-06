@@ -1,7 +1,7 @@
 import json
 import random
 
-from fastapi import Request, HTTPException, Depends, Security
+from fastapi import Request, HTTPException, Security
 from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials
 
