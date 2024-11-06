@@ -1,6 +1,8 @@
 import json
 import random
+import time
 
+import jwt
 from fastapi import Request, HTTPException, Security
 from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials
@@ -219,14 +221,17 @@ async def refresh(request: Request):
     if not refresh_token and not access_token:
         raise HTTPException(status_code=401, detail="refresh_token or access_token is required")
 
+    need_refresh = True
     if access_token:
-        account_check_info = await chatgpt_account_check(access_token)
-        if account_check_info:
-            auth_info.update(account_check_info)
-            auth_info.update({"accessToken": access_token})
-            return Response(content=json.dumps(auth_info), media_type="application/json")
+        try:
+            access_token_info = jwt.decode(access_token, options={"verify_signature": False})
+            exp = access_token_info.get("exp", 0)
+            if exp > int(time.time()) + 60 * 60 * 24 * 5:
+                need_refresh = False
+        except Exception as e:
+            logger.error(f"access_token: {e}")
 
-    if refresh_token:
+    if refresh_token and need_refresh:
         chatgpt_refresh_info = await chatgpt_refresh(refresh_token)
         if chatgpt_refresh_info:
             auth_info.update(chatgpt_refresh_info)
@@ -236,4 +241,13 @@ async def refresh(request: Request):
                 auth_info.update(account_check_info)
                 auth_info.update({"accessToken": access_token})
                 return Response(content=json.dumps(auth_info), media_type="application/json")
+    elif access_token:
+        account_check_info = await chatgpt_account_check(access_token)
+        if account_check_info:
+            auth_info.update(account_check_info)
+            auth_info.update({"accessToken": access_token})
+            return Response(content=json.dumps(auth_info), media_type="application/json")
+
     raise HTTPException(status_code=401, detail="Unauthorized")
+
+
