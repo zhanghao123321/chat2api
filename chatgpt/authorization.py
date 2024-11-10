@@ -105,6 +105,9 @@ async def verify_token(req_token):
             return access_token
         elif len(req_token) == 45:
             try:
+                if req_token in globals.error_token_list:
+                    raise HTTPException(status_code=401, detail="Error RefreshToken")
+
                 access_token = await rt2ac(req_token, force_refresh=False)
                 return access_token
             except HTTPException as e:
