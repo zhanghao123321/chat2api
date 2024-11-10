@@ -3,14 +3,14 @@
         "user": {
             "id": "user-chatgpt"
         },
-        "expires": "2025-02-03T07:42:22.816Z",
+        "expires": "2025-02-06T04:45:36.774Z",
         "accessToken": "",
         "authProvider": "login-web"
     },
     "user": {
         "id": "user-chatgpt"
     },
-    "cluster": "unified-8",
+    "cluster": "unified-9",
     "userCountry": "US",
     "userRegion": "New York",
     "userRegionCode": "1",
@@ -180,6 +180,12 @@
                         }
                     ]
                 },
+                "263833443": {
+                    "name": "263833443",
+                    "value": false,
+                    "rule_id": "default",
+                    "secondary_exposures": []
+                },
                 "286716193": {
                     "name": "286716193",
                     "value": false,
@@ -313,7 +319,7 @@
                         {
                             "gate": "2547456621",
                             "gateValue": "false",
-                            "ruleID": "default"
+                            "ruleID": "jDZnsHB4L995XxJ7J5vtK"
                         }
                     ]
                 },
@@ -490,8 +496,8 @@
                 },
                 "1074323483": {
                     "name": "1074323483",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "3XS23yS4mC0Cwh5EdtjRKS:2.00:2",
                     "secondary_exposures": [
                         {
                             "gate": "491279851",
@@ -792,7 +798,7 @@
                 "2048332657": {
                     "name": "2048332657",
                     "value": false,
-                    "rule_id": "4Ml8il11ipXFhxuSNHg2u5",
+                    "rule_id": "7zy1mC6ANDLQQEC55KcGXC",
                     "secondary_exposures": []
                 },
                 "2067628123": {
@@ -916,7 +922,7 @@
                 "2547456621": {
                     "name": "2547456621",
                     "value": false,
-                    "rule_id": "default",
+                    "rule_id": "jDZnsHB4L995XxJ7J5vtK",
                     "secondary_exposures": []
                 },
                 "2558436080": {
@@ -1008,7 +1014,7 @@
                 "2813404493": {
                     "name": "2813404493",
                     "value": false,
-                    "rule_id": "4jCRuoOxK8tLEGn9ngylXq",
+                    "rule_id": "3Nbm43geh0PA374V61Qaiy:0.00:1",
                     "secondary_exposures": [
                         {
                             "gate": "491279851",
@@ -1017,8 +1023,8 @@
                         },
                         {
                             "gate": "1074323483",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "3XS23yS4mC0Cwh5EdtjRKS:2.00:2"
                         }
                     ]
                 },
@@ -1037,27 +1043,17 @@
                 "2848981774": {
                     "name": "2848981774",
                     "value": false,
-                    "rule_id": "default",
+                    "rule_id": "7pWblJdnqPz5cjzLR3i3K:0.00:1",
                     "secondary_exposures": [
                         {
-                            "gate": "1456438623",
+                            "gate": "491279851",
                             "gateValue": "false",
                             "ruleID": "default"
                         },
                         {
-                            "gate": "1745914872",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
-                            "gate": "2546838099",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
-                            "gate": "3805873235",
-                            "gateValue": "false",
-                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW"
+                            "gate": "1074323483",
+                            "gateValue": "true",
+                            "ruleID": "3XS23yS4mC0Cwh5EdtjRKS:2.00:2"
                         }
                     ]
                 },
@@ -1103,6 +1099,18 @@
                     "rule_id": "32QpYlIXk5Wr45idZ2iRkG",
                     "secondary_exposures": []
                 },
+                "2923133196": {
+                    "name": "2923133196",
+                    "value": false,
+                    "rule_id": "1HnipyUiP0nxZWtbaIXTlK",
+                    "secondary_exposures": [
+                        {
+                            "gate": "2048332657",
+                            "gateValue": "false",
+                            "ruleID": "7zy1mC6ANDLQQEC55KcGXC"
+                        }
+                    ]
+                },
                 "2935021756": {
                     "name": "2935021756",
                     "value": false,
@@ -1126,6 +1134,33 @@
                     "value": false,
                     "rule_id": "default",
                     "secondary_exposures": []
+                },
+                "3051378794": {
+                    "name": "3051378794",
+                    "value": false,
+                    "rule_id": "default",
+                    "secondary_exposures": [
+                        {
+                            "gate": "1456438623",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        },
+                        {
+                            "gate": "1745914872",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        },
+                        {
+                            "gate": "2546838099",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        },
+                        {
+                            "gate": "3805873235",
+                            "gateValue": "false",
+                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW"
+                        }
+                    ]
                 },
                 "3134329717": {
                     "name": "3134329717",
@@ -1203,6 +1238,12 @@
                     "name": "3643162575",
                     "value": false,
                     "rule_id": "default",
+                    "secondary_exposures": []
+                },
+                "3650277116": {
+                    "name": "3650277116",
+                    "value": false,
+                    "rule_id": "3Txp6tA3tgTjsKGkRbaKVM:0.00:7",
                     "secondary_exposures": []
                 },
                 "3655058338": {
@@ -1333,6 +1374,12 @@
                 },
                 "4038001028": {
                     "name": "4038001028",
+                    "value": false,
+                    "rule_id": "default",
+                    "secondary_exposures": []
+                },
+                "4039254565": {
+                    "name": "4039254565",
                     "value": false,
                     "rule_id": "default",
                     "secondary_exposures": []
@@ -1747,8 +1794,8 @@
                         "autocomplete_fetch_interval": 200,
                         "num_completions_to_fetch_from_index": 8
                     },
-                    "group": "prestart",
-                    "rule_id": "prestart",
+                    "group": "layerAssignment",
+                    "rule_id": "layerAssignment",
                     "is_device_based": false,
                     "secondary_exposures": [
                         {
@@ -1761,7 +1808,7 @@
                         "enable_hardcoded_onboarding_prompt"
                     ],
                     "is_user_in_experiment": false,
-                    "is_experiment_active": false,
+                    "is_experiment_active": true,
                     "is_in_layer": true
                 },
                 "683595302": {
@@ -2253,22 +2300,6 @@
                     ],
                     "is_user_in_experiment": false,
                     "is_experiment_active": false,
-                    "is_in_layer": true
-                },
-                "1350548984": {
-                    "name": "1350548984",
-                    "value": {
-                        "disable-ssr": false
-                    },
-                    "group": "layerAssignment",
-                    "rule_id": "layerAssignment",
-                    "is_device_based": true,
-                    "secondary_exposures": [],
-                    "explicit_parameters": [
-                        "disable-ssr"
-                    ],
-                    "is_user_in_experiment": false,
-                    "is_experiment_active": true,
                     "is_in_layer": true
                 },
                 "1388643772": {
@@ -3778,6 +3809,48 @@
                     "is_experiment_active": true,
                     "is_in_layer": true
                 },
+                "2983619420": {
+                    "name": "2983619420",
+                    "value": {
+                        "is_anon_chat_enabled": true,
+                        "is_anon_chat_enabled_for_new_users_only": false,
+                        "is_try_it_first_on_login_page_enabled": false,
+                        "is_no_auth_welcome_modal_enabled": false,
+                        "no_auth_soft_rate_limit": 10,
+                        "no_auth_hard_rate_limit": 1200,
+                        "should_show_no_auth_signup_banner": true,
+                        "is_no_auth_welcome_back_modal_enabled": true,
+                        "is_no_auth_soft_rate_limit_modal_enabled": true,
+                        "is_no_auth_gpt4o_modal_enabled": false,
+                        "is_login_primary_button": true,
+                        "is_desktop_primary_auth_button_on_right": false,
+                        "is_primary_btn_blue": false,
+                        "should_show_disclaimer_only_once_per_device": true,
+                        "is_secondary_banner_button_enabled": false,
+                        "is_secondary_auth_banner_button_enabled": true
+                    },
+                    "group": "layerAssignment",
+                    "rule_id": "layerAssignment",
+                    "is_device_based": false,
+                    "secondary_exposures": [
+                        {
+                            "gate": "3238165271",
+                            "gateValue": "false",
+                            "ruleID": "disabled"
+                        },
+                        {
+                            "gate": "2983591614",
+                            "gateValue": "false",
+                            "ruleID": "disabled"
+                        }
+                    ],
+                    "explicit_parameters": [
+                        "is_anon_chat_enabled"
+                    ],
+                    "is_user_in_experiment": false,
+                    "is_experiment_active": true,
+                    "is_in_layer": true
+                },
                 "3021134725": {
                     "name": "3021134725",
                     "value": {
@@ -4076,6 +4149,16 @@
                     "is_experiment_active": true,
                     "is_in_layer": true
                 },
+                "3297250902": {
+                    "name": "3297250902",
+                    "value": {
+                        "use_new_query": false
+                    },
+                    "group": "default",
+                    "rule_id": "default",
+                    "is_device_based": false,
+                    "secondary_exposures": []
+                },
                 "3299284219": {
                     "name": "3299284219",
                     "value": {
@@ -4220,6 +4303,49 @@
                     "secondary_exposures": [],
                     "explicit_parameters": [
                         "is_mobile_web_toggle_enabled"
+                    ],
+                    "is_user_in_experiment": false,
+                    "is_experiment_active": false,
+                    "is_in_layer": true
+                },
+                "3514586323": {
+                    "name": "3514586323",
+                    "value": {
+                        "enable_hardcoded_vision_prompts": true,
+                        "enable_hardcoded_file_document_prompts": true,
+                        "enable_hardcoded_data_vis_prompts": true,
+                        "enable_hardcoded_browse_prompts": true,
+                        "is_two_line": false,
+                        "enable_new_homepage": false,
+                        "autocomplete_mode": "INDEX",
+                        "starter_prompt_ranking_algorithm": "homepage_v2",
+                        "autocomplete_min_char": 4,
+                        "autocomplete_max_char": 32,
+                        "headline_option": "HELP_WITH",
+                        "use_memory_in_model_autocomplete": false,
+                        "filter_starter_prompt_by_model": false,
+                        "use_modapi_in_autocomplete": false,
+                        "autocomplete_qualified_start_date": "2000-10-11T00:00:00Z",
+                        "enable_new_autocomplete_homepage": true,
+                        "model_talks_option": "",
+                        "enable_new_mobile": true,
+                        "search_autocomplete_mode": "BING",
+                        "enable_hardcoded_onboarding_prompt": false,
+                        "autocomplete_fetch_interval": 200,
+                        "num_completions_to_fetch_from_index": 8
+                    },
+                    "group": "prestart",
+                    "rule_id": "prestart",
+                    "is_device_based": false,
+                    "secondary_exposures": [
+                        {
+                            "gate": "4273941502",
+                            "gateValue": "false",
+                            "ruleID": "1nGrz4l6GM0LgZvm0pDCtp:2.00:1"
+                        }
+                    ],
+                    "explicit_parameters": [
+                        "starter_prompt_ranking_algorithm"
                     ],
                     "is_user_in_experiment": false,
                     "is_experiment_active": false,
@@ -4398,6 +4524,22 @@
                     ],
                     "is_user_in_experiment": false,
                     "is_experiment_active": false,
+                    "is_in_layer": true
+                },
+                "3762501946": {
+                    "name": "3762501946",
+                    "value": {
+                        "disable-ssr": false
+                    },
+                    "group": "layerAssignment",
+                    "rule_id": "layerAssignment",
+                    "is_device_based": true,
+                    "secondary_exposures": [],
+                    "explicit_parameters": [
+                        "disable-ssr"
+                    ],
+                    "is_user_in_experiment": false,
+                    "is_experiment_active": true,
                     "is_in_layer": true
                 },
                 "3814631162": {
@@ -4723,8 +4865,8 @@
                         "autocomplete_fetch_interval": 200,
                         "num_completions_to_fetch_from_index": 8
                     },
-                    "group": "prestart",
-                    "rule_id": "prestart",
+                    "group": "layerAssignment",
+                    "rule_id": "layerAssignment",
                     "is_device_based": false,
                     "secondary_exposures": [
                         {
@@ -4740,7 +4882,7 @@
                         "autocomplete_qualified_start_date"
                     ],
                     "is_user_in_experiment": false,
-                    "is_experiment_active": false,
+                    "is_experiment_active": true,
                     "is_in_layer": true
                 }
             },
@@ -5333,11 +5475,6 @@
                     "is_device_based": false,
                     "secondary_exposures": [
                         {
-                            "gate": "1789593108",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
                             "gate": "3238165271",
                             "gateValue": "false",
                             "ruleID": "disabled"
@@ -5350,11 +5487,6 @@
                     ],
                     "explicit_parameters": [],
                     "undelegated_secondary_exposures": [
-                        {
-                            "gate": "1789593108",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
                         {
                             "gate": "3238165271",
                             "gateValue": "false",
@@ -5485,7 +5617,7 @@
                 "sdkType": "statsig-node",
                 "sdkVersion": "5.26.0"
             },
-            "time": 1730791506444,
+            "time": 1731041051398,
             "evaluated_keys": {
                 "userID": "user-chatgpt",
                 "customIDs": {

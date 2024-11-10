@@ -22,6 +22,7 @@ from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, n
 banned_paths = [
     "backend-api/accounts/logout_all",
     "backend-api/accounts/deactivate",
+    "backend-api/payments/checkout"
     "backend-api/user_system_messages",
     "backend-api/memories",
     "backend-api/settings/clear_account_user_memory",
@@ -61,34 +62,64 @@ async def get_gizmos_bootstrap(request: Request):
         return {"gizmos": []}
 
 
-@app.get("/backend-api/conversations")
-async def get_conversations(request: Request):
-    limit = int(request.query_params.get("limit", 28))
-    offset = int(request.query_params.get("offset", 0))
-    is_archived = request.query_params.get("is_archived", None)
+@app.get("/backend-api/gizmos/pinned")
+async def get_gizmos_pinned(request: Request):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if len(token) == 45 or token.startswith("eyJhbGciOi"):
-        return await chatgpt_reverse_proxy(request, "backend-api/conversations")
+        return await chatgpt_reverse_proxy(request, "backend-api/gizmos/pinned")
     else:
-        items = []
-        for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
-            conversation = globals.conversation_map.get(conversation_id, None)
-            if conversation:
-                if is_archived == "true":
-                    if conversation.get("is_archived", False):
-                        items.append(conversation)
-                else:
-                    if not conversation.get("is_archived", False):
-                        items.append(conversation)
-        items = items[int(offset):int(offset) + int(limit)]
-        conversations = {
-            "items": items,
-            "total": len(items),
-            "limit": limit,
-            "offset": offset,
-            "has_missing_conversations": False
+        return {"items": [], "cursor": None}
+
+
+@app.get("/public-api/gizmos/discovery/recent")
+async def get_gizmos_discovery_recent(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "public-api/gizmos/discovery/recent")
+    else:
+        return {
+            "info": {
+                "id": "recent",
+                "title": "Recently Used",
+            },
+            "list": {
+                "items": [],
+                "cursor": None
+            }
         }
-        return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
+
+
+@app.api_route("/backend-api/conversations", methods=["GET", "PATCH"])
+async def get_conversations(request: Request):
+    if request.method == "GET":
+        limit = int(request.query_params.get("limit", 28))
+        offset = int(request.query_params.get("offset", 0))
+        is_archived = request.query_params.get("is_archived", None)
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if len(token) == 45 or token.startswith("eyJhbGciOi"):
+            return await chatgpt_reverse_proxy(request, "backend-api/conversations")
+        else:
+            items = []
+            for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
+                conversation = globals.conversation_map.get(conversation_id, None)
+                if conversation:
+                    if is_archived == "true":
+                        if conversation.get("is_archived", False):
+                            items.append(conversation)
+                    else:
+                        if not conversation.get("is_archived", False):
+                            items.append(conversation)
+            items = items[int(offset):int(offset) + int(limit)]
+            conversations = {
+                "items": items,
+                "total": len(items),
+                "limit": limit,
+                "offset": offset,
+                "has_missing_conversations": False
+            }
+            return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
 
 
 @app.get("/backend-api/conversation/{conversation_id}")
