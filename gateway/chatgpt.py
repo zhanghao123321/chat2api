@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -18,6 +19,9 @@ async def chatgpt_html(request: Request):
         token = request.cookies.get("token")
     if not token:
         return await login_html(request)
+
+    if len(token) != 45 and not token.startswith("eyJhbGciOi"):
+        token = quote(token)
 
     user_remix_context = chatgpt_context.copy()
     set_value_for_key(user_remix_context, "user", {"id": "user-chatgpt"})

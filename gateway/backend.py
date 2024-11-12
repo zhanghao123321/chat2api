@@ -91,33 +91,32 @@ async def get_gizmos_discovery_recent(request: Request):
 
 @app.api_route("/backend-api/conversations", methods=["GET", "PATCH"])
 async def get_conversations(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/conversations")
     if request.method == "GET":
         limit = int(request.query_params.get("limit", 28))
         offset = int(request.query_params.get("offset", 0))
         is_archived = request.query_params.get("is_archived", None)
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
-        if len(token) == 45 or token.startswith("eyJhbGciOi"):
-            return await chatgpt_reverse_proxy(request, "backend-api/conversations")
-        else:
-            items = []
-            for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
-                conversation = globals.conversation_map.get(conversation_id, None)
-                if conversation:
-                    if is_archived == "true":
-                        if conversation.get("is_archived", False):
-                            items.append(conversation)
-                    else:
-                        if not conversation.get("is_archived", False):
-                            items.append(conversation)
-            items = items[int(offset):int(offset) + int(limit)]
-            conversations = {
-                "items": items,
-                "total": len(items),
-                "limit": limit,
-                "offset": offset,
-                "has_missing_conversations": False
-            }
-            return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
+        items = []
+        for conversation_id in globals.seed_map.get(token, {}).get("conversations", []):
+            conversation = globals.conversation_map.get(conversation_id, None)
+            if conversation:
+                if is_archived == "true":
+                    if conversation.get("is_archived", False):
+                        items.append(conversation)
+                else:
+                    if not conversation.get("is_archived", False):
+                        items.append(conversation)
+        items = items[int(offset):int(offset) + int(limit)]
+        conversations = {
+            "items": items,
+            "total": len(items),
+            "limit": limit,
+            "offset": offset,
+            "has_missing_conversations": False
+        }
+        return Response(content=json.dumps(conversations, indent=4), media_type="application/json")
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
 
