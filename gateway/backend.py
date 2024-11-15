@@ -22,7 +22,7 @@ from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, n
 banned_paths = [
     "backend-api/accounts/logout_all",
     "backend-api/accounts/deactivate",
-    "backend-api/payments/checkout"
+    "backend-api/payments/checkout",
     "backend-api/user_system_messages",
     "backend-api/memories",
     "backend-api/settings/clear_account_user_memory",
