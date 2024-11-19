@@ -16,7 +16,6 @@ from chatgpt.proofofWork import get_config, get_dpl, get_answer_token, get_requi
 from utils.Client import Client
 from utils.Logger import logger
 from utils.configs import (
-    proxy_url_list,
     chatgpt_base_url_list,
     ark0se_token_url_list,
     history_disabled,
@@ -27,6 +26,7 @@ from utils.configs import (
     check_model,
     auth_key,
     turnstile_solver_url,
+    oai_language,
 )
 
 
@@ -101,7 +101,7 @@ class ChatService:
             'accept-language': 'en-US,en;q=0.9',
             'content-type': 'application/json',
             'oai-device-id': self.oai_device_id,
-            'oai-language': 'en-US',
+            'oai-language': oai_language,
             'origin': self.host_url,
             'priority': 'u=1, i',
             'referer': f'{self.host_url}/',
