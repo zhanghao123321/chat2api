@@ -50,7 +50,7 @@ def get_req_token(req_token, seed=None):
 def get_fp(req_token):
     fp = globals.fp_map.get(req_token, {})
     if fp and fp.get("user-agent") and fp.get("impersonate"):
-        if "proxy_url" in fp.keys() and fp["proxy_url"] and fp["proxy_url"] not in configs.proxy_url_list:
+        if "proxy_url" in fp.keys() and fp["proxy_url"] is None and fp["proxy_url"] not in configs.proxy_url_list:
             fp["proxy_url"] = random.choice(configs.proxy_url_list) if configs.proxy_url_list else None
             globals.fp_map[req_token] = fp
             with open(globals.FP_FILE, "w", encoding="utf-8") as f:
