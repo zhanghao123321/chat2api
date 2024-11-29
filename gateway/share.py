@@ -9,7 +9,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 import utils.globals as globals
 from app import app, security_scheme
-from chatgpt.authorization import get_fp, verify_token
+from chatgpt.authorization import verify_token
+from chatgpt.fp import get_fp
 from gateway.reverseProxy import get_real_req_token
 from utils.Client import Client
 from utils.Logger import logger
@@ -127,13 +128,13 @@ async def chatgpt_account_check(access_token):
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         req_token = await get_real_req_token(access_token)
         access_token = await verify_token(req_token)
-        fp = get_fp(req_token)
+        fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
 
         headers = base_headers.copy()
-        headers.update({"authorization": f"Bearer {access_token}"})
         headers.update(fp)
+        headers.update({"authorization": f"Bearer {access_token}"})
 
         client = Client(proxy=proxy_url, impersonate=impersonate)
         r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers,

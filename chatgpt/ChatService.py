@@ -8,9 +8,10 @@ from starlette.concurrency import run_in_threadpool
 
 from api.files import get_image_size, get_file_extension, determine_file_use_case
 from api.models import model_proxy
-from chatgpt.authorization import get_req_token, verify_token, get_fp
+from chatgpt.authorization import get_req_token, verify_token
 from chatgpt.chatFormat import api_messages_to_chat, stream_response, format_not_stream_response, head_process_response
 from chatgpt.chatLimit import check_is_limit, handle_request_limit
+from chatgpt.fp import get_fp
 from chatgpt.proofofWork import get_config, get_dpl, get_answer_token, get_requirements_token
 
 from utils.Client import Client
@@ -52,10 +53,10 @@ class ChatService:
             self.access_token = None
             self.account_id = None
 
-        self.fp = get_fp(self.req_token)
-        self.proxy_url = self.fp.get("proxy_url")
+        self.fp = get_fp(self.req_token).copy()
+        self.proxy_url = self.fp.pop("proxy_url", None)
+        self.impersonate = self.fp.pop("impersonate", "safari15_3")
         self.user_agent = self.fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
-        self.impersonate = self.fp.get("impersonate", "safari15_3")
         logger.info(f"Request token: {self.req_token}")
         logger.info(f"Request proxy: {self.proxy_url}")
         logger.info(f"Request UA: {self.user_agent}")
@@ -86,7 +87,6 @@ class ChatService:
 
         self.s = Client(proxy=self.proxy_url, impersonate=self.impersonate)
 
-        self.oai_device_id = str(uuid.uuid4())
         self.persona = None
         self.ark0se_token = None
         self.proof_token = None
@@ -100,19 +100,16 @@ class ChatService:
             'accept-encoding': 'gzip, deflate, br, zstd',
             'accept-language': 'en-US,en;q=0.9',
             'content-type': 'application/json',
-            'oai-device-id': self.oai_device_id,
             'oai-language': oai_language,
             'origin': self.host_url,
             'priority': 'u=1, i',
             'referer': f'{self.host_url}/',
-            'sec-ch-ua': self.fp.get("sec-ch-ua", '"Chromium";v="124", "Microsoft Edge";v="124", "Not-A.Brand";v="99"'),
-            'sec-ch-ua-mobile': self.fp.get("sec-ch-ua-mobile", "?0"),
-            'sec-ch-ua-platform': self.fp.get("sec-ch-ua-platform", '"Windows"'),
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': self.user_agent
+            'sec-fetch-site': 'same-origin'
         }
+        self.base_headers.update(self.fp)
+
         if self.access_token:
             self.base_url = self.host_url + "/backend-api"
             self.base_headers['authorization'] = f'Bearer {self.access_token}'
@@ -225,7 +222,7 @@ class ChatService:
                     if not self.ark0se_token_url:
                         raise HTTPException(status_code=403, detail="Ark0se service required")
                     ark0se_dx = ark0se.get("dx")
-                    ark0se_client = Client(impersonate=self.fp.get("impersonate", "safari15_3"))
+                    ark0se_client = Client(impersonate=self.impersonate)
                     try:
                         r2 = await ark0se_client.post(
                             url=self.ark0se_token_url, json={"blob": ark0se_dx, "method": ark0se_method}, timeout=15
