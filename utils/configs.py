@@ -29,6 +29,7 @@ ark0se_token_url = os.getenv('ARK' + 'OSE_TOKEN_URL', '').replace(' ', '')
 if not ark0se_token_url:
     ark0se_token_url = os.getenv('ARK0SE_TOKEN_URL', None)
 proxy_url = os.getenv('PROXY_URL', '').replace(' ', '')
+sentinel_proxy_url = os.getenv('SENTINEL_PROXY_URL', None)
 export_proxy_url = os.getenv('EXPORT_PROXY_URL', None)
 impersonate_list_str = os.getenv('IMPERSONATE', '[]')
 user_agents_list_str = os.getenv('USER_AGENTS', '[]')
@@ -54,6 +55,7 @@ authorization_list = authorization.split(',') if authorization else []
 chatgpt_base_url_list = chatgpt_base_url.split(',') if chatgpt_base_url else []
 ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
+sentinel_proxy_url_list = sentinel_proxy_url.split(',') if sentinel_proxy_url else []
 impersonate_list = ast.literal_eval(impersonate_list_str)
 user_agents_list = ast.literal_eval(user_agents_list_str)
 device_tuple = ast.literal_eval(device_tuple_str)

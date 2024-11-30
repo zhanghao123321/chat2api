@@ -19,12 +19,12 @@ from utils.Logger import logger
 from utils.configs import (
     chatgpt_base_url_list,
     ark0se_token_url_list,
+    sentinel_proxy_url_list,
     history_disabled,
     pow_difficulty,
     conversation_only,
     enable_limit,
     upload_by_url,
-    check_model,
     auth_key,
     turnstile_solver_url,
     oai_language,
@@ -86,6 +86,10 @@ class ChatService:
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
 
         self.s = Client(proxy=self.proxy_url, impersonate=self.impersonate)
+        if sentinel_proxy_url_list:
+            self.ss = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=self.impersonate)
+        else:
+            self.ss = self.s
 
         self.persona = None
         self.ark0se_token = None
@@ -162,41 +166,23 @@ class ChatService:
             config = get_config(self.user_agent)
             p = get_requirements_token(config)
             data = {'p': p}
-            r = await self.s.post(url, headers=headers, json=data, timeout=5)
+            r = await self.ss.post(url, headers=headers, json=data, timeout=5)
             if r.status_code == 200:
                 resp = r.json()
 
-                if check_model:
-                    r = await self.s.get(f'{self.base_url}/models', headers=headers, timeout=5)
-                    if r.status_code == 200:
-                        models = r.json().get('models')
-                        if not any(self.req_model in model.get("slug", "") for model in models):
-                            logger.error(f"Model {self.req_model} not support.")
-                            raise HTTPException(
-                                status_code=404,
-                                detail={
-                                    "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
-                                    "type": "invalid_request_error",
-                                    "param": None,
-                                    "code": "model_not_found",
-                                },
-                            )
-                    else:
-                        raise HTTPException(status_code=404, detail="Failed to get models")
-                else:
-                    self.persona = resp.get("persona")
-                    if self.persona != "chatgpt-paid":
-                        if self.req_model == "gpt-4":
-                            logger.error(f"Model {self.resp_model} not support for {self.persona}")
-                            raise HTTPException(
-                                status_code=404,
-                                detail={
-                                    "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
-                                    "type": "invalid_request_error",
-                                    "param": None,
-                                    "code": "model_not_found",
-                                },
-                            )
+                self.persona = resp.get("persona")
+                if self.persona != "chatgpt-paid":
+                    if self.req_model == "gpt-4" or self.req_model == "o1-preview":
+                        logger.error(f"Model {self.resp_model} not support for {self.persona}")
+                        raise HTTPException(
+                            status_code=404,
+                            detail={
+                                "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
+                                "type": "invalid_request_error",
+                                "param": None,
+                                "code": "model_not_found",
+                            },
+                        )
 
                 turnstile = resp.get('turnstile', {})
                 turnstile_required = turnstile.get('required')
@@ -515,6 +501,10 @@ class ChatService:
     async def close_client(self):
         if self.s:
             await self.s.close()
+            del self.s
+        if self.ss:
+            await self.ss.close()
+            del self.ss
         if self.ws:
             await self.ws.close()
             del self.ws
