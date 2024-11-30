@@ -9,7 +9,8 @@ from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 
 import utils.globals as globals
-from chatgpt.authorization import verify_token, get_req_token, get_fp
+from chatgpt.authorization import verify_token, get_req_token
+from chatgpt.fp import get_fp
 from utils.Client import Client
 from utils.Logger import logger
 from utils.configs import chatgpt_base_url_list
@@ -173,7 +174,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
-        fp = get_fp(req_token)
+        fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
         user_agent = fp.get("user-agent")

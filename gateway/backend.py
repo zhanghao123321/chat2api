@@ -11,7 +11,8 @@ from starlette.concurrency import run_in_threadpool
 
 import utils.globals as globals
 from app import app
-from chatgpt.authorization import verify_token, get_fp
+from chatgpt.authorization import verify_token
+from chatgpt.fp import get_fp
 from chatgpt.proofofWork import get_answer_token, get_config, get_requirements_token
 from gateway.chatgpt import chatgpt_html
 from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list
@@ -252,11 +253,10 @@ if no_sentinel:
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
         req_token = await get_real_req_token(token)
         access_token = await verify_token(req_token)
-        fp = get_fp(req_token)
+        fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
-        user_agent = fp.get("user-agent",
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        user_agent = fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
 
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         proof_token = None
@@ -264,14 +264,10 @@ if no_sentinel:
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority",
-                                    "oai-device-id"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua", "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
         }
         headers.update(fp)
-        headers.update({
-            "authorization": f"Bearer {access_token}",
-            "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
-        })
+        headers.update({"authorization": f"Bearer {access_token}"})
 
         client = Client(proxy=proxy_url, impersonate=impersonate)
 
