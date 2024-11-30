@@ -8,6 +8,9 @@
 
 🔍 回复格式与真实 API 完全一致，适配几乎所有客户端
 
+👮 配套用户管理端[Chat-Share](https://github.com/h88782481/Chat-Share)使用前需提前配置好环境变量（ENABLE_GATEWAY设置为True，AUTO_SEED设置为False）
+
+
 ## 交流群
 
 [https://t.me/chat2api](https://t.me/chat2api)
