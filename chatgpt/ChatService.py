@@ -130,6 +130,11 @@ class ChatService:
     async def set_model(self):
         self.origin_model = self.data.get("model", "gpt-3.5-turbo-0125")
         self.resp_model = model_proxy.get(self.origin_model, self.origin_model)
+        if "gizmo" in self.origin_model or "g-" in self.origin_model:
+            self.gizmo_id = "g-" + self.origin_model.split("g-")[-1]
+        else:
+            self.gizmo_id = None
+
         if "o1-preview" in self.origin_model:
             self.req_model = "o1-preview"
         elif "o1-mini" in self.origin_model:
@@ -146,8 +151,6 @@ class ChatService:
             self.req_model = "gpt-4o"
         elif "gpt-4-mobile" in self.origin_model:
             self.req_model = "gpt-4-mobile"
-        elif "gpt-4-gizmo" in self.origin_model:
-            self.req_model = "gpt-4o"
         elif "gpt-4" in self.origin_model:
             self.req_model = "gpt-4"
         elif "gpt-3.5" in self.origin_model:
@@ -155,7 +158,7 @@ class ChatService:
         elif "auto" in self.origin_model:
             self.req_model = "auto"
         else:
-            self.req_model = "auto"
+            self.req_model = "gpt-4o"
 
     async def get_chat_requirements(self):
         if conversation_only:
@@ -282,9 +285,8 @@ class ChatService:
             self.chat_headers.pop('openai-sentinel-ark' + 'ose-token', None)
             self.chat_headers.pop('openai-sentinel-turnstile-token', None)
 
-        if "gpt-4-gizmo" in self.origin_model:
-            gizmo_id = self.origin_model.split("gpt-4-gizmo-")[-1]
-            conversation_mode = {"kind": "gizmo_interaction", "gizmo_id": gizmo_id}
+        if self.gizmo_id:
+            conversation_mode = {"kind": "gizmo_interaction", "gizmo_id": self.gizmo_id}
         else:
             conversation_mode = {"kind": "primary_assistant"}
 

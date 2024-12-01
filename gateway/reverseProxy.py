@@ -13,7 +13,7 @@ from chatgpt.authorization import verify_token, get_req_token
 from chatgpt.fp import get_fp
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import chatgpt_base_url_list
+from utils.configs import chatgpt_base_url_list, sentinel_proxy_url_list
 
 
 def generate_current_time():
@@ -206,7 +206,10 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         data = await request.body()
 
-        client = Client(proxy=proxy_url, impersonate=impersonate)
+        if sentinel_proxy_url_list and "backend-api/sentinel/chat-requirements" in path:
+            client = Client(proxy=random.choice(sentinel_proxy_url_list))
+        else:
+            client = Client(proxy=proxy_url, impersonate=impersonate)
         try:
             background = BackgroundTask(client.close)
             r = await client.request(request.method, f"{base_url}/{path}", params=params, headers=headers,
