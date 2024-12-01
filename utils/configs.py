@@ -32,6 +32,9 @@ proxy_url = os.getenv('PROXY_URL', '').replace(' ', '')
 export_proxy_url = os.getenv('EXPORT_PROXY_URL', None)
 impersonate_list_str = os.getenv('IMPERSONATE', '[]')
 user_agents_list_str = os.getenv('USER_AGENTS', '[]')
+device_tuple_str = os.getenv('DEVICE_TUPLE', '()')
+browser_tuple_str = os.getenv('BROWSER_TUPLE', '()')
+platform_tuple_str = os.getenv('PLATFORM_TUPLE', '()')
 
 cf_file_url = os.getenv('CF_FILE_URL', None)
 turnstile_solver_url = os.getenv('TURNSTILE_SOLVER_URL', None)
@@ -53,6 +56,9 @@ ark0se_token_url_list = ark0se_token_url.split(',') if ark0se_token_url else []
 proxy_url_list = proxy_url.split(',') if proxy_url else []
 impersonate_list = ast.literal_eval(impersonate_list_str)
 user_agents_list = ast.literal_eval(user_agents_list_str)
+device_tuple = ast.literal_eval(device_tuple_str)
+browser_tuple = ast.literal_eval(browser_tuple_str)
+platform_tuple = ast.literal_eval(platform_tuple_str)
 
 enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
 auto_seed = is_true(os.getenv('AUTO_SEED', True))
