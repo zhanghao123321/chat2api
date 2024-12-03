@@ -18,7 +18,8 @@ from gateway.chatgpt import chatgpt_html
 from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel, sentinel_proxy_url_list
+from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel, sentinel_proxy_url_list, \
+    force_no_history
 
 banned_paths = [
     "backend-api/accounts/logout_all",
@@ -322,6 +323,18 @@ if no_sentinel:
                 await clients.close()
                 del clients
 
+        history = True
+        try:
+            req_json = json.loads(data)
+            history = not req_json.get("history_and_training_disabled", False)
+        except Exception:
+            pass
+        if force_no_history:
+            history = False
+            req_json = json.loads(data)
+            req_json["history_and_training_disabled"] = True
+            data = json.dumps(req_json).encode("utf-8")
+
         background = BackgroundTask(c_close, client, clients)
         r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
                                      cookies=request_cookies, data=data, stream=True, allow_redirects=False)
@@ -333,8 +346,12 @@ if no_sentinel:
         if x_sign:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
-            return StreamingResponse(content_generator(r, token), headers=rheaders,
-                                     media_type=rheaders.get("content-type"), background=background)
+            conv_key = r.cookies.get("conv_key", "")
+            response = StreamingResponse(content_generator(r, token, history),
+                                         media_type=r.headers.get("content-type", ""),
+                                         background=background)
+            response.set_cookie("conv_key", value=conv_key)
+            return response
         else:
             return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"),
                             status_code=r.status_code, background=background)

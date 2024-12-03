@@ -64,6 +64,7 @@ platform_tuple = ast.literal_eval(platform_tuple_str)
 
 enable_gateway = is_true(os.getenv('ENABLE_GATEWAY', False))
 auto_seed = is_true(os.getenv('AUTO_SEED', True))
+force_no_history = is_true(os.getenv('FORCE_NO_HISTORY', False))
 no_sentinel = is_true(os.getenv('NO_SENTINEL', False))
 
 with open('version.txt') as f:
@@ -97,4 +98,5 @@ logger.info("OAI_LANGUAGE:      " + str(oai_language))
 logger.info("------------------------- Gateway --------------------------")
 logger.info("ENABLE_GATEWAY:    " + str(enable_gateway))
 logger.info("AUTO_SEED:         " + str(auto_seed))
+logger.info("FORCE_NO_HISTORY: " + str(force_no_history))
 logger.info("-" * 60)

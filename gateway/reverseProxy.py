@@ -13,7 +13,7 @@ from chatgpt.authorization import verify_token, get_req_token
 from chatgpt.fp import get_fp
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import chatgpt_base_url_list, sentinel_proxy_url_list
+from utils.configs import chatgpt_base_url_list, sentinel_proxy_url_list, force_no_history
 
 
 def generate_current_time():
@@ -108,12 +108,12 @@ def save_conversation(token, conversation_id, title=None):
         logger.info(f"Conversation ID: {conversation_id}, Title: {title}")
 
 
-async def content_generator(r, token):
+async def content_generator(r, token, history=True):
     conversation_id = None
     title = None
     async for chunk in r.aiter_content():
         try:
-            if (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
+            if history and (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
                 chat_chunk = chunk.decode('utf-8')
                 if chat_chunk.startswith("data: {"):
                     if "\n\nevent: delta" in chat_chunk:
@@ -206,6 +206,20 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
 
         data = await request.body()
 
+        history = True
+        if path.endswith("backend-api/conversation"):
+            try:
+                req_json = json.loads(data)
+                history = not req_json.get("history_and_training_disabled", False)
+            except Exception:
+                pass
+            if force_no_history:
+                history = False
+                req_json = json.loads(data)
+                req_json["history_and_training_disabled"] = True
+                data = json.dumps(req_json).encode("utf-8")
+
+
         if sentinel_proxy_url_list and "backend-api/sentinel/chat-requirements" in path:
             client = Client(proxy=random.choice(sentinel_proxy_url_list))
         else:
@@ -226,8 +240,11 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                 logger.info(f"Request proxy: {proxy_url}")
                 logger.info(f"Request UA: {user_agent}")
                 logger.info(f"Request impersonate: {impersonate}")
-                return StreamingResponse(content_generator(r, token), media_type=r.headers.get("content-type", ""),
-                                         background=background)
+                conv_key = r.cookies.get("conv_key", "")
+                response = StreamingResponse(content_generator(r, token, history), media_type=r.headers.get("content-type", ""),
+                                  background=background)
+                response.set_cookie("conv_key", value=conv_key)
+                return response
             else:
                 if "/backend-api/conversation" in path or "/register-websocket" in path:
                     response = Response(content=(await r.atext()), media_type=r.headers.get("content-type"),
@@ -236,6 +253,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     content = await r.atext()
                     content = (content
                                .replace("ab.chatgpt.com", origin_host)
+                               .replace("webrtc.chatgpt.com", origin_host)
                                .replace("cdn.oaistatic.com", origin_host)
                                # .replace("files.oaiusercontent.com", origin_host)
                                .replace("chatgpt.com", origin_host)
@@ -244,10 +262,12 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     content_type = rheaders.get("content-type", "")
                     cache_control = rheaders.get("cache-control", "")
                     expires = rheaders.get("expires", "")
+                    content_disposition = rheaders.get("content-disposition", "")
                     rheaders = {
                         "cache-control": cache_control,
                         "content-type": content_type,
-                        "expires": expires
+                        "expires": expires,
+                        "content-disposition": content_disposition
                     }
                     response = Response(content=content, headers=rheaders,
                                         status_code=r.status_code, background=background)

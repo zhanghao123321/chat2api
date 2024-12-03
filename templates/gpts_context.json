@@ -3,14 +3,14 @@
         "user": {
             "id": "user-chatgpt"
         },
-        "expires": "2025-02-26T16:42:25.251Z",
+        "expires": "2025-03-03T23:33:59.799Z",
         "accessToken": "",
         "authProvider": "login-web"
     },
     "user": {
         "id": "user-chatgpt"
     },
-    "cluster": "unified-8",
+    "cluster": "unified-16",
     "userCountry": "US",
     "userRegion": "New York",
     "userRegionCode": "1",
@@ -278,8 +278,8 @@
                 },
                 "562926978": {
                     "name": "562926978",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "5NtGLuwEGvKkFrz0jD9Jgb:100.00:1",
                     "secondary_exposures": [
                         {
                             "gate": "1457171347",
@@ -288,8 +288,8 @@
                         },
                         {
                             "gate": "1426009137",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp:60.00:1"
                         }
                     ]
                 },
@@ -359,6 +359,12 @@
                     "rule_id": "3hRSthtIBD5acnNskGRJjV",
                     "secondary_exposures": []
                 },
+                "645560164": {
+                    "name": "645560164",
+                    "value": false,
+                    "rule_id": "default",
+                    "secondary_exposures": []
+                },
                 "711369489": {
                     "name": "711369489",
                     "value": false,
@@ -383,8 +389,8 @@
                         },
                         {
                             "gate": "1426009137",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp:60.00:1"
                         }
                     ]
                 },
@@ -487,7 +493,7 @@
                 "989108178": {
                     "name": "989108178",
                     "value": false,
-                    "rule_id": "2IPlNE4lgwrh0MfAfdxRES:0.00:1",
+                    "rule_id": "4sTodKrNyByM4guZ68MORR",
                     "secondary_exposures": [
                         {
                             "gate": "1457171347",
@@ -496,30 +502,15 @@
                         },
                         {
                             "gate": "1426009137",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
-                            "gate": "697158486",
-                            "gateValue": "false",
-                            "ruleID": "5KvTiw548r4tjqy7oHEcAL"
-                        },
-                        {
-                            "gate": "3199899666",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
-                            "gate": "2048457345",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp:60.00:1"
                         }
                     ]
                 },
                 "989226566": {
                     "name": "989226566",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "6yqqYAWKtmfU8A7QGdiky4",
                     "secondary_exposures": [
                         {
                             "gate": "1457171347",
@@ -528,8 +519,8 @@
                         },
                         {
                             "gate": "1426009137",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp:60.00:1"
                         }
                     ]
                 },
@@ -560,14 +551,8 @@
                 "1074323483": {
                     "name": "1074323483",
                     "value": false,
-                    "rule_id": "K8Z1UK9UqlAfqutxTFwFR:0.00:4",
-                    "secondary_exposures": [
-                        {
-                            "gate": "491279851",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        }
-                    ]
+                    "rule_id": "disabled",
+                    "secondary_exposures": []
                 },
                 "1103845153": {
                     "name": "1103845153",
@@ -689,8 +674,8 @@
                 },
                 "1426009137": {
                     "name": "1426009137",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "7D8EAif25E3Y8A3zkg6ljp:60.00:1",
                     "secondary_exposures": [
                         {
                             "gate": "1457171347",
@@ -790,12 +775,6 @@
                     "name": "1656345175",
                     "value": true,
                     "rule_id": "2CwIChuIr7SLQ2CyqRegF2",
-                    "secondary_exposures": []
-                },
-                "1666487044": {
-                    "name": "1666487044",
-                    "value": false,
-                    "rule_id": "2FIt63MiniZJkSS0ySTaoY:0.00:1",
                     "secondary_exposures": []
                 },
                 "1684776951": {
@@ -972,6 +951,12 @@
                     "rule_id": "1XW58zJg16b7h0clyVhEW3:100.00:10",
                     "secondary_exposures": []
                 },
+                "2420509970": {
+                    "name": "2420509970",
+                    "value": true,
+                    "rule_id": "6pgwKYvzYmSTzlrSjZlKMS",
+                    "secondary_exposures": []
+                },
                 "2436427643": {
                     "name": "2436427643",
                     "value": false,
@@ -1002,8 +987,8 @@
                 },
                 "2445152477": {
                     "name": "2445152477",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "5qtlunRMswJX2JGoF8GikC",
                     "secondary_exposures": []
                 },
                 "2449630478": {
@@ -1125,8 +1110,8 @@
                 },
                 "2775516364": {
                     "name": "2775516364",
-                    "value": false,
-                    "rule_id": "default",
+                    "value": true,
+                    "rule_id": "62xFU2LRHp4dPsOwj2jVUT",
                     "secondary_exposures": [
                         {
                             "gate": "1457171347",
@@ -1135,8 +1120,8 @@
                         },
                         {
                             "gate": "1426009137",
-                            "gateValue": "false",
-                            "ruleID": "default"
+                            "gateValue": "true",
+                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp:60.00:1"
                         }
                     ]
                 },
@@ -1146,14 +1131,9 @@
                     "rule_id": "4jCRuoOxK8tLEGn9ngylXq",
                     "secondary_exposures": [
                         {
-                            "gate": "491279851",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
                             "gate": "1074323483",
                             "gateValue": "false",
-                            "ruleID": "K8Z1UK9UqlAfqutxTFwFR:0.00:4"
+                            "ruleID": "disabled"
                         }
                     ]
                 },
@@ -1175,14 +1155,14 @@
                     "rule_id": "default",
                     "secondary_exposures": [
                         {
+                            "gate": "1074323483",
+                            "gateValue": "false",
+                            "ruleID": "disabled"
+                        },
+                        {
                             "gate": "491279851",
                             "gateValue": "false",
                             "ruleID": "default"
-                        },
-                        {
-                            "gate": "1074323483",
-                            "gateValue": "false",
-                            "ruleID": "K8Z1UK9UqlAfqutxTFwFR:0.00:4"
                         },
                         {
                             "gate": "3011415004",
@@ -1417,6 +1397,11 @@
                     "value": false,
                     "rule_id": "default",
                     "secondary_exposures": [
+                        {
+                            "gate": "2478069220",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        },
                         {
                             "gate": "3860901052",
                             "gateValue": "false",
@@ -1692,7 +1677,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "layerAssignment",
                     "rule_id": "layerAssignment",
@@ -1705,7 +1696,8 @@
                         "personalized_onboarding",
                         "write_custom_instructions_in_onboarding",
                         "plus_rl_during_onboarding_minutes_after_creation",
-                        "onboarding_show_custom_instructions_page"
+                        "onboarding_show_custom_instructions_page",
+                        "onboarding_flow_tool_steps"
                     ],
                     "is_user_in_experiment": false,
                     "is_experiment_active": true,
@@ -2504,16 +2496,6 @@
                     "is_experiment_active": false,
                     "is_in_layer": true
                 },
-                "1248699119": {
-                    "name": "1248699119",
-                    "value": {},
-                    "group": "prestart",
-                    "rule_id": "prestart",
-                    "is_device_based": false,
-                    "secondary_exposures": [],
-                    "is_user_in_experiment": false,
-                    "is_experiment_active": false
-                },
                 "1277879515": {
                     "name": "1277879515",
                     "value": {
@@ -2645,17 +2627,19 @@
                 "1597388338": {
                     "name": "1597388338",
                     "value": {
-                        "enable_arch_updates": false
+                        "enable_arch_updates": false,
+                        "include_pin_state": true,
+                        "include_legacy_sidebar_contents": true
                     },
-                    "group": "layerAssignment",
-                    "rule_id": "layerAssignment",
+                    "group": "abandoned",
+                    "rule_id": "abandoned",
                     "is_device_based": true,
                     "secondary_exposures": [],
                     "explicit_parameters": [
                         "enable_arch_updates"
                     ],
                     "is_user_in_experiment": false,
-                    "is_experiment_active": true,
+                    "is_experiment_active": false,
                     "is_in_layer": true
                 },
                 "1722608525": {
@@ -3035,23 +3019,14 @@
                 "2272050751": {
                     "name": "2272050751",
                     "value": {
-                        "enable_arch_updates": false
+                        "enable_arch_updates": false,
+                        "include_pin_state": true,
+                        "include_legacy_sidebar_contents": true
                     },
                     "group": "abandoned",
                     "rule_id": "abandoned",
                     "is_device_based": true,
-                    "secondary_exposures": [
-                        {
-                            "gate": "491279851",
-                            "gateValue": "false",
-                            "ruleID": "default"
-                        },
-                        {
-                            "gate": "3011415004",
-                            "gateValue": "false",
-                            "ruleID": "7pUMK6uci7sslAj8bP7VEA"
-                        }
-                    ],
+                    "secondary_exposures": [],
                     "explicit_parameters": [
                         "enable_arch_updates"
                     ],
@@ -3266,6 +3241,37 @@
                     "is_experiment_active": false,
                     "is_in_layer": true
                 },
+                "2380789656": {
+                    "name": "2380789656",
+                    "value": {
+                        "enable_arch_updates": false,
+                        "include_pin_state": true,
+                        "include_legacy_sidebar_contents": true
+                    },
+                    "group": "prestart",
+                    "rule_id": "prestart",
+                    "is_device_based": true,
+                    "secondary_exposures": [
+                        {
+                            "gate": "491279851",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        },
+                        {
+                            "gate": "3011415004",
+                            "gateValue": "false",
+                            "ruleID": "7pUMK6uci7sslAj8bP7VEA"
+                        }
+                    ],
+                    "explicit_parameters": [
+                        "include_pin_state",
+                        "include_legacy_sidebar_contents",
+                        "enable_arch_updates"
+                    ],
+                    "is_user_in_experiment": false,
+                    "is_experiment_active": false,
+                    "is_in_layer": true
+                },
                 "2395035283": {
                     "name": "2395035283",
                     "value": {
@@ -3429,7 +3435,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "abandoned",
                     "rule_id": "abandoned",
@@ -3450,7 +3462,13 @@
                     "group": "prestart",
                     "rule_id": "prestart",
                     "is_device_based": false,
-                    "secondary_exposures": [],
+                    "secondary_exposures": [
+                        {
+                            "gate": "1132191510",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        }
+                    ],
                     "explicit_parameters": [
                         "snowflake_composer_entry_point"
                     ],
@@ -3662,7 +3680,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "targetingGate",
                     "rule_id": "targetingGate",
@@ -3919,7 +3943,9 @@
                 "2795141704": {
                     "name": "2795141704",
                     "value": {
-                        "enable_arch_updates": false
+                        "enable_arch_updates": false,
+                        "include_pin_state": true,
+                        "include_legacy_sidebar_contents": true
                     },
                     "group": "prestart",
                     "rule_id": "prestart",
@@ -4835,7 +4861,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "prestart",
                     "rule_id": "prestart",
@@ -4849,7 +4881,9 @@
                         "keep_onboarding_after_dismiss",
                         "write_custom_instructions_in_onboarding",
                         "onboarding_show_custom_instructions_page",
-                        "plus_rl_during_onboarding_minutes_after_creation"
+                        "plus_rl_during_onboarding_minutes_after_creation",
+                        "onboarding_show_other_option",
+                        "onboarding_flow_tool_steps"
                     ],
                     "is_user_in_experiment": false,
                     "is_experiment_active": false,
@@ -5117,17 +5151,23 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
-                    "group": "layerAssignment",
-                    "rule_id": "layerAssignment",
+                    "group": "launchedGroup",
+                    "rule_id": "launchedGroup",
                     "is_device_based": false,
                     "secondary_exposures": [],
                     "explicit_parameters": [
                         "one_announcement_tooltip_per_session"
                     ],
                     "is_user_in_experiment": false,
-                    "is_experiment_active": true,
+                    "is_experiment_active": false,
                     "is_in_layer": true
                 },
                 "3917128856": {
@@ -5373,7 +5413,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "launchedGroup",
                     "rule_id": "launchedGroup",
@@ -5535,7 +5581,9 @@
                 "660512088": {
                     "name": "660512088",
                     "value": {
-                        "enable_arch_updates": false
+                        "enable_arch_updates": false,
+                        "include_pin_state": true,
+                        "include_legacy_sidebar_contents": true
                     },
                     "group": "default",
                     "rule_id": "default",
@@ -5607,7 +5655,13 @@
                         "enable_mobile_app_upsell_banner": false,
                         "onboarding_show_custom_instructions_page": false,
                         "one_tooltip_per_session": false,
-                        "one_announcement_tooltip_per_session": false
+                        "one_announcement_tooltip_per_session": true,
+                        "onboarding_show_other_option": false,
+                        "onboarding_flow_tool_steps": [
+                            "dalle",
+                            "file_upload",
+                            "canvas"
+                        ]
                     },
                     "group": "targetingGate",
                     "rule_id": "targetingGate",
@@ -5635,9 +5689,21 @@
                     "group": "default",
                     "rule_id": "default",
                     "is_device_based": false,
-                    "secondary_exposures": [],
+                    "secondary_exposures": [
+                        {
+                            "gate": "1132191510",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        }
+                    ],
                     "explicit_parameters": [],
-                    "undelegated_secondary_exposures": []
+                    "undelegated_secondary_exposures": [
+                        {
+                            "gate": "1132191510",
+                            "gateValue": "false",
+                            "ruleID": "default"
+                        }
+                    ]
                 },
                 "1238742812": {
                     "name": "1238742812",
@@ -6225,7 +6291,7 @@
                 "sdkType": "statsig-node",
                 "sdkVersion": "5.26.0"
             },
-            "time": 1732811998887,
+            "time": 1733268738993,
             "evaluated_keys": {
                 "userID": "user-chatgpt",
                 "customIDs": {

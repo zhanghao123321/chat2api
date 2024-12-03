@@ -17,12 +17,12 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-02-26T16:39:37.135Z",
+                        "expires": "2025-03-03T02:24:36.189Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
                     "dataUpdateCount": 1,
-                    "dataUpdatedAt": 1732811977271,
+                    "dataUpdatedAt": 1733192676299,
                     "error": null,
                     "errorUpdateCount": 0,
                     "errorUpdatedAt": 0,
@@ -38,14 +38,14 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-02-26T16:39:37.135Z",
+                        "expires": "2025-03-03T02:24:36.189Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
                     "user": {
                         "id": "user-chatgpt"
                     },
-                    "cluster": "unified-8",
+                    "cluster": "unified-16",
                     "userCountry": "US",
                     "userRegion": "New York",
                     "userRegionCode": "1",
@@ -313,8 +313,8 @@
                                 },
                                 "562926978": {
                                     "name": "562926978",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "5NtGLuwEGvKkFrz0jD9Jgb:100.00:1",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1457171347",
@@ -323,8 +323,8 @@
                                         },
                                         {
                                             "gate": "1426009137",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp"
                                         }
                                     ]
                                 },
@@ -418,8 +418,8 @@
                                         },
                                         {
                                             "gate": "1426009137",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp"
                                         }
                                     ]
                                 },
@@ -522,7 +522,7 @@
                                 "989108178": {
                                     "name": "989108178",
                                     "value": false,
-                                    "rule_id": "2IPlNE4lgwrh0MfAfdxRES:0.00:1",
+                                    "rule_id": "4sTodKrNyByM4guZ68MORR",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1457171347",
@@ -531,30 +531,15 @@
                                         },
                                         {
                                             "gate": "1426009137",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "697158486",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvTiw548r4tjqy7oHEcAL"
-                                        },
-                                        {
-                                            "gate": "3199899666",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "2048457345",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp"
                                         }
                                     ]
                                 },
                                 "989226566": {
                                     "name": "989226566",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "6yqqYAWKtmfU8A7QGdiky4",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1457171347",
@@ -563,8 +548,8 @@
                                         },
                                         {
                                             "gate": "1426009137",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp"
                                         }
                                     ]
                                 },
@@ -724,8 +709,8 @@
                                 },
                                 "1426009137": {
                                     "name": "1426009137",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "7D8EAif25E3Y8A3zkg6ljp",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1457171347",
@@ -825,12 +810,6 @@
                                     "name": "1656345175",
                                     "value": true,
                                     "rule_id": "2CwIChuIr7SLQ2CyqRegF2",
-                                    "secondary_exposures": []
-                                },
-                                "1666487044": {
-                                    "name": "1666487044",
-                                    "value": false,
-                                    "rule_id": "2FIt63MiniZJkSS0ySTaoY:0.00:1",
                                     "secondary_exposures": []
                                 },
                                 "1684776951": {
@@ -1160,8 +1139,8 @@
                                 },
                                 "2775516364": {
                                     "name": "2775516364",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "62xFU2LRHp4dPsOwj2jVUT",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1457171347",
@@ -1170,8 +1149,8 @@
                                         },
                                         {
                                             "gate": "1426009137",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "7D8EAif25E3Y8A3zkg6ljp"
                                         }
                                     ]
                                 },
@@ -1727,7 +1706,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -1740,7 +1725,8 @@
                                         "personalized_onboarding",
                                         "write_custom_instructions_in_onboarding",
                                         "plus_rl_during_onboarding_minutes_after_creation",
-                                        "onboarding_show_custom_instructions_page"
+                                        "onboarding_show_custom_instructions_page",
+                                        "onboarding_flow_tool_steps"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": true,
@@ -2682,15 +2668,15 @@
                                     "value": {
                                         "enable_arch_updates": false
                                     },
-                                    "group": "layerAssignment",
-                                    "rule_id": "layerAssignment",
+                                    "group": "abandoned",
+                                    "rule_id": "abandoned",
                                     "is_device_based": true,
                                     "secondary_exposures": [],
                                     "explicit_parameters": [
                                         "enable_arch_updates"
                                     ],
                                     "is_user_in_experiment": false,
-                                    "is_experiment_active": true,
+                                    "is_experiment_active": false,
                                     "is_in_layer": true
                                 },
                                 "1722608525": {
@@ -3464,7 +3450,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3485,7 +3477,13 @@
                                     "group": "prestart",
                                     "rule_id": "prestart",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1132191510",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
                                     "explicit_parameters": [
                                         "snowflake_composer_entry_point"
                                     ],
@@ -3697,7 +3695,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "targetingGate",
                                     "rule_id": "targetingGate",
@@ -4870,7 +4874,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -4884,7 +4894,9 @@
                                         "keep_onboarding_after_dismiss",
                                         "write_custom_instructions_in_onboarding",
                                         "onboarding_show_custom_instructions_page",
-                                        "plus_rl_during_onboarding_minutes_after_creation"
+                                        "plus_rl_during_onboarding_minutes_after_creation",
+                                        "onboarding_show_other_option",
+                                        "onboarding_flow_tool_steps"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
@@ -5152,7 +5164,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -5408,7 +5426,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -5642,7 +5666,13 @@
                                         "enable_mobile_app_upsell_banner": false,
                                         "onboarding_show_custom_instructions_page": false,
                                         "one_tooltip_per_session": false,
-                                        "one_announcement_tooltip_per_session": false
+                                        "one_announcement_tooltip_per_session": false,
+                                        "onboarding_show_other_option": false,
+                                        "onboarding_flow_tool_steps": [
+                                            "dalle",
+                                            "file_upload",
+                                            "canvas"
+                                        ]
                                     },
                                     "group": "targetingGate",
                                     "rule_id": "targetingGate",
@@ -5670,9 +5700,21 @@
                                     "group": "default",
                                     "rule_id": "default",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1132191510",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
                                     "explicit_parameters": [],
-                                    "undelegated_secondary_exposures": []
+                                    "undelegated_secondary_exposures": [
+                                        {
+                                            "gate": "1132191510",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ]
                                 },
                                 "1238742812": {
                                     "name": "1238742812",
@@ -6260,7 +6302,7 @@
                                 "sdkType": "statsig-node",
                                 "sdkVersion": "5.26.0"
                             },
-                            "time": 1732811680973,
+                            "time": 1733192442367,
                             "evaluated_keys": {
                                 "userID": "user-chatgpt",
                                 "customIDs": {
@@ -6284,7 +6326,7 @@
                 "isIos": false,
                 "isAndroidChrome": false,
                 "isElectron": false,
-                "cspScriptNonce": "bb6aa07d-4bdb-49d9-a007-4e33ffaa987f"
+                "cspScriptNonce": "4fce7440-fa5b-4791-9f2c-b1d6807d2708"
             },
             "routes/_conversation": {
                 "prefetchSearch": null
