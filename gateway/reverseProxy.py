@@ -245,9 +245,14 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                   background=background)
                 response.set_cookie("conv_key", value=conv_key)
                 return response
+            elif 'image' in r.headers.get("content-type", ""):
+                rheaders = dict(r.headers)
+                response = Response(content=await r.acontent(), headers=rheaders,
+                                        status_code=r.status_code, background=background)
+                return response
             else:
                 if "/backend-api/conversation" in path or "/register-websocket" in path:
-                    response = Response(content=(await r.atext()), media_type=r.headers.get("content-type"),
+                    response = Response(content=(await r.acontent()), media_type=r.headers.get("content-type"),
                                         status_code=r.status_code, background=background)
                 else:
                     content = await r.atext()
@@ -258,6 +263,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                # .replace("files.oaiusercontent.com", origin_host)
                                .replace("https://chatgpt.com", "")
                                .replace("https", petrol))
+
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")
                     cache_control = rheaders.get("cache-control", "")
