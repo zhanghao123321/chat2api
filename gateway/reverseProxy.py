@@ -245,7 +245,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                   background=background)
                 response.set_cookie("conv_key", value=conv_key)
                 return response
-            elif 'image' in r.headers.get("content-type", ""):
+            elif 'image' in r.headers.get("content-type", "") or "audio" in r.headers.get("content-type", "") or "video" in r.headers.get("content-type", ""):
                 rheaders = dict(r.headers)
                 response = Response(content=await r.acontent(), headers=rheaders,
                                         status_code=r.status_code, background=background)
@@ -256,14 +256,22 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                         status_code=r.status_code, background=background)
                 else:
                     content = await r.atext()
-                    content = (content
-                               .replace("ab.chatgpt.com", origin_host)
-                               .replace("webrtc.chatgpt.com", origin_host)
-                               .replace("cdn.oaistatic.com", origin_host)
-                               # .replace("files.oaiusercontent.com", origin_host)
-                               .replace("https://chatgpt.com", "")
-                               .replace("https", petrol))
-
+                    if "public-api/" in path:
+                        content = (content
+                                   .replace("ab.chatgpt.com", origin_host)
+                                   .replace("webrtc.chatgpt.com", origin_host)
+                                   .replace("cdn.oaistatic.com", origin_host)
+                                   # .replace("files.oaiusercontent.com", origin_host)
+                                   .replace("chatgpt.com", "")
+                                   .replace("https", petrol))
+                    else:
+                        content = (content
+                                   .replace("ab.chatgpt.com", origin_host)
+                                   .replace("webrtc.chatgpt.com", origin_host)
+                                   .replace("cdn.oaistatic.com", origin_host)
+                                   # .replace("files.oaiusercontent.com", origin_host)
+                                   .replace("chatgpt.com", origin_host)
+                                   .replace("https", petrol))
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")
                     cache_control = rheaders.get("cache-control", "")
