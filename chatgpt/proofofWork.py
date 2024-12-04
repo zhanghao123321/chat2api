@@ -12,8 +12,7 @@ import pybase64
 from utils.Logger import logger
 from utils.configs import conversation_only
 
-cores = [16, 24, 32]
-screens = [3000, 4000, 6000]
+cores = [8, 16, 24, 32]
 timeLayout = "%a %b %d %Y %H:%M:%S"
 
 cached_scripts = []
@@ -27,7 +26,6 @@ navigator_key = [
     "locks−[object LockManager]",
     "appCodeName−Mozilla",
     "permissions−[object Permissions]",
-    "appVersion−5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "share−function share() { [native code] }",
     "webdriver−false",
     "managed−[object NavigatorManagedData]",
@@ -56,9 +54,7 @@ navigator_key = [
     "login−[object NavigatorLogin]",
     "vendorSub−",
     "login−[object NavigatorLogin]",
-    "userAgent−Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "getInstalledRelatedApps−function getInstalledRelatedApps() { [native code] }",
-    "userAgent−Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "mediaDevices−[object MediaDevices]",
     "locks−[object LockManager]",
     "webkitGetUserMedia−function webkitGetUserMedia() { [native code] }",
@@ -66,7 +62,6 @@ navigator_key = [
     "xr−[object XRSystem]",
     "mediaDevices−[object MediaDevices]",
     "virtualKeyboard−[object VirtualKeyboard]",
-    "userAgent−Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "virtualKeyboard−[object VirtualKeyboard]",
     "appName−Netscape",
     "storageBuckets−[object StorageBucketManager]",
@@ -104,10 +99,8 @@ navigator_key = [
     "getUserMedia−function getUserMedia() { [native code] }",
     "mediaDevices−[object MediaDevices]",
     "webkitPersistentStorage−[object DeprecatedStorageQuota]",
-    "userAgent−Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "sendBeacon−function sendBeacon() { [native code] }",
     "hardwareConcurrency−32",
-    "appVersion−5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "credentials−[object CredentialsContainer]",
     "storage−[object StorageManager]",
     "cookieEnabled−true",
@@ -117,7 +110,6 @@ navigator_key = [
     "pdfViewerEnabled−true",
     "hardwareConcurrency−32",
     "xr−[object XRSystem]",
-    "userAgent−Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
     "webdriver−false",
     "getInstalledRelatedApps−function getInstalledRelatedApps() { [native code] }",
     "getInstalledRelatedApps−function getInstalledRelatedApps() { [native code] }",
@@ -439,15 +431,13 @@ def get_parse_time():
 
 
 def get_config(user_agent):
-    core = random.choice(cores)
-    screen = random.choice(screens)
     config = [
-        core + screen,
+        random.randint(1080, 1440+1080),
         get_parse_time(),
         4294705152,
         0,
         user_agent,
-        random.choice(cached_scripts) if cached_scripts else None,
+        "",
         cached_dpl,
         "en-US",
         "en-US,es-US,en,es",
@@ -457,6 +447,8 @@ def get_config(user_agent):
         random.choice(window_key),
         time.perf_counter(),
         str(uuid.uuid4()),
+        "",
+        random.choice(cores),
     ]
     return config
 

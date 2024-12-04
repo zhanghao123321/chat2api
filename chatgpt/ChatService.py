@@ -37,6 +37,7 @@ class ChatService:
         self.req_token = get_req_token(origin_token)
         self.chat_token = "gAAAAAB"
         self.s = None
+        self.ss = None
         self.ws = None
 
     async def set_dynamic_data(self, data):
