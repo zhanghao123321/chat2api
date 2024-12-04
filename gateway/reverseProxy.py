@@ -256,7 +256,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                .replace("webrtc.chatgpt.com", origin_host)
                                .replace("cdn.oaistatic.com", origin_host)
                                # .replace("files.oaiusercontent.com", origin_host)
-                               .replace("chatgpt.com", origin_host)
+                               .replace("https://chatgpt.com", "")
                                .replace("https", petrol))
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")
