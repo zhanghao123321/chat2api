@@ -17,12 +17,12 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-06T01:47:36.226Z",
+                        "expires": "2025-03-06T05:21:46.188Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
                     "dataUpdateCount": 1,
-                    "dataUpdatedAt": 1733449656326,
+                    "dataUpdatedAt": 1733462506290,
                     "error": null,
                     "errorUpdateCount": 0,
                     "errorUpdatedAt": 0,
@@ -39,7 +39,7 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-06T01:47:36.226Z",
+                        "expires": "2025-03-06T05:21:46.188Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
@@ -62,7 +62,7 @@
                                 "14938527": {
                                     "name": "14938527",
                                     "value": false,
-                                    "rule_id": "default",
+                                    "rule_id": "6ZX1lRsBENhTh01tU69cEF:10.00:7",
                                     "secondary_exposures": []
                                 },
                                 "16325302": {
@@ -426,8 +426,8 @@
                                 },
                                 "719574156": {
                                     "name": "719574156",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "4FbCJ49ZGiMh8nKihq0RHK",
                                     "secondary_exposures": []
                                 },
                                 "730579107": {
@@ -444,7 +444,7 @@
                                 },
                                 "740954505": {
                                     "name": "740954505",
-                                    "value": false,
+                                    "value": true,
                                     "rule_id": "2Ey97LJY7QymPfJfxULJwr:85.00:6",
                                     "secondary_exposures": [
                                         {
@@ -746,8 +746,8 @@
                                 },
                                 "1489221567": {
                                     "name": "1489221567",
-                                    "value": false,
-                                    "rule_id": "z06JxGlMXQVrwG418FqnU",
+                                    "value": true,
+                                    "rule_id": "z06JHEAwILRjZXDBUfee6",
                                     "secondary_exposures": []
                                 },
                                 "1524207076": {
@@ -1059,8 +1059,8 @@
                                 },
                                 "2542814321": {
                                     "name": "2542814321",
-                                    "value": true,
-                                    "rule_id": "1m1xZtjqqNjZ3o8AOuRHeU",
+                                    "value": false,
+                                    "rule_id": "6Usmt3Th0mkUkVQJ0oyeST:0.00:1",
                                     "secondary_exposures": []
                                 },
                                 "2544616245": {
@@ -2787,7 +2787,7 @@
                                         {
                                             "gate": "14938527",
                                             "gateValue": "false",
-                                            "ruleID": "default"
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:10.00:7"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -3598,18 +3598,18 @@
                                         "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
                                         "use_phone_number": false,
-                                        "login_allow_phone": false,
+                                        "login_allow_phone": true,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false
                                     },
-                                    "group": "targetingGate",
-                                    "rule_id": "targetingGate",
+                                    "group": "launchedGroup",
+                                    "rule_id": "launchedGroup",
                                     "is_device_based": true,
                                     "secondary_exposures": [
                                         {
                                             "gate": "1414026179",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "11Agn4Yr6zJFKtuyOs5Upr"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -3803,10 +3803,16 @@
                                             "canvas"
                                         ]
                                     },
-                                    "group": "layerAssignment",
-                                    "rule_id": "layerAssignment",
+                                    "group": "targetingGate",
+                                    "rule_id": "targetingGate",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1016364891",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
                                     "explicit_parameters": [
                                         "enable_mobile_app_upsell_banner"
                                     ],
@@ -5872,11 +5878,22 @@
                                             "canvas"
                                         ]
                                     },
-                                    "group": "default",
-                                    "rule_id": "default",
+                                    "group": "targetingGate",
+                                    "rule_id": "targetingGate",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
-                                    "explicit_parameters": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1016364891",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
+                                    "explicit_parameters": [
+                                        "enable_mobile_app_upsell_banner"
+                                    ],
+                                    "allocated_experiment_name": "2724953007",
+                                    "is_experiment_active": true,
+                                    "is_user_in_experiment": false,
                                     "undelegated_secondary_exposures": []
                                 },
                                 "871635014": {
@@ -6097,7 +6114,7 @@
                                         {
                                             "gate": "14938527",
                                             "gateValue": "false",
-                                            "ruleID": "default"
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:10.00:7"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -6501,13 +6518,13 @@
                                 "sdkType": "statsig-node",
                                 "sdkVersion": "5.26.0"
                             },
-                            "time": 1733449591883,
+                            "time": 1733462235338,
                             "evaluated_keys": {
                                 "userID": "user-chatgpt",
                                 "customIDs": {
-                                    "WebAnonymousCookieID": "b9d1ad44-271e-45b2-9ea5-3f15269c598c",
-                                    "DeviceId": "b9d1ad44-271e-45b2-9ea5-3f15269c598c",
-                                    "stableID": "b9d1ad44-271e-45b2-9ea5-3f15269c598c"
+                                    "WebAnonymousCookieID": "e36f7c12-b4c8-4705-b0ef-c98e1994e3f0",
+                                    "DeviceId": "e36f7c12-b4c8-4705-b0ef-c98e1994e3f0",
+                                    "stableID": "e36f7c12-b4c8-4705-b0ef-c98e1994e3f0"
                                 }
                             },
                             "hash_used": "djb2",
@@ -6525,7 +6542,7 @@
                 "isIos": false,
                 "isAndroidChrome": false,
                 "isElectron": false,
-                "cspScriptNonce": "cdf9b650-861c-444c-b543-6ee53be21482"
+                "cspScriptNonce": "2763a2f6-2c23-422d-9dae-db7fc5037af6"
             },
             "routes/_conversation": {
                 "prefetchSearch": null
