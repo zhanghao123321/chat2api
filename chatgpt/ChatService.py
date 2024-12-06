@@ -288,6 +288,7 @@ class ChatService:
 
         if self.gizmo_id:
             conversation_mode = {"kind": "gizmo_interaction", "gizmo_id": self.gizmo_id}
+            logger.info(f"Gizmo id: {self.gizmo_id}")
         else:
             conversation_mode = {"kind": "primary_assistant"}
 

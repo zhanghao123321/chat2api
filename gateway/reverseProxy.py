@@ -13,7 +13,7 @@ from chatgpt.authorization import verify_token, get_req_token
 from chatgpt.fp import get_fp
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import chatgpt_base_url_list, sentinel_proxy_url_list, force_no_history
+from utils.configs import chatgpt_base_url_list, sentinel_proxy_url_list, force_no_history, file_host, voice_host
 
 
 def generate_current_time():
@@ -259,17 +259,17 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     if "public-api/" in path:
                         content = (content
                                    .replace("ab.chatgpt.com", origin_host)
-                                   .replace("webrtc.chatgpt.com", origin_host)
                                    .replace("cdn.oaistatic.com", origin_host)
-                                   # .replace("files.oaiusercontent.com", origin_host)
-                                   .replace("chatgpt.com", "")
+                                   .replace("webrtc.chatgpt.com", voice_host if voice_host else "webrtc.chatgpt.com")
+                                   .replace("files.oaiusercontent.com", file_host if file_host else "files.oaiusercontent.com")
+                                   .replace("https://chatgpt.com", "")
                                    .replace("https", petrol))
                     else:
                         content = (content
                                    .replace("ab.chatgpt.com", origin_host)
-                                   .replace("webrtc.chatgpt.com", origin_host)
                                    .replace("cdn.oaistatic.com", origin_host)
-                                   # .replace("files.oaiusercontent.com", origin_host)
+                                   .replace("webrtc.chatgpt.com", voice_host if voice_host else "webrtc.chatgpt.com")
+                                   .replace("files.oaiusercontent.com", file_host if file_host else "files.oaiusercontent.com")
                                    .replace("chatgpt.com", origin_host)
                                    .replace("https", petrol))
                     rheaders = dict(r.headers)
