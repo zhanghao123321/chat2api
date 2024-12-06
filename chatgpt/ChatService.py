@@ -19,12 +19,12 @@ from utils.Logger import logger
 from utils.configs import (
     chatgpt_base_url_list,
     ark0se_token_url_list,
+    sentinel_proxy_url_list,
     history_disabled,
     pow_difficulty,
     conversation_only,
     enable_limit,
     upload_by_url,
-    check_model,
     auth_key,
     turnstile_solver_url,
     oai_language,
@@ -37,6 +37,7 @@ class ChatService:
         self.req_token = get_req_token(origin_token)
         self.chat_token = "gAAAAAB"
         self.s = None
+        self.ss = None
         self.ws = None
 
     async def set_dynamic_data(self, data):
@@ -86,6 +87,10 @@ class ChatService:
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
 
         self.s = Client(proxy=self.proxy_url, impersonate=self.impersonate)
+        if sentinel_proxy_url_list:
+            self.ss = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=self.impersonate)
+        else:
+            self.ss = self.s
 
         self.persona = None
         self.ark0se_token = None
@@ -126,6 +131,11 @@ class ChatService:
     async def set_model(self):
         self.origin_model = self.data.get("model", "gpt-3.5-turbo-0125")
         self.resp_model = model_proxy.get(self.origin_model, self.origin_model)
+        if "gizmo" in self.origin_model or "g-" in self.origin_model:
+            self.gizmo_id = "g-" + self.origin_model.split("g-")[-1]
+        else:
+            self.gizmo_id = None
+
         if "o1-preview" in self.origin_model:
             self.req_model = "o1-preview"
         elif "o1-mini" in self.origin_model:
@@ -142,8 +152,6 @@ class ChatService:
             self.req_model = "gpt-4o"
         elif "gpt-4-mobile" in self.origin_model:
             self.req_model = "gpt-4-mobile"
-        elif "gpt-4-gizmo" in self.origin_model:
-            self.req_model = "gpt-4o"
         elif "gpt-4" in self.origin_model:
             self.req_model = "gpt-4"
         elif "gpt-3.5" in self.origin_model:
@@ -151,7 +159,7 @@ class ChatService:
         elif "auto" in self.origin_model:
             self.req_model = "auto"
         else:
-            self.req_model = "auto"
+            self.req_model = "gpt-4o"
 
     async def get_chat_requirements(self):
         if conversation_only:
@@ -162,41 +170,23 @@ class ChatService:
             config = get_config(self.user_agent)
             p = get_requirements_token(config)
             data = {'p': p}
-            r = await self.s.post(url, headers=headers, json=data, timeout=5)
+            r = await self.ss.post(url, headers=headers, json=data, timeout=5)
             if r.status_code == 200:
                 resp = r.json()
 
-                if check_model:
-                    r = await self.s.get(f'{self.base_url}/models', headers=headers, timeout=5)
-                    if r.status_code == 200:
-                        models = r.json().get('models')
-                        if not any(self.req_model in model.get("slug", "") for model in models):
-                            logger.error(f"Model {self.req_model} not support.")
-                            raise HTTPException(
-                                status_code=404,
-                                detail={
-                                    "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
-                                    "type": "invalid_request_error",
-                                    "param": None,
-                                    "code": "model_not_found",
-                                },
-                            )
-                    else:
-                        raise HTTPException(status_code=404, detail="Failed to get models")
-                else:
-                    self.persona = resp.get("persona")
-                    if self.persona != "chatgpt-paid":
-                        if self.req_model == "gpt-4":
-                            logger.error(f"Model {self.resp_model} not support for {self.persona}")
-                            raise HTTPException(
-                                status_code=404,
-                                detail={
-                                    "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
-                                    "type": "invalid_request_error",
-                                    "param": None,
-                                    "code": "model_not_found",
-                                },
-                            )
+                self.persona = resp.get("persona")
+                if self.persona != "chatgpt-paid":
+                    if self.req_model == "gpt-4" or self.req_model == "o1-preview":
+                        logger.error(f"Model {self.resp_model} not support for {self.persona}")
+                        raise HTTPException(
+                            status_code=404,
+                            detail={
+                                "message": f"The model `{self.origin_model}` does not exist or you do not have access to it.",
+                                "type": "invalid_request_error",
+                                "param": None,
+                                "code": "model_not_found",
+                            },
+                        )
 
                 turnstile = resp.get('turnstile', {})
                 turnstile_required = turnstile.get('required')
@@ -296,9 +286,9 @@ class ChatService:
             self.chat_headers.pop('openai-sentinel-ark' + 'ose-token', None)
             self.chat_headers.pop('openai-sentinel-turnstile-token', None)
 
-        if "gpt-4-gizmo" in self.origin_model:
-            gizmo_id = self.origin_model.split("gpt-4-gizmo-")[-1]
-            conversation_mode = {"kind": "gizmo_interaction", "gizmo_id": gizmo_id}
+        if self.gizmo_id:
+            conversation_mode = {"kind": "gizmo_interaction", "gizmo_id": self.gizmo_id}
+            logger.info(f"Gizmo id: {self.gizmo_id}")
         else:
             conversation_mode = {"kind": "primary_assistant"}
 
@@ -515,6 +505,10 @@ class ChatService:
     async def close_client(self):
         if self.s:
             await self.s.close()
+            del self.s
+        if self.ss:
+            await self.ss.close()
+            del self.ss
         if self.ws:
             await self.ws.close()
             del self.ws
