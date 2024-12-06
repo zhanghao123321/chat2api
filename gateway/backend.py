@@ -48,7 +48,7 @@ async def check_account(request: Request):
         for key in check_account_info.get("accounts", {}).keys():
             account_id = check_account_info["accounts"][key]["account"]["account_id"]
             globals.seed_map[token]["user_id"] = \
-            check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
+                check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
             check_account_info["accounts"][key]["account"]["account_user_id"] = f"user-chatgpt__{account_id}"
         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
             json.dump(globals.seed_map, f, indent=4)
@@ -257,7 +257,8 @@ if no_sentinel:
         fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
-        user_agent = fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        user_agent = fp.get("user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
 
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         proof_token = None
@@ -265,7 +266,8 @@ if no_sentinel:
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua", "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
+                                    "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
         }
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
@@ -280,7 +282,7 @@ if no_sentinel:
         p = get_requirements_token(config)
         data = {'p': p}
         r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                              timeout=10)
+                               timeout=10)
         resp = r.json()
         turnstile = resp.get('turnstile', {})
         turnstile_required = turnstile.get('required')
@@ -347,9 +349,8 @@ if no_sentinel:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
             conv_key = r.cookies.get("conv_key", "")
-            response = StreamingResponse(content_generator(r, token, history),
-                                         media_type=r.headers.get("content-type", ""),
-                                         background=background)
+            response = StreamingResponse(content_generator(r, token, history), headers=rheaders,
+                                         media_type=r.headers.get("content-type", ""), background=background)
             response.set_cookie("conv_key", value=conv_key)
             return response
         else:
