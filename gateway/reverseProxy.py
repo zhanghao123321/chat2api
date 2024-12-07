@@ -186,23 +186,21 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             "origin": base_url,
             "referer": f"{base_url}/"
         })
-        if "ab.chatgpt.com" in base_url:
+        if "v1/initialize" in path:
+            headers.update({"user-agent": request.headers.get("user-agent")})
             if "statsig-api-key" not in headers:
                 headers.update({
                     "statsig-sdk-type": "js-client",
                     "statsig-api-key": "client-tnE5GCU2F2cTxRiMbvTczMDT1jpwIigZHsZSdqiy4u",
                     "statsig-sdk-version": "5.1.0",
-                    "statsig-client-time": int(time.time() * 1000)
+                    "statsig-client-time": int(time.time() * 1000),
                 })
 
         token = headers.get("authorization", "").replace("Bearer ", "")
         if token:
             req_token = await get_real_req_token(token)
             access_token = await verify_token(req_token)
-            headers.update({
-                "authorization": f"Bearer {access_token}",
-                "oai-device-id": fp.get("oai-device-id", str(uuid.uuid4()))
-            })
+            headers.update({"authorization": f"Bearer {access_token}"})
 
         data = await request.body()
 
@@ -258,20 +256,21 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     content = await r.atext()
                     if "public-api/" in path:
                         content = (content
-                                   .replace("ab.chatgpt.com", origin_host)
-                                   .replace("cdn.oaistatic.com", origin_host)
+                                   .replace("https://ab.chatgpt.com", f"{petrol}://{origin_host}")
+                                   .replace("https://cdn.oaistatic.com", f"{petrol}://{origin_host}")
                                    .replace("webrtc.chatgpt.com", voice_host if voice_host else "webrtc.chatgpt.com")
                                    .replace("files.oaiusercontent.com", file_host if file_host else "files.oaiusercontent.com")
-                                   .replace("https://chatgpt.com", "")
-                                   .replace("https", petrol))
+                                   .replace("chatgpt.com/ces", f"{origin_host}/ces")
+                                   )
                     else:
                         content = (content
-                                   .replace("ab.chatgpt.com", origin_host)
-                                   .replace("cdn.oaistatic.com", origin_host)
+                                   .replace("https://ab.chatgpt.com", f"{petrol}://{origin_host}")
+                                   .replace("https://cdn.oaistatic.com", f"{petrol}://{origin_host}")
                                    .replace("webrtc.chatgpt.com", voice_host if voice_host else "webrtc.chatgpt.com")
                                    .replace("files.oaiusercontent.com", file_host if file_host else "files.oaiusercontent.com")
-                                   .replace("chatgpt.com", origin_host)
-                                   .replace("https", petrol))
+                                   .replace("https://chatgpt.com", f"{petrol}://{origin_host}")
+                                   .replace("chatgpt.com/ces", f"{origin_host}/ces")
+                                   )
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")
                     cache_control = rheaders.get("cache-control", "")
