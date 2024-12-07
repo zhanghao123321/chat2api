@@ -18,7 +18,8 @@ from gateway.chatgpt import chatgpt_html
 from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list
 from utils.Client import Client
 from utils.Logger import logger
-from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel
+from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel, sentinel_proxy_url_list, \
+    force_no_history
 
 banned_paths = [
     "backend-api/accounts/logout_all",
@@ -47,7 +48,7 @@ async def check_account(request: Request):
         for key in check_account_info.get("accounts", {}).keys():
             account_id = check_account_info["accounts"][key]["account"]["account_id"]
             globals.seed_map[token]["user_id"] = \
-            check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
+                check_account_info["accounts"][key]["account"]["account_user_id"].split("__")[0]
             check_account_info["accounts"][key]["account"]["account_user_id"] = f"user-chatgpt__{account_id}"
         with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
             json.dump(globals.seed_map, f, indent=4)
@@ -256,7 +257,8 @@ if no_sentinel:
         fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
-        user_agent = fp.get("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+        user_agent = fp.get("user-agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
 
         host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         proof_token = None
@@ -264,18 +266,23 @@ if no_sentinel:
 
         headers = {
             key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua", "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
+            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
+                                    "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
         }
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
         client = Client(proxy=proxy_url, impersonate=impersonate)
+        if sentinel_proxy_url_list:
+            clients = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=impersonate)
+        else:
+            clients = client
 
         config = get_config(user_agent)
         p = get_requirements_token(config)
         data = {'p': p}
-        r = await client.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                              timeout=10)
+        r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
+                               timeout=10)
         resp = r.json()
         turnstile = resp.get('turnstile', {})
         turnstile_required = turnstile.get('required')
@@ -309,19 +316,43 @@ if no_sentinel:
         params = dict(request.query_params)
         data = await request.body()
         request_cookies = dict(request.cookies)
-        background = BackgroundTask(client.close)
+
+        async def c_close(client, clients):
+            if client:
+                await client.close()
+                del client
+            if clients:
+                await clients.close()
+                del clients
+
+        history = True
+        try:
+            req_json = json.loads(data)
+            history = not req_json.get("history_and_training_disabled", False)
+        except Exception:
+            pass
+        if force_no_history:
+            history = False
+            req_json = json.loads(data)
+            req_json["history_and_training_disabled"] = True
+            data = json.dumps(req_json).encode("utf-8")
+
+        background = BackgroundTask(c_close, client, clients)
         r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
                                      cookies=request_cookies, data=data, stream=True, allow_redirects=False)
         rheaders = r.headers
+        logger.info(f"Request token: {req_token}")
+        logger.info(f"Request proxy: {proxy_url}")
+        logger.info(f"Request UA: {user_agent}")
+        logger.info(f"Request impersonate: {impersonate}")
         if x_sign:
             rheaders.update({"x-sign": x_sign})
         if 'stream' in rheaders.get("content-type", ""):
-            logger.info(f"Request token: {req_token}")
-            logger.info(f"Request proxy: {proxy_url}")
-            logger.info(f"Request UA: {user_agent}")
-            logger.info(f"Request impersonate: {impersonate}")
-            return StreamingResponse(content_generator(r, token), headers=rheaders,
-                                     media_type=rheaders.get("content-type"), background=background)
+            conv_key = r.cookies.get("conv_key", "")
+            response = StreamingResponse(content_generator(r, token, history), headers=rheaders,
+                                         media_type=r.headers.get("content-type", ""), background=background)
+            response.set_cookie("conv_key", value=conv_key)
+            return response
         else:
             return Response(content=(await r.atext()), headers=rheaders, media_type=rheaders.get("content-type"),
                             status_code=r.status_code, background=background)

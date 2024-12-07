@@ -42,13 +42,13 @@ class Client:
         return r
 
     async def close(self):
-        if self.session:
+        if hasattr(self, 'session'):
             try:
                 await self.session.close()
                 del self.session
             except Exception:
                 pass
-        if self.session2:
+        if hasattr(self, 'session2'):
             try:
                 await self.session2.close()
                 del self.session2
