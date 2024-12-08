@@ -138,6 +138,8 @@ class ChatService:
 
         if "o1-preview" in self.origin_model:
             self.req_model = "o1-preview"
+        elif "o1-pro" in self.origin_model:
+            self.req_model = "o1-pro"
         elif "o1-mini" in self.origin_model:
             self.req_model = "o1-mini"
         elif "o1" in self.origin_model:
@@ -250,8 +252,8 @@ class ChatService:
                     detail = r.json().get("detail", r.json())
                 else:
                     detail = r.text
-                if "cf-spinner-please-wait" in detail:
-                    raise HTTPException(status_code=r.status_code, detail="cf-spinner-please-wait")
+                if "cf_chl_opt" in detail:
+                    raise HTTPException(status_code=r.status_code, detail="cf_chl_opt")
                 if r.status_code == 429:
                     raise HTTPException(status_code=r.status_code, detail="rate-limit")
                 raise HTTPException(status_code=r.status_code, detail=detail)
@@ -295,8 +297,17 @@ class ChatService:
         logger.info(f"Model mapping: {self.origin_model} -> {self.req_model}")
         self.chat_request = {
             "action": "next",
+            "client_contextual_info": {
+                "is_dark_mode": False,
+                "time_since_loaded": random.randint(50, 500),
+                "page_height": random.randint(500, 1000),
+                "page_width": random.randint(1000, 2000),
+                "pixel_ratio": 1.5,
+                "screen_height": random.randint(800, 1200),
+                "screen_width": random.randint(1200, 2200),
+            },
             "conversation_mode": conversation_mode,
-            "force_nulligen": False,
+            "conversation_origin": None,
             "force_paragen": False,
             "force_paragen_model_slug": "",
             "force_rate_limit": False,
@@ -304,9 +315,14 @@ class ChatService:
             "history_and_training_disabled": self.history_disabled,
             "messages": chat_messages,
             "model": self.req_model,
+            "paragen_cot_summary_display_override": "allow",
+            "paragen_stream_type_override": None,
             "parent_message_id": self.parent_message_id if self.parent_message_id else f"{uuid.uuid4()}",
             "reset_rate_limits": False,
             "suggestions": [],
+            "supported_encodings": [],
+            "system_hints": [],
+            "timezone": "America/Los_Angeles",
             "timezone_offset_min": -480,
             "variant_purpose": "comparison_implicit",
             "websocket_request_id": f"{uuid.uuid4()}",
@@ -327,9 +343,9 @@ class ChatService:
                     if r.status_code == 429:
                         check_is_limit(detail, token=self.req_token, model=self.req_model)
                 else:
-                    if "cf-spinner-please-wait" in rtext:
-                        # logger.error(f"Failed to send conversation: cf-spinner-please-wait")
-                        raise HTTPException(status_code=r.status_code, detail="cf-spinner-please-wait")
+                    if "cf_chl_opt" in rtext:
+                        # logger.error(f"Failed to send conversation: cf_chl_opt")
+                        raise HTTPException(status_code=r.status_code, detail="cf_chl_opt")
                     if r.status_code == 429:
                         # logger.error(f"Failed to send conversation: rate-limit")
                         raise HTTPException(status_code=r.status_code, detail="rate-limit")
