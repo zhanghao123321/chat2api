@@ -151,20 +151,17 @@ async def chatgpt_account_check(access_token):
         auth_info.update({"accounts_info": accounts_info})
 
         account_ordering = accounts_info.get("account_ordering", [])
-        is_deactivated = None
+        is_deactivated = True
         plan_type = None
         team_ids = []
         for account in account_ordering:
-            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated",
-                                                                                                    False)
+            this_is_deactivated = accounts_info['accounts'].get(account, {}).get("account", {}).get("is_deactivated", False)
             this_plan_type = accounts_info['accounts'].get(account, {}).get("account", {}).get("plan_type", "free")
 
-            if this_is_deactivated and is_deactivated is None:
-                is_deactivated = True
-            else:
+            if not this_is_deactivated:
                 is_deactivated = False
 
-            if "team" in this_plan_type:
+            if "team" in this_plan_type and not this_is_deactivated:
                 plan_type = this_plan_type
                 team_ids.append(account)
             elif plan_type is None:
