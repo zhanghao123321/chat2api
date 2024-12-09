@@ -10,7 +10,7 @@ from utils.kv_utils import set_value_for_key
 
 @app.post("/v1/initialize")
 async def initialize(request: Request):
-    initialize_response = (await chatgpt_reverse_proxy(request, f"/v1/initialize"))
+    initialize_response = (await chatgpt_reverse_proxy(request, f"v1/initialize"))
     initialize_str = initialize_response.body.decode('utf-8')
     initialize_json = json.loads(initialize_str)
     set_value_for_key(initialize_json, "ip", "8.8.8.8")
@@ -21,6 +21,11 @@ async def initialize(request: Request):
 @app.post("/v1/rgstr")
 async def rgstr():
     return Response(status_code=202, content=json.dumps({"success": True}, indent=4), media_type="application/json")
+
+
+@app.get("/ces/v1/projects/oai/settings")
+async def ces_v1_projects_oai_settings():
+    return Response(status_code=200, content=json.dumps({"integrations":{"Segment.io":{"apiHost":"chatgpt.com/ces/v1","apiKey":"oai"}}}, indent=4), media_type="application/json")
 
 
 @app.post("/ces/v1/{path:path}")
