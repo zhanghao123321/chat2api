@@ -3,6 +3,8 @@ services:
     image: caomingjun/warp
     container_name: warp
     restart: always
+    devices:
+      - /dev/net/tun:/dev/net/tun
     environment:
       - WARP_SLEEP=5
     cap_add:
