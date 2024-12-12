@@ -24,11 +24,13 @@ from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, n
 banned_paths = [
     "backend-api/accounts/logout_all",
     "backend-api/accounts/deactivate",
-    "backend-api/payments/checkout",
+    "backend-api/payments",
+    "backend-api/subscriptions",
     "backend-api/user_system_messages",
     "backend-api/memories",
     "backend-api/settings/clear_account_user_memory",
-    "backend-api/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+    "backend-api/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+    "backend-api/accounts/mfa_info",
     "backend-api/accounts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/invites",
     "admin",
 ]
