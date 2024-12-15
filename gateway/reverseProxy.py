@@ -205,7 +205,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         data = await request.body()
 
         history = True
-        if path.endswith("backend-api/conversation"):
+        if path.endswith("backend-api/conversation") or path.endswith("backend-alt/conversation"):
             try:
                 req_json = json.loads(data)
                 history = not req_json.get("history_and_training_disabled", False)
@@ -249,7 +249,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                         status_code=r.status_code, background=background)
                 return response
             else:
-                if "/backend-api/conversation" in path or "/register-websocket" in path:
+                if path.endswith("backend-api/conversation") or path.endswith("backend-alt/conversation") or "/register-websocket" in path:
                     response = Response(content=(await r.acontent()), media_type=r.headers.get("content-type"),
                                         status_code=r.status_code, background=background)
                 else:

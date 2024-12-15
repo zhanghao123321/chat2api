@@ -17,12 +17,12 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-11T03:06:04.653Z",
+                        "expires": "2025-03-15T11:37:16.460Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
                     "dataUpdateCount": 1,
-                    "dataUpdatedAt": 1733886364747,
+                    "dataUpdatedAt": 1734262636678,
                     "error": null,
                     "errorUpdateCount": 0,
                     "errorUpdatedAt": 0,
@@ -39,14 +39,14 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-11T03:06:04.653Z",
+                        "expires": "2025-03-15T11:37:16.460Z",
                         "accessToken": "",
                         "authProvider": "login-web"
                     },
                     "user": {
                         "id": "user-chatgpt"
                     },
-                    "cluster": "unified-4",
+                    "cluster": "unified-16",
                     "userCountry": "US",
                     "userRegion": "New York",
                     "userRegionCode": "1",
@@ -59,10 +59,16 @@
                     "statsig": {
                         "payload": {
                             "feature_gates": {
+                                "5541454": {
+                                    "name": "5541454",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
                                 "14938527": {
                                     "name": "14938527",
-                                    "value": false,
-                                    "rule_id": "6ZX1lRsBENhTh01tU69cEF:20.00:10",
+                                    "value": true,
+                                    "rule_id": "6ZX1lRsBENhTh01tU69cEF:50.00:11",
                                     "secondary_exposures": []
                                 },
                                 "16325302": {
@@ -138,12 +144,12 @@
                                 "138956718": {
                                     "name": "138956718",
                                     "value": false,
-                                    "rule_id": "default",
+                                    "rule_id": "6Iz9DOvfXcdEdluYzsLW4j",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1132191510",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "dHE9Ru37UQ9JP4Jaewul2:100.00:1"
                                         }
                                     ]
                                 },
@@ -218,7 +224,19 @@
                                         {
                                             "gate": "3805873235",
                                             "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:0.00:1"
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                        }
+                                    ]
+                                },
+                                "223382091": {
+                                    "name": "223382091",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "3765213438",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
                                         }
                                     ]
                                 },
@@ -290,6 +308,12 @@
                                     "name": "389809369",
                                     "value": false,
                                     "rule_id": "5WK3s5Ax4bJcCZUXG1aCaM:0.00:2",
+                                    "secondary_exposures": []
+                                },
+                                "408434742": {
+                                    "name": "408434742",
+                                    "value": true,
+                                    "rule_id": "7Gx2zHvJkkluct689OcIdo:100.00:2",
                                     "secondary_exposures": []
                                 },
                                 "437245079": {
@@ -673,12 +697,18 @@
                                 },
                                 "1132191510": {
                                     "name": "1132191510",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "dHE9Ru37UQ9JP4Jaewul2:100.00:1",
                                     "secondary_exposures": []
                                 },
                                 "1159399595": {
                                     "name": "1159399595",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
+                                "1185336854": {
+                                    "name": "1185336854",
                                     "value": false,
                                     "rule_id": "default",
                                     "secondary_exposures": []
@@ -693,18 +723,6 @@
                                     "name": "1236320153",
                                     "value": true,
                                     "rule_id": "7Bq8t59h8MTmfDfmTxiCBa:100.00:6",
-                                    "secondary_exposures": []
-                                },
-                                "1239490451": {
-                                    "name": "1239490451",
-                                    "value": false,
-                                    "rule_id": "default",
-                                    "secondary_exposures": []
-                                },
-                                "1239490452": {
-                                    "name": "1239490452",
-                                    "value": false,
-                                    "rule_id": "default",
                                     "secondary_exposures": []
                                 },
                                 "1291584794": {
@@ -743,17 +761,7 @@
                                     "rule_id": "default",
                                     "secondary_exposures": [
                                         {
-                                            "gate": "697158486",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvTiw548r4tjqy7oHEcAL"
-                                        },
-                                        {
-                                            "gate": "3199899666",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "2048457345",
+                                            "gate": "1185336854",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         }
@@ -848,7 +856,7 @@
                                         {
                                             "gate": "3805873235",
                                             "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:0.00:1"
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
                                         }
                                     ]
                                 },
@@ -856,12 +864,6 @@
                                     "name": "1568195116",
                                     "value": false,
                                     "rule_id": "KKhehNjRxNHoIWKNkqpU2",
-                                    "secondary_exposures": []
-                                },
-                                "1578703058": {
-                                    "name": "1578703058",
-                                    "value": false,
-                                    "rule_id": "2l4nEVMUnPuXkgprUm5zzs:1.00:2",
                                     "secondary_exposures": []
                                 },
                                 "1611573287": {
@@ -1085,17 +1087,7 @@
                                     "rule_id": "default",
                                     "secondary_exposures": [
                                         {
-                                            "gate": "697158486",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvTiw548r4tjqy7oHEcAL"
-                                        },
-                                        {
-                                            "gate": "3199899666",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "2048457345",
+                                            "gate": "1185336854",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         }
@@ -1202,7 +1194,7 @@
                                         {
                                             "gate": "3805873235",
                                             "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:0.00:1"
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
                                         }
                                     ]
                                 },
@@ -1326,7 +1318,7 @@
                                         {
                                             "gate": "3805873235",
                                             "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:0.00:1"
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
                                         }
                                     ]
                                 },
@@ -1460,7 +1452,7 @@
                                         {
                                             "gate": "3805873235",
                                             "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:0.00:1"
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
                                         }
                                     ]
                                 },
@@ -1520,18 +1512,18 @@
                                 },
                                 "3419264204": {
                                     "name": "3419264204",
-                                    "value": false,
-                                    "rule_id": "1SLt7ZIEzNa581wiqmmbrJ:0.00:1",
+                                    "value": true,
+                                    "rule_id": "TimnjAQwD9gvgtWvkJpnR:100.00:2",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1132191510",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
+                                            "gateValue": "true",
+                                            "ruleID": "dHE9Ru37UQ9JP4Jaewul2:100.00:1"
                                         },
                                         {
                                             "gate": "138956718",
                                             "gateValue": "false",
-                                            "ruleID": "default"
+                                            "ruleID": "6Iz9DOvfXcdEdluYzsLW4j"
                                         }
                                     ]
                                 },
@@ -1539,6 +1531,12 @@
                                     "name": "3435450078",
                                     "value": true,
                                     "rule_id": "2qCdHpFuWOOkibzLRL0zgn",
+                                    "secondary_exposures": []
+                                },
+                                "3472722167": {
+                                    "name": "3472722167",
+                                    "value": false,
+                                    "rule_id": "default",
                                     "secondary_exposures": []
                                 },
                                 "3483957186": {
@@ -1645,6 +1643,12 @@
                                 },
                                 "3768008236": {
                                     "name": "3768008236",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
+                                "3802166424": {
+                                    "name": "3802166424",
                                     "value": false,
                                     "rule_id": "default",
                                     "secondary_exposures": []
@@ -2035,9 +2039,7 @@
                                     "name": "488365967",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -2236,9 +2238,7 @@
                                     "name": "754469756",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -2259,10 +2259,10 @@
                                     "name": "790041403",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "prestart",
@@ -2308,9 +2308,7 @@
                                     "name": "917528628",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -2333,9 +2331,7 @@
                                     "name": "923531957",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -2358,13 +2354,13 @@
                                     "name": "938456440",
                                     "value": {
                                         "enable_indexing": true,
-                                        "wave": 10,
-                                        "enable_ux": false,
-                                        "enable_local_indexing": false,
+                                        "wave": 9,
+                                        "enable_ux": true,
+                                        "enable_local_indexing": true,
                                         "backfill_completed": false
                                     },
-                                    "group": "2FurbaJwwLPFodZHhOZyBO",
-                                    "rule_id": "2FurbaJwwLPFodZHhOZyBO",
+                                    "group": "2Furb94u4tGb4OrLGH3ViM",
+                                    "rule_id": "2Furb94u4tGb4OrLGH3ViM",
                                     "is_device_based": false,
                                     "secondary_exposures": [
                                         {
@@ -2790,10 +2786,10 @@
                                     "name": "1597388338",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "abandoned",
@@ -2867,16 +2863,16 @@
                                 "1856338298": {
                                     "name": "1856338298",
                                     "value": {
-                                        "forward_to_authapi": false
+                                        "forward_to_authapi": true
                                     },
-                                    "group": "targetingGate",
-                                    "rule_id": "targetingGate",
+                                    "group": "2RO4BOrVWPrsxRUPYNKPLe:override",
+                                    "rule_id": "2RO4BOrVWPrsxRUPYNKPLe:override",
                                     "is_device_based": true,
                                     "secondary_exposures": [
                                         {
                                             "gate": "14938527",
-                                            "gateValue": "false",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:20.00:10"
+                                            "gateValue": "true",
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -3042,9 +3038,7 @@
                                     "name": "2068644600",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -3135,9 +3129,7 @@
                                     "name": "2214103875",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -3181,10 +3173,10 @@
                                     "name": "2272050751",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "abandoned",
@@ -3409,10 +3401,10 @@
                                     "name": "2380789656",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "prestart",
@@ -3440,6 +3432,16 @@
                                             "ruleID": "7pUMK6uci7sslAj8bP7VEA"
                                         },
                                         {
+                                            "gate": "3802166424",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "5541454",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
                                             "gate": "1347376961",
                                             "gateValue": "false",
                                             "ruleID": ""
@@ -3449,7 +3451,8 @@
                                         "include_legacy_sidebar_contents",
                                         "enable_arch_updates",
                                         "include_floating_state",
-                                        "include_share_on_mobile"
+                                        "include_share_on_mobile",
+                                        "include_account_settings_move"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
@@ -3598,9 +3601,7 @@
                                     "name": "2497137017",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -3611,7 +3612,8 @@
                                     "is_device_based": true,
                                     "secondary_exposures": [],
                                     "explicit_parameters": [
-                                        "signup_allow_phone"
+                                        "signup_allow_phone",
+                                        "use_new_phone_ui"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
@@ -3666,24 +3668,33 @@
                                         "snowflake_composer_entry_point": false,
                                         "use_broad_rate_limit_language": false
                                     },
-                                    "group": "prestart",
-                                    "rule_id": "prestart",
+                                    "group": "targetingGate",
+                                    "rule_id": "targetingGate",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1132191510",
+                                            "gateValue": "true",
+                                            "ruleID": "dHE9Ru37UQ9JP4Jaewul2:100.00:1"
+                                        },
+                                        {
+                                            "gate": "138956718",
+                                            "gateValue": "false",
+                                            "ruleID": "6Iz9DOvfXcdEdluYzsLW4j"
+                                        }
+                                    ],
                                     "explicit_parameters": [
                                         "snowflake_composer_entry_point"
                                     ],
                                     "is_user_in_experiment": false,
-                                    "is_experiment_active": false,
+                                    "is_experiment_active": true,
                                     "is_in_layer": true
                                 },
                                 "2555105235": {
                                     "name": "2555105235",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": true,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -3710,9 +3721,7 @@
                                     "name": "2555870456",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -3834,10 +3843,10 @@
                                 "2663462255": {
                                     "name": "2663462255",
                                     "value": {
-                                        "is-enabled": false
+                                        "is-enabled": true
                                     },
-                                    "group": "4SAS7Q9b2Wbsmv8vvzWs2y",
-                                    "rule_id": "4SAS7Q9b2Wbsmv8vvzWs2y",
+                                    "group": "4SAS7ROdvekWFUGr6HS5lA",
+                                    "rule_id": "4SAS7ROdvekWFUGr6HS5lA",
                                     "is_device_based": true,
                                     "secondary_exposures": [
                                         {
@@ -4154,10 +4163,10 @@
                                     "name": "2795141704",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "prestart",
@@ -4663,9 +4672,7 @@
                                     "name": "3074105577",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -4868,10 +4875,10 @@
                                     "name": "3295035639",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
                                     "group": "prestart",
@@ -4968,9 +4975,7 @@
                                     "name": "3337889731",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -5178,9 +5183,7 @@
                                     "name": "3600059992",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -5805,14 +5808,14 @@
                                     "name": "660512088",
                                     "value": {
                                         "enable_arch_updates": false,
-                                        "include_legacy_sidebar_contents": false,
+                                        "include_legacy_sidebar_contents": true,
                                         "include_floating_state": false,
-                                        "include_share_on_mobile": true,
-                                        "include_account_settings_move": true,
+                                        "include_share_on_mobile": false,
+                                        "include_account_settings_move": false,
                                         "include_scrolling_behavior_update": false
                                     },
-                                    "group": "default",
-                                    "rule_id": "default",
+                                    "group": "prestart",
+                                    "rule_id": "prestart",
                                     "is_device_based": true,
                                     "secondary_exposures": [
                                         {
@@ -5836,12 +5839,27 @@
                                             "ruleID": "7pUMK6uci7sslAj8bP7VEA"
                                         },
                                         {
+                                            "gate": "3802166424",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "5541454",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
                                             "gate": "1347376961",
                                             "gateValue": "false",
                                             "ruleID": ""
                                         }
                                     ],
-                                    "explicit_parameters": [],
+                                    "explicit_parameters": [
+                                        "enable_arch_updates"
+                                    ],
+                                    "allocated_experiment_name": "790041403",
+                                    "is_experiment_active": false,
+                                    "is_user_in_experiment": false,
                                     "undelegated_secondary_exposures": [
                                         {
                                             "gate": "2558701922",
@@ -5862,6 +5880,16 @@
                                             "gate": "3011415004",
                                             "gateValue": "false",
                                             "ruleID": "7pUMK6uci7sslAj8bP7VEA"
+                                        },
+                                        {
+                                            "gate": "3802166424",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "5541454",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
                                         },
                                         {
                                             "gate": "1347376961",
@@ -5937,15 +5965,26 @@
                                         "snowflake_composer_entry_point": false,
                                         "use_broad_rate_limit_language": false
                                     },
-                                    "group": "prestart",
-                                    "rule_id": "prestart",
+                                    "group": "targetingGate",
+                                    "rule_id": "targetingGate",
                                     "is_device_based": false,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1132191510",
+                                            "gateValue": "true",
+                                            "ruleID": "dHE9Ru37UQ9JP4Jaewul2:100.00:1"
+                                        },
+                                        {
+                                            "gate": "138956718",
+                                            "gateValue": "false",
+                                            "ruleID": "6Iz9DOvfXcdEdluYzsLW4j"
+                                        }
+                                    ],
                                     "explicit_parameters": [
                                         "snowflake_composer_entry_point"
                                     ],
                                     "allocated_experiment_name": "2533035210",
-                                    "is_experiment_active": false,
+                                    "is_experiment_active": true,
                                     "is_user_in_experiment": false,
                                     "undelegated_secondary_exposures": []
                                 },
@@ -5980,9 +6019,7 @@
                                     "name": "1346366956",
                                     "value": {
                                         "use_email_otp": false,
-                                        "show_phone_number_signup": false,
                                         "signup_cta_copy": "SIGN_UP",
-                                        "use_phone_number": false,
                                         "login_allow_phone": false,
                                         "signup_allow_phone": false,
                                         "forwardToAuthApi": false,
@@ -6134,24 +6171,29 @@
                                 "1914829685": {
                                     "name": "1914829685",
                                     "value": {
-                                        "forward_to_authapi": false
+                                        "forward_to_authapi": true
                                     },
-                                    "group": "default",
-                                    "rule_id": "default",
+                                    "group": "2RO4BOrVWPrsxRUPYNKPLe:override",
+                                    "rule_id": "2RO4BOrVWPrsxRUPYNKPLe:override",
                                     "is_device_based": true,
                                     "secondary_exposures": [
                                         {
                                             "gate": "14938527",
-                                            "gateValue": "false",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:20.00:10"
+                                            "gateValue": "true",
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
                                         }
                                     ],
-                                    "explicit_parameters": [],
+                                    "explicit_parameters": [
+                                        "forward_to_authapi"
+                                    ],
+                                    "allocated_experiment_name": "1856338298",
+                                    "is_experiment_active": false,
+                                    "is_user_in_experiment": false,
                                     "undelegated_secondary_exposures": [
                                         {
                                             "gate": "14938527",
-                                            "gateValue": "false",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:20.00:10"
+                                            "gateValue": "true",
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
                                         }
                                     ]
                                 },
@@ -6288,13 +6330,13 @@
                                     "name": "3436367576",
                                     "value": {
                                         "enable_indexing": true,
-                                        "wave": 10,
-                                        "enable_ux": false,
-                                        "enable_local_indexing": false,
+                                        "wave": 9,
+                                        "enable_ux": true,
+                                        "enable_local_indexing": true,
                                         "backfill_completed": false
                                     },
-                                    "group": "2FurbaJwwLPFodZHhOZyBO",
-                                    "rule_id": "2FurbaJwwLPFodZHhOZyBO",
+                                    "group": "2Furb94u4tGb4OrLGH3ViM",
+                                    "rule_id": "2Furb94u4tGb4OrLGH3ViM",
                                     "is_device_based": false,
                                     "secondary_exposures": [
                                         {
@@ -6548,13 +6590,13 @@
                                 "sdkType": "statsig-node",
                                 "sdkVersion": "5.26.0"
                             },
-                            "time": 1733886069089,
+                            "time": 1734259034347,
                             "evaluated_keys": {
                                 "userID": "user-chatgpt",
                                 "customIDs": {
-                                    "WebAnonymousCookieID": "62cb17bc-8968-4405-8801-b2cd181bf75a",
-                                    "DeviceId": "62cb17bc-8968-4405-8801-b2cd181bf75a",
-                                    "stableID": "62cb17bc-8968-4405-8801-b2cd181bf75a"
+                                    "WebAnonymousCookieID": "ad300921-30cd-40ef-8c43-8a3cc2ad591f",
+                                    "DeviceId": "ad300921-30cd-40ef-8c43-8a3cc2ad591f",
+                                    "stableID": "ad300921-30cd-40ef-8c43-8a3cc2ad591f"
                                 }
                             },
                             "hash_used": "djb2",
@@ -6572,7 +6614,7 @@
                 "isIos": false,
                 "isAndroidChrome": false,
                 "isElectron": false,
-                "cspScriptNonce": "2c1aeec6-392b-43e2-8822-d0f90e909f00"
+                "cspScriptNonce": "e453b7b8-f3fa-4f24-9696-5f43a6914d0a"
             },
             "routes/_conversation": {
                 "prefetchSearch": null

@@ -315,6 +315,7 @@ if no_sentinel:
         }
 
 
+    @app.post("/backend-alt/conversation")
     @app.post("/backend-api/conversation")
     async def chat_conversations(request: Request):
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
@@ -413,7 +414,7 @@ if no_sentinel:
             data = json.dumps(req_json).encode("utf-8")
 
         background = BackgroundTask(c_close, client, clients)
-        r = await client.post_stream(f"{host_url}/backend-api/conversation", params=params, headers=headers,
+        r = await client.post_stream(f"{host_url}{request.url.path}", params=params, headers=headers,
                                      cookies=request_cookies, data=data, stream=True, allow_redirects=False)
         rheaders = r.headers
         logger.info(f"Request token: {req_token}")
