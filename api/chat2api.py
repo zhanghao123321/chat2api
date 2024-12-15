@@ -127,7 +127,10 @@ async def add_token(token: str):
 @app.post(f"/{api_prefix}/seed_tokens/clear" if api_prefix else "/seed_tokens/clear")
 async def clear_seed_tokens():
     globals.seed_map.clear()
+    globals.conversation_map.clear()
     with open(globals.SEED_MAP_FILE, "w", encoding="utf-8") as f:
+        f.write("{}")
+    with open(globals.CONVERSATION_MAP_FILE, "w", encoding="utf-8") as f:
         f.write("{}")
     logger.info(f"Seed token count: {len(globals.seed_map)}")
     return {"status": "success", "seed_tokens_count": len(globals.seed_map)}
