@@ -1,7 +1,6 @@
 import json
 import random
 import time
-import uuid
 from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
@@ -171,6 +170,9 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             base_url = "https://files.oaiusercontent.com"
         if "v1/" in path:
             base_url = "https://ab.chatgpt.com"
+        if "sandbox" in path:
+            base_url = "https://web-sandbox.oaiusercontent.com"
+            path = path.replace("sandbox/", "")
 
         token = request.cookies.get("token", "")
         req_token = await get_real_req_token(token)
@@ -268,9 +270,12 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                                    .replace("https://cdn.oaistatic.com", f"{petrol}://{origin_host}")
                                    .replace("webrtc.chatgpt.com", voice_host if voice_host else "webrtc.chatgpt.com")
                                    .replace("files.oaiusercontent.com", file_host if file_host else "files.oaiusercontent.com")
+                                   .replace("web-sandbox.oaiusercontent.com", f"{origin_host}/sandbox")
                                    .replace("https://chatgpt.com", f"{petrol}://{origin_host}")
                                    .replace("chatgpt.com/ces", f"{origin_host}/ces")
                                    )
+                    if base_url == "https://web-sandbox.oaiusercontent.com":
+                        content = content.replace("/assets", "/sandbox/assets")
                     rheaders = dict(r.headers)
                     content_type = rheaders.get("content-type", "")
                     cache_control = rheaders.get("cache-control", "")

@@ -93,6 +93,24 @@ async def get_gizmos_discovery_recent(request: Request):
         }
 
 
+@app.get("/backend-api/gizmos/snorlax/sidebar")
+async def get_gizmos_snorlax_sidebar(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith:
+        return await chatgpt_reverse_proxy(request, "backend-api/gizmos/snorlax/sidebar")
+    else:
+        return {"items": [], "cursor": None}
+
+
+@app.post("/backend-api/gizmos/snorlax/upsert")
+async def get_gizmos_snorlax_upsert(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith:
+        return await chatgpt_reverse_proxy(request, "backend-api/gizmos/snorlax/upsert")
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+
 @app.api_route("/backend-api/conversations", methods=["GET", "PATCH"])
 async def get_conversations(request: Request):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
@@ -260,41 +278,46 @@ if no_sentinel:
         else:
             clients = client
 
-        config = get_config(user_agent)
-        p = get_requirements_token(config)
-        data = {'p': p}
-        r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                               timeout=10)
-        resp = r.json()
-        turnstile = resp.get('turnstile', {})
-        turnstile_required = turnstile.get('required')
-        if turnstile_required:
-            turnstile_dx = turnstile.get("dx")
-            try:
-                if turnstile_solver_url:
-                    res = await client.post(turnstile_solver_url,
-                                            json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
-                    turnstile_token = res.json().get("t")
-            except Exception as e:
-                logger.info(f"Turnstile ignored: {e}")
+        try:
+            config = get_config(user_agent)
+            p = get_requirements_token(config)
+            data = {'p': p}
+            r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
+                                   timeout=10)
+            if r.status_code != 200:
+                raise HTTPException(status_code=r.status_code, detail="Failed to get chat requirements")
+            resp = r.json()
+            turnstile = resp.get('turnstile', {})
+            turnstile_required = turnstile.get('required')
+            if turnstile_required:
+                turnstile_dx = turnstile.get("dx")
+                try:
+                    if turnstile_solver_url:
+                        res = await client.post(turnstile_solver_url,
+                                                json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                        turnstile_token = res.json().get("t")
+                except Exception as e:
+                    logger.info(f"Turnstile ignored: {e}")
 
-        proofofwork = resp.get('proofofwork', {})
-        proofofwork_required = proofofwork.get('required')
-        if proofofwork_required:
-            proofofwork_diff = proofofwork.get("difficulty")
-            proofofwork_seed = proofofwork.get("seed")
-            proof_token, solved = await run_in_threadpool(
-                get_answer_token, proofofwork_seed, proofofwork_diff, config
-            )
-            if not solved:
-                raise HTTPException(status_code=403, detail="Failed to solve proof of work")
-        chat_token = resp.get('token')
+            proofofwork = resp.get('proofofwork', {})
+            proofofwork_required = proofofwork.get('required')
+            if proofofwork_required:
+                proofofwork_diff = proofofwork.get("difficulty")
+                proofofwork_seed = proofofwork.get("seed")
+                proof_token, solved = await run_in_threadpool(
+                    get_answer_token, proofofwork_seed, proofofwork_diff, config
+                )
+                if not solved:
+                    raise HTTPException(status_code=403, detail="Failed to solve proof of work")
+            chat_token = resp.get('token')
 
-        openai_sentinel_tokens_cache[req_token] = {
-            "chat_token": chat_token,
-            "proof_token": proof_token,
-            "turnstile_token": turnstile_token
-        }
+            openai_sentinel_tokens_cache[req_token] = {
+                "chat_token": chat_token,
+                "proof_token": proof_token,
+                "turnstile_token": turnstile_token
+            }
+        except Exception as e:
+            logger.error(f"Sentinel failed: {e}")
 
         return {
             "arkose": {
@@ -339,55 +362,59 @@ if no_sentinel:
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
-        client = Client(proxy=proxy_url, impersonate=impersonate)
-        if sentinel_proxy_url_list:
-            clients = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=impersonate)
-        else:
-            clients = client
+        try:
+            client = Client(proxy=proxy_url, impersonate=impersonate)
+            if sentinel_proxy_url_list:
+                clients = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=impersonate)
+            else:
+                clients = client
 
-        sentinel_tokens = openai_sentinel_tokens_cache.get(req_token, {})
-        openai_sentinel_tokens_cache.pop(req_token, None)
-        if not sentinel_tokens:
-            config = get_config(user_agent)
-            p = get_requirements_token(config)
-            data = {'p': p}
-            r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                                   timeout=10)
-            resp = r.json()
-            turnstile = resp.get('turnstile', {})
-            turnstile_required = turnstile.get('required')
-            if turnstile_required:
-                turnstile_dx = turnstile.get("dx")
-                try:
-                    if turnstile_solver_url:
-                        res = await client.post(turnstile_solver_url,
-                                                json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
-                        turnstile_token = res.json().get("t")
-                except Exception as e:
-                    logger.info(f"Turnstile ignored: {e}")
+            sentinel_tokens = openai_sentinel_tokens_cache.get(req_token, {})
+            openai_sentinel_tokens_cache.pop(req_token, None)
+            if not sentinel_tokens:
+                config = get_config(user_agent)
+                p = get_requirements_token(config)
+                data = {'p': p}
+                r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
+                                       timeout=10)
+                resp = r.json()
+                turnstile = resp.get('turnstile', {})
+                turnstile_required = turnstile.get('required')
+                if turnstile_required:
+                    turnstile_dx = turnstile.get("dx")
+                    try:
+                        if turnstile_solver_url:
+                            res = await client.post(turnstile_solver_url,
+                                                    json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                            turnstile_token = res.json().get("t")
+                    except Exception as e:
+                        logger.info(f"Turnstile ignored: {e}")
 
-            proofofwork = resp.get('proofofwork', {})
-            proofofwork_required = proofofwork.get('required')
-            if proofofwork_required:
-                proofofwork_diff = proofofwork.get("difficulty")
-                proofofwork_seed = proofofwork.get("seed")
-                proof_token, solved = await run_in_threadpool(
-                    get_answer_token, proofofwork_seed, proofofwork_diff, config
-                )
-                if not solved:
-                    raise HTTPException(status_code=403, detail="Failed to solve proof of work")
-            chat_token = resp.get('token')
-            headers.update({
-                "openai-sentinel-chat-requirements-token": chat_token,
-                "openai-sentinel-proof-token": proof_token,
-                "openai-sentinel-turnstile-token": turnstile_token,
-            })
-        else:
-            headers.update({
-                "openai-sentinel-chat-requirements-token": sentinel_tokens.get("chat_token", ""),
-                "openai-sentinel-proof-token": sentinel_tokens.get("proof_token", ""),
-                "openai-sentinel-turnstile-token": sentinel_tokens.get("turnstile_token", "")
-            })
+                proofofwork = resp.get('proofofwork', {})
+                proofofwork_required = proofofwork.get('required')
+                if proofofwork_required:
+                    proofofwork_diff = proofofwork.get("difficulty")
+                    proofofwork_seed = proofofwork.get("seed")
+                    proof_token, solved = await run_in_threadpool(
+                        get_answer_token, proofofwork_seed, proofofwork_diff, config
+                    )
+                    if not solved:
+                        raise HTTPException(status_code=403, detail="Failed to solve proof of work")
+                chat_token = resp.get('token')
+                headers.update({
+                    "openai-sentinel-chat-requirements-token": chat_token,
+                    "openai-sentinel-proof-token": proof_token,
+                    "openai-sentinel-turnstile-token": turnstile_token,
+                })
+            else:
+                headers.update({
+                    "openai-sentinel-chat-requirements-token": sentinel_tokens.get("chat_token", ""),
+                    "openai-sentinel-proof-token": sentinel_tokens.get("proof_token", ""),
+                    "openai-sentinel-turnstile-token": sentinel_tokens.get("turnstile_token", "")
+                })
+        except Exception as e:
+            logger.error(f"Sentinel failed: {e}")
+            return Response(status_code=403, content="Sentinel failed")
 
         params = dict(request.query_params)
         data = await request.body()

@@ -449,6 +449,7 @@ def get_config(user_agent):
         str(uuid.uuid4()),
         "",
         random.choice(cores),
+        int(time.time() * 1000),
     ]
     return config
 
