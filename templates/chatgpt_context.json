@@ -17,12 +17,12 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-15T11:37:16.460Z",
+                        "expires": "2025-03-28T22:32:08.147Z",
                         "accessToken": "",
-                        "authProvider": "login-web"
+                        "authProvider": "openai"
                     },
                     "dataUpdateCount": 1,
-                    "dataUpdatedAt": 1734262636678,
+                    "dataUpdatedAt": 1735425128213,
                     "error": null,
                     "errorUpdateCount": 0,
                     "errorUpdatedAt": 0,
@@ -39,14 +39,14 @@
                         "user": {
                             "id": "user-chatgpt"
                         },
-                        "expires": "2025-03-15T11:37:16.460Z",
+                        "expires": "2025-03-28T22:32:08.147Z",
                         "accessToken": "",
-                        "authProvider": "login-web"
+                        "authProvider": "openai"
                     },
                     "user": {
                         "id": "user-chatgpt"
                     },
-                    "cluster": "unified-16",
+                    "cluster": "unified-1",
                     "userCountry": "US",
                     "userRegion": "New York",
                     "userRegionCode": "1",
@@ -68,7 +68,7 @@
                                 "14938527": {
                                     "name": "14938527",
                                     "value": true,
-                                    "rule_id": "6ZX1lRsBENhTh01tU69cEF:50.00:11",
+                                    "rule_id": "6ZX1lRsBENhTh01tU69cEF:100.00:12",
                                     "secondary_exposures": []
                                 },
                                 "16325302": {
@@ -203,8 +203,8 @@
                                 },
                                 "218782548": {
                                     "name": "218782548",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "O6KJIc17hgSSq02YhhJrb:100.00:2",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1456438623",
@@ -223,8 +223,8 @@
                                         },
                                         {
                                             "gate": "3805873235",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
                                         }
                                     ]
                                 },
@@ -355,7 +355,13 @@
                                     "name": "491279851",
                                     "value": false,
                                     "rule_id": "default",
-                                    "secondary_exposures": []
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "2404506894",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ]
                                 },
                                 "543687013": {
                                     "name": "543687013",
@@ -525,9 +531,30 @@
                                 },
                                 "756982148": {
                                     "name": "756982148",
-                                    "value": false,
-                                    "rule_id": "default",
-                                    "secondary_exposures": []
+                                    "value": true,
+                                    "rule_id": "3oAWYdzegKPwxhFJjJrGz3",
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "1456438623",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "1745914872",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "2546838099",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "3805873235",
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
+                                        }
+                                    ]
                                 },
                                 "771993664": {
                                     "name": "771993664",
@@ -551,6 +578,12 @@
                                     "name": "809675868",
                                     "value": true,
                                     "rule_id": "1iAnUEFCwiZXOoTJr0TUu8:100.00:2",
+                                    "secondary_exposures": []
+                                },
+                                "854062205": {
+                                    "name": "854062205",
+                                    "value": false,
+                                    "rule_id": "default",
                                     "secondary_exposures": []
                                 },
                                 "857491970": {
@@ -581,12 +614,6 @@
                                     "name": "910189142",
                                     "value": true,
                                     "rule_id": "3epNymlQdEWHnDUZEmtWUC",
-                                    "secondary_exposures": []
-                                },
-                                "967447444": {
-                                    "name": "967447444",
-                                    "value": true,
-                                    "rule_id": "2mOBTIuCpZKSBYUIdPaATY",
                                     "secondary_exposures": []
                                 },
                                 "989108178": {
@@ -710,7 +737,7 @@
                                 "1185336854": {
                                     "name": "1185336854",
                                     "value": false,
-                                    "rule_id": "default",
+                                    "rule_id": "3GC5EDPc40ORp0tHkwKwh3",
                                     "secondary_exposures": []
                                 },
                                 "1198030896": {
@@ -763,7 +790,7 @@
                                         {
                                             "gate": "1185336854",
                                             "gateValue": "false",
-                                            "ruleID": "default"
+                                            "ruleID": "3GC5EDPc40ORp0tHkwKwh3"
                                         }
                                     ]
                                 },
@@ -835,8 +862,8 @@
                                 },
                                 "1567586774": {
                                     "name": "1567586774",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "3aegmuqWMRiqEElkWxnN4D",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1456438623",
@@ -855,8 +882,8 @@
                                         },
                                         {
                                             "gate": "3805873235",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
                                         }
                                     ]
                                 },
@@ -902,12 +929,6 @@
                                     "rule_id": "default",
                                     "secondary_exposures": []
                                 },
-                                "1794124947": {
-                                    "name": "1794124947",
-                                    "value": true,
-                                    "rule_id": "6Xp2LEMkm5UEgaW5ZGIN3M",
-                                    "secondary_exposures": []
-                                },
                                 "1820151945": {
                                     "name": "1820151945",
                                     "value": false,
@@ -933,6 +954,18 @@
                                     "secondary_exposures": [
                                         {
                                             "gate": "2304807207",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ]
+                                },
+                                "1856506891": {
+                                    "name": "1856506891",
+                                    "value": false,
+                                    "rule_id": "2sBv7z8UDwp9gCya0XVOUP",
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "3463955812",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         }
@@ -984,12 +1017,6 @@
                                     "name": "2048332657",
                                     "value": false,
                                     "rule_id": "7zy1mC6ANDLQQEC55KcGXC",
-                                    "secondary_exposures": []
-                                },
-                                "2055244389": {
-                                    "name": "2055244389",
-                                    "value": false,
-                                    "rule_id": "default",
                                     "secondary_exposures": []
                                 },
                                 "2067628123": {
@@ -1089,7 +1116,7 @@
                                         {
                                             "gate": "1185336854",
                                             "gateValue": "false",
-                                            "ruleID": "default"
+                                            "ruleID": "3GC5EDPc40ORp0tHkwKwh3"
                                         }
                                     ]
                                 },
@@ -1111,20 +1138,8 @@
                                     "rule_id": "default",
                                     "secondary_exposures": []
                                 },
-                                "2492340648": {
-                                    "name": "2492340648",
-                                    "value": false,
-                                    "rule_id": "7vWEOrlZ07LCdewUnumW3C:0.00:9",
-                                    "secondary_exposures": []
-                                },
                                 "2494375100": {
                                     "name": "2494375100",
-                                    "value": false,
-                                    "rule_id": "default",
-                                    "secondary_exposures": []
-                                },
-                                "2522578969": {
-                                    "name": "2522578969",
                                     "value": false,
                                     "rule_id": "default",
                                     "secondary_exposures": []
@@ -1173,8 +1188,8 @@
                                 },
                                 "2634628831": {
                                     "name": "2634628831",
-                                    "value": false,
-                                    "rule_id": "default",
+                                    "value": true,
+                                    "rule_id": "6LfSag7ByiH0gGcqoFHHBe",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1456438623",
@@ -1193,8 +1208,8 @@
                                         },
                                         {
                                             "gate": "3805873235",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
                                         }
                                     ]
                                 },
@@ -1263,12 +1278,6 @@
                                     "rule_id": "default",
                                     "secondary_exposures": []
                                 },
-                                "2830958549": {
-                                    "name": "2830958549",
-                                    "value": true,
-                                    "rule_id": "2ZLwnaevLZPVXhSiCv1Y4v:100.00:4",
-                                    "secondary_exposures": []
-                                },
                                 "2833534668": {
                                     "name": "2833534668",
                                     "value": true,
@@ -1278,7 +1287,7 @@
                                 "2848981774": {
                                     "name": "2848981774",
                                     "value": false,
-                                    "rule_id": "default",
+                                    "rule_id": "7gC12Wmu3fiu9DEbD42BRt:0.00:1",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1074323483",
@@ -1287,6 +1296,11 @@
                                         },
                                         {
                                             "gate": "3765213438",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "2404506894",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
@@ -1317,8 +1331,8 @@
                                         },
                                         {
                                             "gate": "3805873235",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
                                         }
                                     ]
                                 },
@@ -1364,6 +1378,12 @@
                                     "rule_id": "32QpYlIXk5Wr45idZ2iRkG",
                                     "secondary_exposures": []
                                 },
+                                "2912660649": {
+                                    "name": "2912660649",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
                                 "2919213474": {
                                     "name": "2919213474",
                                     "value": true,
@@ -1400,6 +1420,18 @@
                                     "rule_id": "default",
                                     "secondary_exposures": []
                                 },
+                                "2943807394": {
+                                    "name": "2943807394",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
+                                "2957741783": {
+                                    "name": "2957741783",
+                                    "value": false,
+                                    "rule_id": "default",
+                                    "secondary_exposures": []
+                                },
                                 "3006519778": {
                                     "name": "3006519778",
                                     "value": false,
@@ -1413,6 +1445,11 @@
                                     "secondary_exposures": [
                                         {
                                             "gate": "3765213438",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "2404506894",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
@@ -1432,7 +1469,7 @@
                                 "3051378794": {
                                     "name": "3051378794",
                                     "value": false,
-                                    "rule_id": "default",
+                                    "rule_id": "4rE18yl8mQ7mt6mTPZUSe7",
                                     "secondary_exposures": [
                                         {
                                             "gate": "1456438623",
@@ -1451,8 +1488,8 @@
                                         },
                                         {
                                             "gate": "3805873235",
-                                            "gateValue": "false",
-                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:5.00:3"
+                                            "gateValue": "true",
+                                            "ruleID": "5KvGWxgOdialy0Dx9IrqmW:100.00:23"
                                         }
                                     ]
                                 },
@@ -1531,6 +1568,12 @@
                                     "name": "3435450078",
                                     "value": true,
                                     "rule_id": "2qCdHpFuWOOkibzLRL0zgn",
+                                    "secondary_exposures": []
+                                },
+                                "3463955812": {
+                                    "name": "3463955812",
+                                    "value": false,
+                                    "rule_id": "default",
                                     "secondary_exposures": []
                                 },
                                 "3472722167": {
@@ -1661,8 +1704,8 @@
                                 },
                                 "3894844102": {
                                     "name": "3894844102",
-                                    "value": false,
-                                    "rule_id": "3QXis04GA1OiER0i1tq5MT:50.00:4",
+                                    "value": true,
+                                    "rule_id": "3QXis04GA1OiER0i1tq5MT:100.00:5",
                                     "secondary_exposures": []
                                 },
                                 "3912844760": {
@@ -1889,6 +1932,22 @@
                                     "is_experiment_active": false,
                                     "is_in_layer": true
                                 },
+                                "357305500": {
+                                    "name": "357305500",
+                                    "value": {},
+                                    "group": "targetingGate",
+                                    "rule_id": "targetingGate",
+                                    "is_device_based": false,
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "317829697",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
+                                    "is_user_in_experiment": false,
+                                    "is_experiment_active": true
+                                },
                                 "387752763": {
                                     "name": "387752763",
                                     "value": {
@@ -1942,7 +2001,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -2194,7 +2255,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -2212,27 +2275,6 @@
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
                                     "is_in_layer": true
-                                },
-                                "743318407": {
-                                    "name": "743318407",
-                                    "value": {},
-                                    "group": "targetingGate",
-                                    "rule_id": "targetingGate",
-                                    "is_device_based": false,
-                                    "secondary_exposures": [
-                                        {
-                                            "gate": "44045625",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "1885925757",
-                                            "gateValue": "false",
-                                            "ruleID": "default"
-                                        }
-                                    ],
-                                    "is_user_in_experiment": false,
-                                    "is_experiment_active": true
                                 },
                                 "754469756": {
                                     "name": "754469756",
@@ -2263,7 +2305,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -2354,13 +2397,13 @@
                                     "name": "938456440",
                                     "value": {
                                         "enable_indexing": true,
-                                        "wave": 9,
+                                        "wave": 5,
                                         "enable_ux": true,
                                         "enable_local_indexing": true,
                                         "backfill_completed": false
                                     },
-                                    "group": "2Furb94u4tGb4OrLGH3ViM",
-                                    "rule_id": "2Furb94u4tGb4OrLGH3ViM",
+                                    "group": "2FumRaLq5rFr2wFq772Zvi",
+                                    "rule_id": "2FumRaLq5rFr2wFq772Zvi",
                                     "is_device_based": false,
                                     "secondary_exposures": [
                                         {
@@ -2790,7 +2833,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -2798,6 +2842,22 @@
                                     "secondary_exposures": [],
                                     "explicit_parameters": [
                                         "enable_arch_updates"
+                                    ],
+                                    "is_user_in_experiment": false,
+                                    "is_experiment_active": false,
+                                    "is_in_layer": true
+                                },
+                                "1691905491": {
+                                    "name": "1691905491",
+                                    "value": {
+                                        "enable_new_ux": false
+                                    },
+                                    "group": "prestart",
+                                    "rule_id": "prestart",
+                                    "is_device_based": false,
+                                    "secondary_exposures": [],
+                                    "explicit_parameters": [
+                                        "enable_new_ux"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
@@ -2837,7 +2897,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -2872,7 +2934,7 @@
                                         {
                                             "gate": "14938527",
                                             "gateValue": "true",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:100.00:12"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -2977,7 +3039,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -3065,6 +3129,52 @@
                                     "is_device_based": false,
                                     "secondary_exposures": []
                                 },
+                                "2198947464": {
+                                    "name": "2198947464",
+                                    "value": {
+                                        "enable_hardcoded_vision_prompts": true,
+                                        "enable_hardcoded_file_document_prompts": true,
+                                        "enable_hardcoded_data_vis_prompts": true,
+                                        "enable_hardcoded_browse_prompts": true,
+                                        "is_two_line": false,
+                                        "enable_new_homepage": false,
+                                        "autocomplete_mode": "INDEX",
+                                        "starter_prompt_ranking_algorithm": "homepage_v2",
+                                        "autocomplete_min_char": 4,
+                                        "autocomplete_max_char": 32,
+                                        "headline_option": "HELP_WITH",
+                                        "use_memory_in_model_autocomplete": false,
+                                        "filter_starter_prompt_by_model": false,
+                                        "use_modapi_in_autocomplete": false,
+                                        "autocomplete_qualified_start_date": "2000-10-11T00:00:00Z",
+                                        "enable_new_autocomplete_homepage": true,
+                                        "model_talks_option": "",
+                                        "enable_new_mobile": true,
+                                        "search_autocomplete_mode": "BING",
+                                        "enable_hardcoded_onboarding_prompt": false,
+                                        "autocomplete_fetch_interval": 200,
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
+                                    },
+                                    "group": "layerAssignment",
+                                    "rule_id": "layerAssignment",
+                                    "is_device_based": false,
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "4273941502",
+                                            "gateValue": "false",
+                                            "ruleID": "1nGrz4l6GM0LgZvm0pDCtp:2.00:1"
+                                        }
+                                    ],
+                                    "explicit_parameters": [
+                                        "enable_recommend_prompts",
+                                        "enable_ask_me_prompts"
+                                    ],
+                                    "is_user_in_experiment": false,
+                                    "is_experiment_active": true,
+                                    "is_in_layer": true
+                                },
                                 "2211924604": {
                                     "name": "2211924604",
                                     "value": {},
@@ -3105,7 +3215,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -3177,7 +3289,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3252,7 +3365,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3300,7 +3415,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3346,7 +3463,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -3405,7 +3524,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -3418,6 +3538,11 @@
                                         },
                                         {
                                             "gate": "3765213438",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "2404506894",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
@@ -3437,14 +3562,9 @@
                                             "ruleID": "default"
                                         },
                                         {
-                                            "gate": "5541454",
+                                            "gate": "854062205",
                                             "gateValue": "false",
                                             "ruleID": "default"
-                                        },
-                                        {
-                                            "gate": "1347376961",
-                                            "gateValue": "false",
-                                            "ruleID": ""
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -3452,7 +3572,7 @@
                                         "enable_arch_updates",
                                         "include_floating_state",
                                         "include_share_on_mobile",
-                                        "include_account_settings_move"
+                                        "include_revised_sidebar_ia"
                                     ],
                                     "is_user_in_experiment": false,
                                     "is_experiment_active": false,
@@ -3531,7 +3651,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3576,7 +3698,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3762,7 +3886,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -3845,18 +3971,12 @@
                                     "value": {
                                         "is-enabled": true
                                     },
-                                    "group": "4SAS7ROdvekWFUGr6HS5lA",
-                                    "rule_id": "4SAS7ROdvekWFUGr6HS5lA",
+                                    "group": "launchedGroup",
+                                    "rule_id": "launchedGroup",
                                     "is_device_based": true,
-                                    "secondary_exposures": [
-                                        {
-                                            "gate": "164447571",
-                                            "gateValue": "true",
-                                            "ruleID": "5p0MgUpTfrapoShcevMcJ8"
-                                        }
-                                    ],
-                                    "is_user_in_experiment": true,
-                                    "is_experiment_active": true
+                                    "secondary_exposures": [],
+                                    "is_user_in_experiment": false,
+                                    "is_experiment_active": false
                                 },
                                 "2664741443": {
                                     "name": "2664741443",
@@ -4117,7 +4237,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -4167,7 +4289,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -4613,7 +4736,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "abandoned",
                                     "rule_id": "abandoned",
@@ -4758,7 +4883,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -4851,7 +4978,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -4879,12 +5008,19 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
                                     "is_device_based": true,
-                                    "secondary_exposures": [],
+                                    "secondary_exposures": [
+                                        {
+                                            "gate": "2943807394",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        }
+                                    ],
                                     "explicit_parameters": [
                                         "include_account_settings_move"
                                     ],
@@ -5118,7 +5254,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -5260,7 +5398,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "launchedGroup",
                                     "rule_id": "launchedGroup",
@@ -5485,6 +5625,16 @@
                                     "is_experiment_active": true,
                                     "is_in_layer": true
                                 },
+                                "4156060548": {
+                                    "name": "4156060548",
+                                    "value": {},
+                                    "group": "layerAssignment",
+                                    "rule_id": "layerAssignment",
+                                    "is_device_based": false,
+                                    "secondary_exposures": [],
+                                    "is_user_in_experiment": false,
+                                    "is_experiment_active": true
+                                },
                                 "4198218833": {
                                     "name": "4198218833",
                                     "value": {
@@ -5677,7 +5827,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "layerAssignment",
                                     "rule_id": "layerAssignment",
@@ -5812,7 +5964,8 @@
                                         "include_floating_state": false,
                                         "include_share_on_mobile": false,
                                         "include_account_settings_move": false,
-                                        "include_scrolling_behavior_update": false
+                                        "include_scrolling_behavior_update": false,
+                                        "include_revised_sidebar_ia": false
                                     },
                                     "group": "prestart",
                                     "rule_id": "prestart",
@@ -5825,6 +5978,11 @@
                                         },
                                         {
                                             "gate": "3765213438",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
+                                            "gate": "2404506894",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
@@ -5844,14 +6002,14 @@
                                             "ruleID": "default"
                                         },
                                         {
-                                            "gate": "5541454",
+                                            "gate": "854062205",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
                                         {
-                                            "gate": "1347376961",
+                                            "gate": "2943807394",
                                             "gateValue": "false",
-                                            "ruleID": ""
+                                            "ruleID": "default"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -5872,6 +6030,11 @@
                                             "ruleID": "default"
                                         },
                                         {
+                                            "gate": "2404506894",
+                                            "gateValue": "false",
+                                            "ruleID": "default"
+                                        },
+                                        {
                                             "gate": "491279851",
                                             "gateValue": "false",
                                             "ruleID": "default"
@@ -5887,14 +6050,14 @@
                                             "ruleID": "default"
                                         },
                                         {
-                                            "gate": "5541454",
+                                            "gate": "854062205",
                                             "gateValue": "false",
                                             "ruleID": "default"
                                         },
                                         {
-                                            "gate": "1347376961",
+                                            "gate": "2943807394",
                                             "gateValue": "false",
-                                            "ruleID": ""
+                                            "ruleID": "default"
                                         }
                                     ]
                                 },
@@ -6180,7 +6343,7 @@
                                         {
                                             "gate": "14938527",
                                             "gateValue": "true",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:100.00:12"
                                         }
                                     ],
                                     "explicit_parameters": [
@@ -6193,7 +6356,7 @@
                                         {
                                             "gate": "14938527",
                                             "gateValue": "true",
-                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:50.00:11"
+                                            "ruleID": "6ZX1lRsBENhTh01tU69cEF:100.00:12"
                                         }
                                     ]
                                 },
@@ -6326,17 +6489,29 @@
                                     "explicit_parameters": [],
                                     "undelegated_secondary_exposures": []
                                 },
+                                "3206655705": {
+                                    "name": "3206655705",
+                                    "value": {
+                                        "enable_new_ux": false
+                                    },
+                                    "group": "default",
+                                    "rule_id": "default",
+                                    "is_device_based": false,
+                                    "secondary_exposures": [],
+                                    "explicit_parameters": [],
+                                    "undelegated_secondary_exposures": []
+                                },
                                 "3436367576": {
                                     "name": "3436367576",
                                     "value": {
                                         "enable_indexing": true,
-                                        "wave": 9,
+                                        "wave": 5,
                                         "enable_ux": true,
                                         "enable_local_indexing": true,
                                         "backfill_completed": false
                                     },
-                                    "group": "2Furb94u4tGb4OrLGH3ViM",
-                                    "rule_id": "2Furb94u4tGb4OrLGH3ViM",
+                                    "group": "2FumRaLq5rFr2wFq772Zvi",
+                                    "rule_id": "2FumRaLq5rFr2wFq772Zvi",
                                     "is_device_based": false,
                                     "secondary_exposures": [
                                         {
@@ -6518,7 +6693,9 @@
                                         "search_autocomplete_mode": "BING",
                                         "enable_hardcoded_onboarding_prompt": false,
                                         "autocomplete_fetch_interval": 200,
-                                        "num_completions_to_fetch_from_index": 8
+                                        "num_completions_to_fetch_from_index": 8,
+                                        "enable_recommend_prompts": false,
+                                        "enable_ask_me_prompts": false
                                     },
                                     "group": "default",
                                     "rule_id": "default",
@@ -6590,13 +6767,13 @@
                                 "sdkType": "statsig-node",
                                 "sdkVersion": "5.26.0"
                             },
-                            "time": 1734259034347,
+                            "time": 1735416074038,
                             "evaluated_keys": {
                                 "userID": "user-chatgpt",
                                 "customIDs": {
-                                    "WebAnonymousCookieID": "ad300921-30cd-40ef-8c43-8a3cc2ad591f",
-                                    "DeviceId": "ad300921-30cd-40ef-8c43-8a3cc2ad591f",
-                                    "stableID": "ad300921-30cd-40ef-8c43-8a3cc2ad591f"
+                                    "WebAnonymousCookieID": "20c29c41-4cd8-4335-a9df-f4141539e2df",
+                                    "DeviceId": "20c29c41-4cd8-4335-a9df-f4141539e2df",
+                                    "stableID": "20c29c41-4cd8-4335-a9df-f4141539e2df"
                                 }
                             },
                             "hash_used": "djb2",
@@ -6614,7 +6791,7 @@
                 "isIos": false,
                 "isAndroidChrome": false,
                 "isElectron": false,
-                "cspScriptNonce": "e453b7b8-f3fa-4f24-9696-5f43a6914d0a"
+                "cspScriptNonce": "c506c601-cf42-4631-ad36-4d3389e68112"
             },
             "routes/_conversation": {
                 "prefetchSearch": null
