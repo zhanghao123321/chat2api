@@ -72,6 +72,26 @@ headers_reject_list = [
     "cf-visitor",
 ]
 
+headers_accept_list = [
+    "openai-sentinel-chat-requirements-token",
+    "openai-sentinel-proof-token",
+    "openai-sentinel-turnstile-token",
+    "accept",
+    "authorization",
+    "accept-encoding",
+    "accept-language",
+    "content-type",
+    "oai-device-id",
+    "oai-echo-logs",
+    "oai-language",
+    "sec-fetch-dest",
+    "sec-fetch-mode",
+    "sec-fetch-site",
+]
+
+
+
+
 
 async def get_real_req_token(token):
     req_token = get_req_token(token)
@@ -162,7 +182,10 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         #     if (key.lower() not in ["host", "origin", "referer", "priority",
         #                             "oai-device-id"] and key.lower() not in headers_reject_list)
         # }
-        headers = {}
+        headers = {
+            key: value for key, value in request.headers.items()
+            if (key.lower() in headers_accept_list)
+        }
 
         base_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         if "assets/" in path:

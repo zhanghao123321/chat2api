@@ -15,7 +15,8 @@ from chatgpt.authorization import verify_token
 from chatgpt.fp import get_fp
 from chatgpt.proofofWork import get_answer_token, get_config, get_requirements_token
 from gateway.chatgpt import chatgpt_html
-from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list
+from gateway.reverseProxy import chatgpt_reverse_proxy, content_generator, get_real_req_token, headers_reject_list, \
+    headers_accept_list
 from utils.Client import Client
 from utils.Logger import logger
 from utils.configs import x_sign, turnstile_solver_url, chatgpt_base_url_list, no_sentinel, sentinel_proxy_url_list, \
@@ -270,7 +271,10 @@ if no_sentinel:
         #     if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
         #                             "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
         # }
-        headers = {}
+        headers = {
+            key: value for key, value in request.headers.items()
+            if (key.lower() in headers_accept_list)
+        }
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
         client = Client(proxy=proxy_url, impersonate=impersonate)
@@ -360,7 +364,10 @@ if no_sentinel:
         #     if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
         #                             "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
         # }
-        headers = {}
+        headers = {
+            key: value for key, value in request.headers.items()
+            if (key.lower() in headers_accept_list)
+        }
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
