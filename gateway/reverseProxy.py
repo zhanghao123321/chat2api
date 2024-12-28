@@ -157,11 +157,12 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         params = dict(request.query_params)
         request_cookies = dict(request.cookies)
 
-        headers = {
-            key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority",
-                                    "oai-device-id"] and key.lower() not in headers_reject_list)
-        }
+        # headers = {
+        #     key: value for key, value in request.headers.items()
+        #     if (key.lower() not in ["host", "origin", "referer", "priority",
+        #                             "oai-device-id"] and key.lower() not in headers_reject_list)
+        # }
+        headers = {}
 
         base_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         if "assets/" in path:

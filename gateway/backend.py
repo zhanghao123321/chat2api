@@ -265,11 +265,12 @@ if no_sentinel:
         proof_token = None
         turnstile_token = None
 
-        headers = {
-            key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
-                                    "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
-        }
+        # headers = {
+        #     key: value for key, value in request.headers.items()
+        #     if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
+        #                             "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
+        # }
+        headers = {}
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
         client = Client(proxy=proxy_url, impersonate=impersonate)
@@ -354,11 +355,12 @@ if no_sentinel:
         proof_token = None
         turnstile_token = None
 
-        headers = {
-            key: value for key, value in request.headers.items()
-            if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
-                                    "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
-        }
+        # headers = {
+        #     key: value for key, value in request.headers.items()
+        #     if (key.lower() not in ["host", "origin", "referer", "priority", "sec-ch-ua-platform", "sec-ch-ua",
+        #                             "sec-ch-ua-mobile", "oai-device-id"] and key.lower() not in headers_reject_list)
+        # }
+        headers = {}
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
