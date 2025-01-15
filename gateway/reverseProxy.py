@@ -90,9 +90,6 @@ headers_accept_list = [
 ]
 
 
-
-
-
 async def get_real_req_token(token):
     req_token = get_req_token(token)
     if len(req_token) == 45 or req_token.startswith("eyJhbGciOi"):
@@ -107,6 +104,7 @@ def save_conversation(token, conversation_id, title=None):
         conversation_detail = {
             "id": conversation_id,
             "title": title,
+            "create_time": generate_current_time(),
             "update_time": generate_current_time()
         }
         globals.conversation_map[conversation_id] = conversation_detail
@@ -134,6 +132,12 @@ async def content_generator(r, token, history=True):
         try:
             if history and (len(token) != 45 and not token.startswith("eyJhbGciOi")) and (not conversation_id or not title):
                 chat_chunk = chunk.decode('utf-8')
+                if not conversation_id or not title and chat_chunk.startswith("event: delta\n\ndata: {"):
+                    chunk_data = chat_chunk[19:]
+                    conversation_id = json.loads(chunk_data).get("v").get("conversation_id")
+                    if conversation_id:
+                        save_conversation(token, conversation_id)
+                        title = globals.conversation_map[conversation_id].get("title")
                 if chat_chunk.startswith("data: {"):
                     if "\n\nevent: delta" in chat_chunk:
                         index = chat_chunk.find("\n\nevent: delta")
@@ -146,14 +150,13 @@ async def content_generator(r, token, history=True):
                     chunk_data = chunk_data.strip()
                     if conversation_id is None:
                         conversation_id = json.loads(chunk_data).get("conversation_id")
-                        save_conversation(token, conversation_id)
-                        title = globals.conversation_map[conversation_id].get("title")
+                        if conversation_id:
+                            save_conversation(token, conversation_id)
+                            title = globals.conversation_map[conversation_id].get("title")
                     if title is None:
-                        if "title" in chunk_data:
-                            pass
                         title = json.loads(chunk_data).get("title")
-                    if title:
-                        save_conversation(token, conversation_id, title)
+                        if title:
+                            save_conversation(token, conversation_id, title)
         except Exception as e:
             # logger.error(e)
             # logger.error(chunk.decode('utf-8'))
