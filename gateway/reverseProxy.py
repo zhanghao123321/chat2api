@@ -201,8 +201,16 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             base_url = "https://web-sandbox.oaiusercontent.com"
             path = path.replace("sandbox/", "")
 
+        token = headers.get("authorization", "").replace("Bearer ", "").strip()
+        if token:
+            req_token = await get_real_req_token(token)
+            access_token = await verify_token(req_token)
+            headers.update({"authorization": f"Bearer {access_token}"})
+
         token = request.cookies.get("token", "")
-        req_token = await get_real_req_token(token)
+        if token!="":
+            req_token = await get_real_req_token(token)
+
         fp = get_fp(req_token).copy()
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
@@ -224,12 +232,6 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     "statsig-sdk-version": "5.1.0",
                     "statsig-client-time": int(time.time() * 1000),
                 })
-
-        token = headers.get("authorization", "").replace("Bearer ", "")
-        if token:
-            req_token = await get_real_req_token(token)
-            access_token = await verify_token(req_token)
-            headers.update({"authorization": f"Bearer {access_token}"})
 
         data = await request.body()
 
