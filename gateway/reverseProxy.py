@@ -95,7 +95,7 @@ async def get_real_req_token(token):
     if len(req_token) == 45 or req_token.startswith("eyJhbGciOi"):
         return req_token
     else:
-        req_token = get_req_token(None, token)
+        req_token = get_req_token("", token)
         return req_token
 
 
@@ -207,11 +207,10 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
             access_token = await verify_token(req_token)
             headers.update({"authorization": f"Bearer {access_token}"})
 
-        token = request.cookies.get("token", "")
-        if token!="":
-            req_token = await get_real_req_token(token)
-
+        cookie_token = request.cookies.get("token", "")
+        req_token = await get_real_req_token(cookie_token)
         fp = get_fp(req_token).copy()
+
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
         user_agent = fp.get("user-agent")
