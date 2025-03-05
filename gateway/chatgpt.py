@@ -30,6 +30,8 @@ async def chatgpt_html(request: Request):
     user_chatgpt_context_2 = chatgpt_context_2.copy()
 
     set_value_for_key_list(user_chatgpt_context_1, "accessToken", token)
+    if request.cookies.get("oai-locale"):
+        set_value_for_key_list(user_chatgpt_context_1, "locale", request.cookies.get("oai-locale"))
 
     user_chatgpt_context_1 = json.dumps(user_chatgpt_context_1, separators=(',', ':'), ensure_ascii=False)
     user_chatgpt_context_2 = json.dumps(user_chatgpt_context_2, separators=(',', ':'), ensure_ascii=False)
