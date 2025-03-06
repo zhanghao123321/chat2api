@@ -318,7 +318,7 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                     response = Response(content=content, headers=rheaders,
                                         status_code=r.status_code, background=background)
                 return response
-        except Exception:
+        except Exception as e:
             await client.close()
     except HTTPException as e:
         raise e

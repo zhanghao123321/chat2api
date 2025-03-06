@@ -112,6 +112,24 @@ async def get_gizmos_snorlax_upsert(request: Request):
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
+@app.get("/backend-api/subscriptions")
+async def post_subscriptions(request: Request):
+    return {
+        "id": str(uuid.uuid4()),
+        "plan_type": "pro",
+        "seats_in_use": 1,
+        "seats_entitled": 1,
+        "active_until": "2050-01-01T00:00:00Z",
+        "billing_period": None,
+        "will_renew": True,
+        "non_profit_org_discount_applied": None,
+        "billing_currency": "USD",
+        "is_delinquent": False,
+        "became_delinquent_timestamp": None,
+        "grace_period_end_timestamp": None
+    }
+
+
 @app.api_route("/backend-api/conversations", methods=["GET", "PATCH"])
 async def get_conversations(request: Request):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
