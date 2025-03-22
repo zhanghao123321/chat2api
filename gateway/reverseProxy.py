@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import time
@@ -211,6 +212,8 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
         req_token = await get_real_req_token(cookie_token)
         fp = get_fp(req_token).copy()
 
+        session_id = hashlib.md5(req_token.encode()).hexdigest()
+
         proxy_url = fp.pop("proxy_url", None)
         impersonate = fp.pop("impersonate", "safari15_3")
         user_agent = fp.get("user-agent")
@@ -248,9 +251,11 @@ async def chatgpt_reverse_proxy(request: Request, path: str):
                 data = json.dumps(req_json).encode("utf-8")
 
 
-        if sentinel_proxy_url_list and "backend-api/sentinel/chat-requirements" in path:
-            client = Client(proxy=random.choice(sentinel_proxy_url_list))
+        if "backend-api/sentinel/chat-requirements" in path and sentinel_proxy_url_list:
+            sentinel_proxy_url = random.choice(sentinel_proxy_url_list).replace("{}", session_id) if sentinel_proxy_url_list else None
+            client = Client(proxy=sentinel_proxy_url)
         else:
+            proxy_url = proxy_url.replace("{}", session_id) if proxy_url else None
             client = Client(proxy=proxy_url, impersonate=impersonate)
         try:
             background = BackgroundTask(client.close)

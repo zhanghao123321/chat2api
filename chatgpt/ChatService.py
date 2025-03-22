@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 import random
 import uuid
@@ -86,9 +87,12 @@ class ChatService:
         self.host_url = random.choice(chatgpt_base_url_list) if chatgpt_base_url_list else "https://chatgpt.com"
         self.ark0se_token_url = random.choice(ark0se_token_url_list) if ark0se_token_url_list else None
 
-        self.s = Client(proxy=self.proxy_url, impersonate=self.impersonate)
+        session_id = hashlib.md5(self.req_token.encode()).hexdigest()
+        proxy_url = self.proxy_url.replace("{}", session_id) if self.proxy_url else None
+        self.s = Client(proxy=proxy_url, impersonate=self.impersonate)
         if sentinel_proxy_url_list:
-            self.ss = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=self.impersonate)
+            sentinel_proxy_url = (random.choice(sentinel_proxy_url_list)).replace("{}", session_id) if sentinel_proxy_url_list else None
+            self.ss = Client(proxy=sentinel_proxy_url, impersonate=self.impersonate)
         else:
             self.ss = self.s
 

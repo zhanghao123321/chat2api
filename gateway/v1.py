@@ -13,15 +13,15 @@ with open("templates/initialize.json", "r") as f:
 
 @app.post("/v1/initialize")
 async def initialize(request: Request):
-    # initialize_response = (await chatgpt_reverse_proxy(request, f"v1/initialize"))
-    # if not initialize_response:
-    #     return Response(status_code=204)
-    # initialize_str = initialize_response.body.decode('utf-8')
-    # if not initialize_str:
-    #     return Response(status_code=204)
-    # initialize_json = json.loads(initialize_str)
-    # set_value_for_key_dict(initialize_json, "ip", "8.8.8.8")
-    # set_value_for_key_dict(initialize_json, "country", "US")
+    initialize_response = (await chatgpt_reverse_proxy(request, f"v1/initialize"))
+    if not initialize_response:
+        return Response(status_code=204)
+    initialize_str = initialize_response.body.decode('utf-8')
+    if not initialize_str:
+        return Response(status_code=204)
+    initialize_json = json.loads(initialize_str)
+    set_value_for_key_dict(initialize_json, "ip", "8.8.8.8")
+    set_value_for_key_dict(initialize_json, "country", "US")
     return Response(content=json.dumps(initialize_json, indent=4), media_type="application/json")
 
 
