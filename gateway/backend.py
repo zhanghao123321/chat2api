@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import re
@@ -295,9 +296,12 @@ if no_sentinel:
         }
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
+        session_id = hashlib.md5(req_token.encode()).hexdigest()
+        proxy_url = proxy_url.replace("{}", session_id) if proxy_url else None
         client = Client(proxy=proxy_url, impersonate=impersonate)
         if sentinel_proxy_url_list:
-            clients = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=impersonate)
+            sentinel_proxy_url = random.choice(sentinel_proxy_url_list).replace("{}", session_id) if sentinel_proxy_url_list else None
+            clients = Client(proxy=sentinel_proxy_url, impersonate=impersonate)
         else:
             clients = client
 
@@ -390,9 +394,12 @@ if no_sentinel:
         headers.update({"authorization": f"Bearer {access_token}"})
 
         try:
+            session_id = hashlib.md5(req_token.encode()).hexdigest()
+            proxy_url = proxy_url.replace("{}", session_id) if proxy_url else None
             client = Client(proxy=proxy_url, impersonate=impersonate)
             if sentinel_proxy_url_list:
-                clients = Client(proxy=random.choice(sentinel_proxy_url_list), impersonate=impersonate)
+                sentinel_proxy_url = random.choice(sentinel_proxy_url_list).replace("{}", session_id) if sentinel_proxy_url_list else None
+                clients = Client(proxy=sentinel_proxy_url, impersonate=impersonate)
             else:
                 clients = client
 

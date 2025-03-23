@@ -7,6 +7,9 @@ from app import app
 from gateway.reverseProxy import chatgpt_reverse_proxy
 from utils.kv_utils import set_value_for_key_dict
 
+with open("templates/initialize.json", "r") as f:
+    initialize_json = json.load(f)
+
 
 @app.post("/v1/initialize")
 async def initialize(request: Request):
