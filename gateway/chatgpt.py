@@ -40,16 +40,21 @@ async def chatgpt_html(request: Request):
     user_chatgpt_context_1 = json.dumps(user_chatgpt_context_1, separators=(',', ':'), ensure_ascii=False)
     user_chatgpt_context_2 = json.dumps(user_chatgpt_context_2, separators=(',', ':'), ensure_ascii=False)
 
-    escaped_context_1 = user_chatgpt_context_1.replace("\\", "\\\\")
-    escaped_context_2 = user_chatgpt_context_2.replace("\\", "\\\\")
+    escaped_context_1 = user_chatgpt_context_1.replace("\\", "\\\\").replace('"', '\\"')
+    escaped_context_2 = user_chatgpt_context_2.replace("\\", "\\\\").replace('"', '\\"')
 
-    escaped_context_1 = escaped_context_1.replace('"', '\\"')
-    escaped_context_2 = escaped_context_2.replace('"', '\\"')
+    clear_localstorage_script = """
+    <script>
+        localStorage.clear();
+    </script>
+    """
 
     response = templates.TemplateResponse("chatgpt.html", {
-        "request": request, 
+        "request": request,
         "react_chatgpt_context_1": escaped_context_1,
-        "react_chatgpt_context_2": escaped_context_2
+        "react_chatgpt_context_2": escaped_context_2,
+        "clear_localstorage_script": clear_localstorage_script
     })
     response.set_cookie("token", value=token, expires="Thu, 01 Jan 2099 00:00:00 GMT")
     return response
+
