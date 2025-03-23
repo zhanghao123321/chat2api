@@ -183,7 +183,7 @@ class ChatService:
         url = f'{self.base_url}/sentinel/chat-requirements'
         headers = self.base_headers.copy()
         try:
-            config = get_config(self.user_agent)
+            config = get_config(self.user_agent, self.req_token)
             p = get_requirements_token(config)
             data = {'p': p}
             r = await self.ss.post(url, headers=headers, json=data, timeout=5)

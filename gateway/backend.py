@@ -306,7 +306,7 @@ if no_sentinel:
             clients = client
 
         try:
-            config = get_config(user_agent)
+            config = get_config(user_agent, session_id)
             p = get_requirements_token(config)
             data = {'p': p}
             r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
@@ -406,7 +406,7 @@ if no_sentinel:
             sentinel_tokens = openai_sentinel_tokens_cache.get(req_token, {})
             openai_sentinel_tokens_cache.pop(req_token, None)
             if not sentinel_tokens:
-                config = get_config(user_agent)
+                config = get_config(user_agent, session_id)
                 p = get_requirements_token(config)
                 data = {'p': p}
                 r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
