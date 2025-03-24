@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import time
@@ -136,6 +137,8 @@ async def chatgpt_account_check(access_token):
         headers.update(fp)
         headers.update({"authorization": f"Bearer {access_token}"})
 
+        session_id = hashlib.md5(access_token.encode()).hexdigest()
+        proxy_url = random.choice(proxy_url_list).replace("{}", session_id) if proxy_url_list else None
         client = Client(proxy=proxy_url, impersonate=impersonate)
         r = await client.get(f"{host_url}/backend-api/models?history_and_training_disabled=false", headers=headers,
                              timeout=10)
@@ -182,7 +185,9 @@ async def chatgpt_account_check(access_token):
 
 
 async def chatgpt_refresh(refresh_token):
-    client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+    session_id = hashlib.md5(refresh_token.encode()).hexdigest()
+    proxy_url = random.choice(proxy_url_list).replace("{}", session_id) if proxy_url_list else None
+    client = Client(proxy=proxy_url)
     try:
         data = {
             "client_id": "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh",

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import time
@@ -34,7 +35,9 @@ async def chat_refresh(refresh_token):
         "redirect_uri": "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback",
         "refresh_token": refresh_token
     }
-    client = Client(proxy=random.choice(proxy_url_list) if proxy_url_list else None)
+    session_id = hashlib.md5(refresh_token.encode()).hexdigest()
+    proxy_url = random.choice(proxy_url_list).replace("{}", session_id) if proxy_url_list else None
+    client = Client(proxy=proxy_url)
     try:
         r = await client.post("https://auth0.openai.com/oauth/token", json=data, timeout=15)
         if r.status_code == 200:

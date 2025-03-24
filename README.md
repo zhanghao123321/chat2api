@@ -4,7 +4,7 @@
 
 🌟 无需账号即可使用免费、无限的 `GPT-3.5`
 
-💥 支持 AccessToken 使用账号，支持 `O1-Preview/mini`、`GPT-4`、`GPT-4o/mini`、 `GPTs`
+💥 支持 AccessToken 使用账号，支持 `O3-mini/high`、`O1/mini/Pro`、`GPT-4/4o/mini`、`GPTs`
 
 🔍 回复格式与真实 API 完全一致，适配几乎所有客户端
 
@@ -43,25 +43,28 @@
 > - [x] Tokens 管理，支持上传、清除
 > - [x] 定时使用 `RefreshToken` 刷新 `AccessToken` / 每次启动将会全部非强制刷新一次，每4天晚上3点全部强制刷新一次。
 > - [x] 支持文件下载，需要开启历史记录
-> - [x] 支持 `O1-Preview/mini` 模型推理过程输出
+> - [x] 支持 `O3-mini/high`、`O1/mini/Pro` 等模型推理过程输出
 
 ### 官网镜像 功能
 > - [x] 支持官网原生镜像
 > - [x] 后台账号池随机抽取，`Seed` 设置随机账号
 > - [x] 输入 `RefreshToken` 或 `AccessToken` 直接登录使用
-> - [x] 支持 O1-Preview/mini、GPT-4、GPT-4o/mini
+> - [x] 支持 `O3-mini/high`、`O1/mini/Pro`、`GPT-4/4o/mini`
 > - [x] 敏感信息接口禁用、部分设置接口禁用
 > - [x] /login 登录页面，注销后自动跳转到登录页面
 > - [x] /?token=xxx 直接登录, xxx 为 `RefreshToken` 或 `AccessToken` 或 `SeedToken` (随机种子)
+> - [x] 支持不同 SeedToken 会话隔离
+> - [x] 支持 `GPTs` 商店
+> - [x] 支持 `DeepReaserch`、`Canvas` 等官网独有功能
+> - [x] 支持切换各国语言
 
 
 > TODO
-> - [ ] 镜像支持 `GPTs`
 > - [ ] 暂无，欢迎提 `issue`
 
 ## 逆向API
 
-完全 `OpenAI` 格式的 API ，支持传入 `AccessToken` 或 `RefreshToken`，可用 GPT-4, GPT-4o, GPTs, O1-Preview, O1-Mini：
+完全 `OpenAI` 格式的 API ，支持传入 `AccessToken` 或 `RefreshToken`，可用 GPT-4, GPT-4o, GPT-4o-Mini, GPTs, O1-Pro, O1, O1-Mini, O3-Mini, O3-Mini-High：
 
 ```bash
 curl --location 'http://127.0.0.1:5005/v1/chat/completions' \
