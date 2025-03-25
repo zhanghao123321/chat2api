@@ -211,7 +211,7 @@ class ChatService:
                     try:
                         if turnstile_solver_url:
                             res = await self.s.post(
-                                turnstile_solver_url, json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx}
+                                turnstile_solver_url, json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx, "ua": self.user_agent}
                             )
                             self.turnstile_token = res.json().get("t")
                     except Exception as e:

@@ -269,6 +269,7 @@ async def edge():
 
 if no_sentinel:
     openai_sentinel_tokens_cache = {}
+    openai_sentinel_cookies_cache = {}
 
     @app.post("/backend-api/sentinel/chat-requirements")
     async def sentinel_chat_conversations(request: Request):
@@ -309,8 +310,12 @@ if no_sentinel:
             config = get_config(user_agent, session_id)
             p = get_requirements_token(config)
             data = {'p': p}
-            r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data,
-                                   timeout=10)
+            for cookie in openai_sentinel_cookies_cache.get(req_token, []):
+                clients.session.cookies.set(**cookie)
+            r = await clients.post(f'{host_url}/backend-api/sentinel/chat-requirements', headers=headers, json=data, timeout=10)
+            oai_sc = r.cookies.get("oai-sc")
+            if oai_sc:
+                openai_sentinel_cookies_cache[req_token] = [{"name": "oai-sc", "value": oai_sc}]
             if r.status_code != 200:
                 raise HTTPException(status_code=r.status_code, detail="Failed to get chat requirements")
             resp = r.json()
@@ -321,7 +326,7 @@ if no_sentinel:
                 try:
                     if turnstile_solver_url:
                         res = await client.post(turnstile_solver_url,
-                                                json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                                                json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx, "ua": user_agent})
                         turnstile_token = res.json().get("t")
                 except Exception as e:
                     logger.info(f"Turnstile ignored: {e}")
@@ -419,7 +424,7 @@ if no_sentinel:
                     try:
                         if turnstile_solver_url:
                             res = await client.post(turnstile_solver_url,
-                                                    json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx})
+                                                    json={"url": "https://chatgpt.com", "p": p, "dx": turnstile_dx, "ua": user_agent})
                             turnstile_token = res.json().get("t")
                     except Exception as e:
                         logger.info(f"Turnstile ignored: {e}")
