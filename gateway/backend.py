@@ -262,6 +262,49 @@ async def get_me(request: Request):
     return Response(content=json.dumps(me, indent=4), media_type="application/json")
 
 
+@app.get("/backend-api/tasks")
+async def get_me(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/tasks")
+    else:
+        tasks = {
+            "tasks": [],
+            "cursor": None
+        }
+    return Response(content=json.dumps(tasks, indent=4), media_type="application/json")
+
+
+@app.get("/backend-api/user_system_messages")
+async def get_me(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/user_system_messages")
+    else:
+        user_system_messages = {
+            "object": "user_system_message_detail",
+            "enabled": True,
+            "about_user_message": "",
+            "about_model_message": "",
+            "name_user_message": "",
+            "role_user_message": "",
+            "traits_model_message": "",
+            "other_user_message": "",
+            "disabled_tools": []
+        }
+    return Response(content=json.dumps(user_system_messages, indent=4), media_type="application/json")
+
+
+@app.get("/backend-api/memories")
+async def get_me(request: Request):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if len(token) == 45 or token.startswith("eyJhbGciOi"):
+        return await chatgpt_reverse_proxy(request, "backend-api/memories")
+    else:
+        memories = {"memories":[],"memory_max_tokens":10000,"memory_num_tokens":0}
+    return Response(content=json.dumps(memories, indent=4), media_type="application/json")
+
+
 @app.post("/backend-api/edge")
 async def edge():
     return Response(status_code=204)
