@@ -410,6 +410,20 @@ class ChatService:
             logger.error(f"Failed to get download url: {e}")
             return ""
 
+    async def get_attachment_url(self, file_id, conversation_id):
+        url = f"{self.base_url}/conversation/{conversation_id}/attachment/{file_id}/download"
+        headers = self.base_headers.copy()
+        try:
+            r = await self.s.get(url, headers=headers, timeout=10)
+            if r.status_code == 200:
+                download_url = r.json().get('download_url')
+                return download_url
+            else:
+                raise HTTPException(status_code=r.status_code, detail=r.text)
+        except Exception as e:
+            logger.error(f"Failed to get download url: {e}")
+            return ""
+
     async def get_download_url_from_upload(self, file_id):
         url = f"{self.base_url}/files/{file_id}/uploaded"
         headers = self.base_headers.copy()
