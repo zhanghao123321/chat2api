@@ -137,6 +137,7 @@ async def stream_response(service, response, model, max_tokens):
     last_message_id = None
     last_role = None
     last_content_type = None
+    last_status = None
     model_slug = None
     end = False
 
@@ -214,6 +215,8 @@ async def stream_response(service, response, model, max_tokens):
                                 if role == 'assistant' and last_role != 'assistant':
                                     if recipient == 'dalle.text2im':
                                         new_text = f"\n```{recipient}\n{part[len_last_content:]}"
+                                    elif recipient == 't2uay3k.sj1i4kz':
+                                        new_text = f"\n```image_creator\n{part[len_last_content:]}"
                                     elif last_role == None:
                                         new_text = part[len_last_content:]
                                     else:
@@ -225,6 +228,21 @@ async def stream_response(service, response, model, max_tokens):
                                 else:
                                     new_text = part[len_last_content:]
                             len_last_content = len(part)
+                    elif outer_content_type == "multimodal_text":
+                        parts = content.get("parts", [])
+                        new_text = ""
+                        for part in parts:
+                            file_id = part.get('asset_pointer').replace('sediment://', '')
+                            full_height = part.get("height", 0)
+                            current_height = part.get('metadata', {}).get("generation", {}).get("height", 0)
+                            if full_height > current_height:
+                                completed_rate = current_height / full_height
+                                new_text = f"\n> {completed_rate:.2%}\n"
+                                if last_role != role:
+                                    new_text = f"\n```{new_text}"
+                            else:
+                                image_download_url = await service.get_attachment_url(file_id, conversation_id)
+                                new_text = f"\n```\n![image]({image_download_url})\n"
                     else:
                         text = content.get("text", "")
                         if outer_content_type == "code" and last_content_type != "code":
@@ -241,6 +259,8 @@ async def stream_response(service, response, model, max_tokens):
                         new_text = "\n```\n" + new_text
                     elif last_content_type == "execution_output" and outer_content_type != "execution_output":
                         new_text = "\n```\n" + new_text
+                    elif last_content_type == "multimodal_text" and outer_content_type != "multimodal_text":
+                        new_text = "\n```\n" + new_text
 
                     delta = {"content": new_text}
                     last_content_type = outer_content_type
@@ -248,6 +268,7 @@ async def stream_response(service, response, model, max_tokens):
                         delta = {}
                         finish_reason = "length"
                         end = True
+
                 elif status == "finished_successfully":
                     if content.get("content_type") == "multimodal_text":
                         parts = content.get("parts", [])
@@ -258,14 +279,19 @@ async def stream_response(service, response, model, max_tokens):
                             inner_content_type = part.get('content_type')
                             if inner_content_type == "image_asset_pointer":
                                 last_content_type = "image_asset_pointer"
-                                file_id = part.get('asset_pointer').replace('file-service://', '')
-                                logger.debug(f"file_id: {file_id}")
-                                image_download_url = await service.get_download_url(file_id)
-                                logger.debug(f"image_download_url: {image_download_url}")
-                                if image_download_url:
-                                    delta = {"content": f"\n```\n![image]({image_download_url})\n"}
+                                if part.get('asset_pointer').startswith('file-service://'):
+                                    file_id = part.get('asset_pointer').replace('file-service://', '')
+                                    logger.debug(f"file_id: {file_id}")
+                                    image_download_url = await service.get_download_url(file_id)
+                                    logger.debug(f"image_download_url: {image_download_url}")
+                                    if image_download_url:
+                                        delta = {"content": f"\n```\n![image]({image_download_url})\n"}
+                                    else:
+                                        delta = {"content": f"\n```\nFailed to load the image.\n"}
                                 else:
-                                    delta = {"content": f"\n```\nFailed to load the image.\n"}
+                                    file_id = part.get('asset_pointer').replace('sediment://', '')
+                                    image_download_url = await service.get_attachment_url(file_id, conversation_id)
+                                    delta = {"content": f"\n![image]({image_download_url})\n"}
                     elif message.get("end_turn"):
                         part = content.get("parts", [])[0]
                         new_text = part[len_last_content:]
@@ -294,6 +320,7 @@ async def stream_response(service, response, model, max_tokens):
                     continue
                 last_message_id = message_id
                 last_role = role
+                last_status = status
                 if not end and not delta.get("content"):
                     delta = {"role": "assistant", "content": ""}
                 chunk_new_data["choices"][0]["delta"] = delta

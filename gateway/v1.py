@@ -38,3 +38,8 @@ async def ces_v1_projects_oai_settings():
 @app.post("/ces/v1/{path:path}")
 async def ces_v1():
     return Response(status_code=202, content=json.dumps({"success": True}, indent=4), media_type="application/json")
+
+
+@app.post("/ces/statsc/flush")
+async def ces_v1():
+    return Response(status_code=200, content=json.dumps({"success": True}, indent=4), media_type="application/json")

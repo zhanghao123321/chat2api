@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 
 import pybase64
+import diskcache as dc
 
 from utils.Logger import logger
 from utils.configs import conversation_only
@@ -15,6 +16,7 @@ from utils.configs import conversation_only
 cores = [8, 16, 24, 32]
 timeLayout = "%a %b %d %Y %H:%M:%S"
 
+cache = dc.Cache('./data/pow_config_cache')
 cached_scripts = []
 cached_dpl = ""
 cached_time = 0
@@ -430,9 +432,10 @@ def get_parse_time():
     return now.strftime(timeLayout) + " GMT-0500 (Eastern Standard Time)"
 
 
-def get_config(user_agent):
+@cache.memoize(expire=3600 * 24 * 7)
+def get_config(user_agent, req_token=None):
     config = [
-        random.randint(1080, 1440+1080),
+        random.choice([1920 + 1080, 2560 + 1440, 1920 + 1200, 2560 + 1600]),
         get_parse_time(),
         4294705152,
         0,
